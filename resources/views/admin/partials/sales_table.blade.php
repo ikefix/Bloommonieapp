@@ -1,7 +1,6 @@
 @php
-    // Calculate grand total for this set of sales
-    $grandTotal = $sales->sum(function($sale) {
-        return max($sale->total_price - ($sale->discount ?? 0), 0);
+    $grandTotal = $sales->sum(function ($sale) {
+        return (float) $sale->total_price;
     });
 @endphp
 
