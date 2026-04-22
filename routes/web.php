@@ -26,6 +26,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\Auth\ProductKeyController;
+use App\Http\Controllers\SuperAdminController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -36,6 +38,58 @@ use App\Http\Controllers\InvoiceController;
 | contains the "web" middleware group. Now create something great!
 
 */
+
+
+
+
+
+
+// FOR SUPERADMIN
+
+
+Route::middleware(['auth', 'superadmin'])->group(function () {
+    Route::get('/superadmin-dashboard', [SuperAdminController::class, 'dashboard'])
+        ->name('superadmin.dashboard');
+
+    Route::get('/create-admin', [SuperAdminController::class, 'create'])
+        ->name('superadmin.create');
+
+    Route::post('/create-admin', [SuperAdminController::class, 'store'])
+        ->name('superadmin.store');
+});
+
+
+Route::middleware(['auth'])->group(function () {
+
+    // show product key page
+    Route::get('/show-product-key', [ProductKeyController::class, 'show'])
+        ->name('product.key.form');
+
+    // check product key
+    Route::post('/verify-product-key', [ProductKeyController::class, 'verify'])
+        ->name('product.key.check');
+
+});
+
+
+Route::middleware(['auth', 'activated', 'subscription'])->group(function () {
+
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+        Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
+
+        Route::get('/manager-dashboard', [ManagerController::class, 'dashboard'])->name('manager.jop')->middleware('role:manager');
+
+});
+
+Route::get('/subscription-expired', function () {
+    return view('subscription.expired');
+});
+
+
+
+
+
 
 
 Route::get('/products/export', function () {
@@ -74,12 +128,11 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::get('/admin', [AdminController::class, 'index'])->middleware('role:admin');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
+    // Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
     // Route::get('/manager-dashboard', [ManagerController::class, 'index'])->name('manager.dashboard')->middleware('role:manager');
 });
 
@@ -101,7 +154,7 @@ Route::patch('/manager/update-role/{id}', [ManagerController::class, 'updateRole
 
 
 
-    Route::get('/manager-dashboard', [ManagerController::class, 'dashboard'])->name('manager.jop')->middleware('role:manager');
+    // Route::get('/manager-dashboard', [ManagerController::class, 'dashboard'])->name('manager.jop')->middleware('role:manager');
 
 Route::post('/manager/register', [ManagerController::class, 'storeStaff'])->name('manager.storeStaff');
 

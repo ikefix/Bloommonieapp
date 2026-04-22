@@ -10,12 +10,21 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('shop_id')->nullable(); // if multi-shop system
-            $table->string('title');                           // e.g., Fuel, Maintenance
+
+            // 🔐 SaaS OWNERSHIP (CRITICAL)
+            $table->unsignedBigInteger('owner_id');
+
+            $table->unsignedBigInteger('shop_id')->nullable(); // still useful for branch-level tracking
+
+            $table->string('title'); // Fuel, Maintenance
             $table->decimal('amount', 15, 2);
             $table->text('description')->nullable();
+
             $table->date('date')->default(now());
-            $table->string('added_by')->nullable();             // store cashier or admin name
+
+            // better than string (optional upgrade)
+            $table->unsignedBigInteger('added_by')->nullable(); // user_id (cashier/admin)
+
             $table->timestamps();
         });
     }

@@ -5,10 +5,15 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    
     public function up()
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id(); // This creates a BIGINT UNSIGNED primary key
+            $table->id();
+
+            // 🔐 SaaS OWNERSHIP (IMPORTANT)
+            $table->unsignedBigInteger('owner_id');
+
             $table->string('name');
             $table->timestamps();
         });
@@ -19,5 +24,3 @@ return new class extends Migration {
         Schema::dropIfExists('categories');
     }
 };
-
-

@@ -14,18 +14,51 @@ class LoginController extends Controller
     /**
      * Redirect users after login based on their role.
      */
-    protected function redirectTo()
-    {
-        $user = Auth::user();
+    // protected function redirectTo()
+    // {
+    //     $user = Auth::user();
         
-        if ($user->role === 'admin') {
-            return '/admin-dashboard';
-        } elseif ($user->role === 'manager') {
-            return '/manager-dashboard';
-        } 
-        // Default dashboard (cashier)
-        return '/home';
+    //     if ($user->role === 'superadmin') {
+    //         return '/superadmin-dashboard';
+    //     } elseif ($user->role === 'admin') {
+    //         return '/admin-dashboard';
+    //     } elseif ($user->role === 'manager') {
+    //         return '/manager-dashboard';
+    //     }
+
+    //     return '/home'; // cashier
+    // }
+
+protected function redirectTo()
+{
+    $user = Auth::user();
+
+    // fallback safety
+    if (!$user) {
+        return '/login';
     }
+
+    // SUPERADMIN bypass
+    if ($user->role === 'superadmin') {
+        return '/superadmin-dashboard';
+    }
+
+    // ❌ NOT ACTIVATED → force product key
+    if (!$user->is_activated) {
+        return '/product-key';
+    }
+
+    // ✅ ACTIVATED → go by role
+    if ($user->role === 'admin') {
+        return '/admin-dashboard';
+    }
+
+    if ($user->role === 'manager') {
+        return '/manager-dashboard';
+    }
+
+    return '/home'; // cashier
+}
 
     /**
      * Override credentials method to include role validation during login.

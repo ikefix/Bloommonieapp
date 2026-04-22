@@ -12,15 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('customers', function (Blueprint $table) {
-        $table->id();
-        $table->string('name');
-        $table->string('email')->unique();
-        $table->string('phone');
-        $table->text('address')->nullable();
-        $table->string('company')->nullable();
-        $table->text('notes')->nullable();
-        $table->timestamps();
-    });
+            $table->id();
+
+            // 🔐 SaaS OWNERSHIP (CRITICAL)
+            $table->unsignedBigInteger('owner_id');
+
+            $table->string('name');
+            
+            // ⚠️ IMPORTANT NOTE: remove unique if shared names/emails across admins
+            $table->string('email')->nullable();
+            
+            $table->string('phone');
+            $table->text('address')->nullable();
+            $table->string('company')->nullable();
+            $table->text('notes')->nullable();
+
+            $table->timestamps();
+        });
     }
 
     /**

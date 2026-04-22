@@ -15,12 +15,14 @@ return new class extends Migration
     {
         Schema::create('shops', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id'); // The customer or owner
+
+            // 🔐 SaaS OWNERSHIP (IMPORTANT)
+            $table->unsignedBigInteger('owner_id');
+
             $table->string('name');
             $table->string('location')->nullable();
+
             $table->timestamps();
-        
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
         
     }
