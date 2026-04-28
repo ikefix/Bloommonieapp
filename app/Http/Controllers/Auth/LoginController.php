@@ -29,11 +29,41 @@ class LoginController extends Controller
     //     return '/home'; // cashier
     // }
 
+// protected function redirectTo()
+// {
+//     $user = Auth::user();
+
+//     // fallback safety
+//     if (!$user) {
+//         return '/login';
+//     }
+
+//     // SUPERADMIN bypass
+//     if ($user->role === 'superadmin') {
+//         return '/superadmin-dashboard';
+//     }
+
+//     // ❌ NOT ACTIVATED → force product key
+//     if (!$user->is_activated) {
+//         return '/show-product-key';
+//     }
+
+//     // ✅ ACTIVATED → go by role
+//     if ($user->role === 'admin') {
+//         return '/admin-dashboard';
+//     }
+
+//     if ($user->role === 'manager') {
+//         return '/manager-dashboard';
+//     }
+
+//     return '/home'; // cashier
+// }
+
 protected function redirectTo()
 {
     $user = Auth::user();
 
-    // fallback safety
     if (!$user) {
         return '/login';
     }
@@ -43,8 +73,13 @@ protected function redirectTo()
         return '/superadmin-dashboard';
     }
 
-    // ❌ NOT ACTIVATED → force product key
-    if (!$user->is_activated) {
+    // 🔥 Resolve OWNER (this is the missing piece)
+    $owner = $user->owner_id
+        ? \App\Models\User::find($user->owner_id)
+        : $user;
+
+    // ❌ NOT ACTIVATED (CHECK OWNER, NOT USER)
+    if (!$owner->is_activated) {
         return '/show-product-key';
     }
 

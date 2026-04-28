@@ -91,17 +91,16 @@ class AdminController extends Controller
             'shop_id' => 'required_unless:role,admin|exists:shops,id',
         ]);
 
-        $ownerId = auth()->user()->owner_id;
-    
-        // Create the new user
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password), // Hash password
-            'role' => $request->role,
-            'shop_id' => $request->shop_id, // Store id is saved here for cashiers
-            'owner_id' => $ownerId, // 🔥 THIS IS THE FIX
-        ]);
+$ownerId = auth()->user()->getOwnerId();
+
+$user = User::create([
+    'name' => $request->name,
+    'email' => $request->email,
+    'password' => bcrypt($request->password),
+    'role' => $request->role,
+    'shop_id' => $request->shop_id,
+    'owner_id' => $ownerId,
+]);
     
         return redirect()->route('admin.register')->with('success', 'Staff registered successfully.');
     }

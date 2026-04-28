@@ -52,6 +52,18 @@ public function complaints()
     return $this->hasMany(Complaint::class);
 }
 
+public function getOwnerId()
+{
+    return $this->owner_id ?? $this->id;
+}
+
+public function getOwnerAccount()
+{
+    return $this->owner_id 
+        ? self::find($this->owner_id) 
+        : $this;
+}
+
 protected static function booted()
 {
     static::creating(function ($user) {
