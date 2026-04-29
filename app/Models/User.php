@@ -17,6 +17,12 @@ class User extends Authenticatable
         'password',
         'role',
         'shop_id', // Add shop_id here
+        'plan',
+        'plan_duration',
+        'plan_start',
+        'plan_end',
+        'is_activated',
+        'activated_at',
     ];
 
     protected $hidden = [
@@ -67,11 +73,19 @@ public function getOwnerAccount()
 protected static function booted()
 {
     static::creating(function ($user) {
-        if (auth()->check()) {
-            $user->owner_id = auth()->user()->owner_id ?? auth()->id();
+        // If no owner_id is provided, set temporary value
+        if (!$user->owner_id) {
+            $user->owner_id = 0; // temporary placeholder
         }
     });
-}
-    
+
+    static::created(function ($user) {
+        // After ID is generated, set owner_id to self
+        if ($user->owner_id == 0) {
+            $user->owner_id = $user->id;
+            $user->saveQuietly(); // avoids infinite loop
+        }
+    });
+}  
 }
 

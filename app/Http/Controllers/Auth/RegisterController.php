@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -28,7 +29,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/admin-dashboard';
 
     /**
      * Create a new controller instance.
@@ -61,14 +62,37 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\Models\User
      */
-    protected function create(array $data)
-    {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => 'cashier', // Default role is cashier
-        ]);
-    }
+
+protected function create(array $data)
+{
+    $now = Carbon::now();
+
+    $user = User::create([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'password' => Hash::make($data['password']),
+
+        // 🔥 ROLE
+        'role' => 'admin',
+
+        // 🔥 SaaS ownership (he owns himself)
+        // 'owner_id' => null, // temporary, we fix after create
+
+        // 🔥 Free trial setup
+        'plan' => 'free_trial',
+        'plan_duration' => '3_days',
+        'plan_start' => $now,
+        'plan_end' => $now->copy()->addDays(3),
+
+        'is_activated' => true,
+        'activated_at' => $now,
+    ]);
+
+    // 🔥 IMPORTANT: set owner_id to self
+    $user->owner_id = $user->id;
+    $user->save();
+
+    return $user;
+}
     
 }

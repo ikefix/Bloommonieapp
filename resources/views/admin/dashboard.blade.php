@@ -2,6 +2,7 @@
 
 @section('admincontent')
 
+
 <div class="container">
     <h3>Welcome {{ Auth::user()->name }}</h3>
     <div class="dashboard-stats">
