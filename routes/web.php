@@ -42,6 +42,11 @@ use App\Http\Controllers\SuperAdminController;
 
 
 
+Route::get('/pricing', function () {
+    return view('pricing');
+})->middleware('auth');
+
+
 
 
 // FOR SUPERADMIN

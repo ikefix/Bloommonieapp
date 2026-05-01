@@ -151,6 +151,10 @@
                 <small style="opacity:0.8; font-size:12px;">
                     Keep your plan active to avoid service interruption.
                 </small>
+
+                <small>
+                     <a style="text-decoration: none" href="{{url('/pricing')}}">Upgrade Plan</a>
+                </small>
             </div>
         </div>
 

@@ -25,5 +25,9 @@
         </button>
     </form>
 
+    <div>
+        <P>Dont have a key. <a href="{{url('/subscription-expired')}}"></a>Get One</P>
+    </div>
+
 </body>
 </html>
