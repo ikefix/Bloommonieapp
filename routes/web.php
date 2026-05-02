@@ -22,7 +22,7 @@ use App\Models\Product;
 use App\Http\Controllers\ComplaintController;
 use App\Exports\ProductsExport;
 use Maatwebsite\Excel\Facades\Excel;
-
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\InvoiceController;
@@ -46,6 +46,16 @@ Route::get('/pricing', function () {
     return view('pricing');
 })->middleware('auth');
 
+
+Route::middleware('auth')->group(function () {
+
+Route::get('/subscribe/{plan}/{billing}', [SubscriptionController::class, 'pay'])
+    ->name('subscribe.plan');
+
+    Route::get('/payment/callback', [SubscriptionController::class, 'callback'])
+        ->name('payment.callback');
+
+});
 
 
 
