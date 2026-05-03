@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class CheckSubscription
 {
     public function handle($request, Closure $next)
+    
 {
     $user = auth()->user();
 
