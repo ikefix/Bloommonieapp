@@ -262,7 +262,7 @@ Route::post('/purchaseitem/store', [PurchaseItemController::class, 'store'])->na
 Route::get('/purchaseitem/receipt/{id}', [PurchaseItemController::class, 'showReceipt'])->name('purchaseitem.receipt');
 
 
-Route::get('/home', [PurchaseItemController::class, 'index'])->name('home');
+// Route::get('/home', [PurchaseItemController::class, 'index'])->name('home');
 Route::get('/cashiersales', [PurchaseItemController::class, 'cashiersales'])->name('cashier.home-sales');
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -54,10 +55,6 @@ class HomeController extends Controller
             return redirect('/manager-dashboard');
         }
 
-        if ($user->role === 'cashier') {
-            return redirect('/home');
-        }
-
-        return redirect('/login'); 
+        return redirect('/home'); 
     }
 }
