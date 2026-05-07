@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\RoleController;
@@ -39,41 +39,7 @@ use App\Http\Controllers\SuperAdminController;
 
 */
 
-Route::get('/home', function () {
 
-    $user = Auth::user();
-
-    if (!$user) {
-        return redirect('/login');
-    }
-
-    // SUPERADMIN
-    if ($user->role === 'superadmin') {
-        return redirect('/superadmin-dashboard');
-    }
-
-    // OWNER CHECK
-    $owner = $user->owner_id
-        ? \App\Models\User::find($user->owner_id)
-        : $user;
-
-    // ACTIVATION CHECK
-    if (!$owner->is_activated) {
-        return redirect('/show-product-key');
-    }
-
-    // ROLE REDIRECT
-    if ($user->role === 'admin') {
-        return redirect('/admin-dashboard');
-    }
-
-    if ($user->role === 'manager') {
-        return redirect('/manager-dashboard');
-    }
-
-    return redirect('/home');
-
-})->middleware('auth');
 
 
 Route::get('/pricing', function () {
