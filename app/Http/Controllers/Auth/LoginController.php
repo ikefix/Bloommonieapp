@@ -15,21 +15,6 @@ class LoginController extends Controller
      * Redirect users after login based on their role.
      */
 
-    protected function authenticated(Request $request, $user)
-    {
-        switch ($user->role) {
-
-            case 'admin':
-                return redirect('/admin/dashboard');
-
-            case 'manager':
-                return redirect('/manager/dashboard');
-
-            default:
-                return redirect('/home');
-        }
-    }
-
 
 protected function redirectTo()
 {
