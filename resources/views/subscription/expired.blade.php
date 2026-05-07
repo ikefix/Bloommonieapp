@@ -105,6 +105,14 @@ p {
         Enter Product Key
     </a>
 
+    <!-- Logout -->
+    <form method="POST" action="{{ route('logout') }}" style="margin-top:10px;">
+        @csrf
+        <button type="submit" class="btn btn-secondary" style="width:100%; border:none; cursor:pointer;">
+            Logout
+        </button>
+    </form>
+
 </div>
 
 </body>
