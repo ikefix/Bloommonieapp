@@ -142,8 +142,8 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
         <li>Sales Report</li>
         <li>Report Download</li>
         <li></li>
-        <li>500 Products</li>
-        <li>500 Products</li>
+        <li></li>
+        <li>24/7 Support</li>
         
     </ul>
 
@@ -192,7 +192,7 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
     </div>
 
     <ul class="plan-features">
-        <li>Unlimited Users</li>
+        <li></li>
         <li>Unlimited Locations</li>
         <li>Unlimited Products</li>
     </ul>
