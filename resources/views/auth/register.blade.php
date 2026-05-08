@@ -121,7 +121,7 @@ input:focus {
         <!-- Logo -->
         <div class="text-center mb-4">
             <h3 class="fw-bold">
-                <span style="color:#6f42c1;"> Bloom monie</span>
+                <span style="color:#6f42c1;"> Bloom Monie</span>
             </h3>
         </div>
 
