@@ -87,15 +87,23 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'activated', 'subscription'])->group(function () {
+Route::middleware(['auth', 'activated', 'subscription',])->group(function () {
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
         Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
 
-        Route::get('/manager-dashboard', [ManagerController::class, 'dashboard'])->name('manager.jop')->middleware('role:manager');
+        Route::get('/manager-dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard')->middleware('role:manager');
 
 });
+
+Route::middleware(['auth', 'activated', 'subscription', 'verified'])->group(function () {
+
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+        Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
+});
+
 
 Route::get('/subscription-expired', function () {
     return view('subscription.expired');
@@ -141,7 +149,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+// Auth::routes();
+
+Auth::routes(['verify' => true]);
 
 
 Route::get('/admin', [AdminController::class, 'index'])->middleware('role:admin');
