@@ -130,14 +130,21 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card">
     <div class="plan-title">Basic</div>
 
-    <div class="plan-price" data-monthly="7000" data-yearly="70000">
-        ₦7,000/mo
+    <div class="plan-price" data-monthly="5250" data-yearly="50250">
+        ₦5,250/mo
     </div>
 
     <ul class="plan-features">
         <li>1 User</li>
         <li>1 Store</li>
         <li>500 Products</li>
+        <li>Stock adjustment</li>
+        <li>Sales Report</li>
+        <li>Report Download</li>
+        <li></li>
+        <li>500 Products</li>
+        <li>500 Products</li>
+        
     </ul>
 
     @if($owner->plan == 'basic')
