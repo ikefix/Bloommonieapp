@@ -130,8 +130,8 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card">
     <div class="plan-title">Basic</div>
 
-    <div class="plan-price" data-monthly="5250" data-yearly="50250">
-        ₦5,250/mo
+    <div class="plan-price" data-monthly="5000" data-yearly="50000">
+        ₦5,000/mo
     </div>
 
     <ul class="plan-features">
@@ -164,8 +164,8 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card featured">
     <div class="plan-title">Lite 🔥</div>
 
-    <div class="plan-price" data-monthly="7250" data-yearly="70250">
-        ₦7,250/mo
+    <div class="plan-price" data-monthly="7000" data-yearly="70000">
+        ₦7,000/mo
     </div>
 
     <ul class="plan-features">
@@ -198,8 +198,8 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card">
     <div class="plan-title">Business</div>
 
-    <div class="plan-price" data-monthly="10250" data-yearly="100250">
-        ₦10.250/mo
+    <div class="plan-price" data-monthly="10000" data-yearly="100000">
+        ₦10,000/mo
     </div>
 
     <ul class="plan-features">
