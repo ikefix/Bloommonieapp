@@ -215,7 +215,7 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
         <li>Customer Management</li>  
         <li>Barcode Support</li>
         <li>Discount Management</li>      
-        <li>24/7 Support</li>>
+        <li>24/7 Support</li>
     </ul>
 
     @if($owner->plan == 'business')
