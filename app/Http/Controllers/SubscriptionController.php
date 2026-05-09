@@ -13,15 +13,15 @@ class SubscriptionController extends Controller
     $user = auth()->user();
 
     $monthlyPrices = [
-        'basic' => 7000,
-        'lite' => 10000,
-        'business' => 15000,
+        'basic' => 5000,
+        'lite' => 7000,
+        'business' => 10000,
     ];
 
     $yearlyPrices = [
-        'basic' => 70000,
-        'lite' => 100000,
-        'business' => 150000,
+        'basic' => 50000,
+        'lite' => 70000,
+        'business' => 100000,
     ];
 
     if ($billing == 'yearly') {
