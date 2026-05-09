@@ -138,11 +138,13 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
         <li>1 User</li>
         <li>1 Store</li>
         <li>500 Products</li>
-        <li>Stock adjustment</li>
         <li>Sales Report</li>
+        <li>Profit Report</li>
         <li>Report Download</li>
-        <li></li>
-        <li></li>
+        <li>Stock Adjustment</li>
+        <li>Reciept printing</li>
+        <li>Expence Tracking</li>
+        <li>Discount Management</li>
         <li>24/7 Support</li>
         
     </ul>
@@ -162,14 +164,23 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card featured">
     <div class="plan-title">Lite 🔥</div>
 
-    <div class="plan-price" data-monthly="10000" data-yearly="100000">
-        ₦10,000/mo
+    <div class="plan-price" data-monthly="7250" data-yearly="70250">
+        ₦7,250/mo
     </div>
 
     <ul class="plan-features">
         <li>Unlimited Users</li>
-        <li>2 Stores</li>
+        <li>1 Store</li>
         <li>Unlimited Products</li>
+        <li>Sales Report</li>
+        <li>Profit Report</li>
+        <li>Report Download</li>
+        <li>Stock Adjustment</li>
+        <li>Reciept printing</li>
+        <li>Expence Tracking</li>
+        <li>Discount Management</li>  
+        <li>Barcode Support</li>      
+        <li>24/7 Support</li>
     </ul>
 
     @if($owner->plan == 'lite')
@@ -187,14 +198,24 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card">
     <div class="plan-title">Business</div>
 
-    <div class="plan-price" data-monthly="15000" data-yearly="150000">
-        ₦15,000/mo
+    <div class="plan-price" data-monthly="10250" data-yearly="100250">
+        ₦10.250/mo
     </div>
 
     <ul class="plan-features">
-        <li></li>
-        <li>Unlimited Locations</li>
+         <li>Unlimited Users</li>
+        <li>Unlimited Store</li>
         <li>Unlimited Products</li>
+        <li>Sales Report</li>
+        <li>Profit Report</li>
+        <li>Report Download</li>
+        <li>Stock Adjustment</li>
+        <li>Reciept printing</li>
+        <li>Expence Tracking</li>
+        <li>Customer Management</li>  
+        <li>Barcode Support</li>
+        <li>Discount Management</li>      
+        <li>24/7 Support</li>>
     </ul>
 
     @if($owner->plan == 'business')
