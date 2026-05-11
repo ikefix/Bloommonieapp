@@ -219,7 +219,7 @@ body{
         </button>
     </form>
 
-    <div class="footer-text">
+    <div class="footer-text" style="color: red">
         Didn’t receive the email?<br>
         Check your <span>spam folder</span> or try again.
     </div>

@@ -24,6 +24,14 @@ class ShopController extends Controller
     
     public function store(Request $request)
     {
+        if (!auth()->user()->canCreateMoreStores()) {
+
+            return back()->with(
+                'error',
+                'Your current plan has reached the maximum store limit.'
+            );
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',

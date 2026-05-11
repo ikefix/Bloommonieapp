@@ -45,6 +45,14 @@ public function import(Request $request)
         abort(403, 'Unauthorized action.');
     }
 
+    if (!auth()->user()->canCreateMoreProducts()) {
+
+        return back()->with(
+            'error',
+            'Product limit reached for your plan.'
+        );
+    }
+
     // ✅ Validation
     $request->validate([
         'category_id' => 'required|exists:categories,id',
