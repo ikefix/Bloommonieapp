@@ -130,14 +130,23 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card">
     <div class="plan-title">Basic</div>
 
-    <div class="plan-price" data-monthly="7000" data-yearly="70000">
-        ₦7,000/mo
+    <div class="plan-price" data-monthly="5000" data-yearly="50000">
+        ₦5,000/mo
     </div>
 
     <ul class="plan-features">
         <li>1 User</li>
         <li>1 Store</li>
         <li>500 Products</li>
+        <li>Sales Report</li>
+        <li>Profit Report</li>
+        <li>Report Download</li>
+        <li>Stock Adjustment</li>
+        <li>Reciept printing</li>
+        <li>Expence Tracking</li>
+        <li>Discount Management</li>
+        <li>24/7 Support</li>
+        
     </ul>
 
     @if($owner->plan == 'basic')
@@ -155,14 +164,23 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card featured">
     <div class="plan-title">Lite</div>
 
-    <div class="plan-price" data-monthly="10000" data-yearly="100000">
-        ₦10,000/mo
+    <div class="plan-price" data-monthly="7000" data-yearly="70000">
+        ₦7,000/mo
     </div>
 
     <ul class="plan-features">
         <li>Unlimited Users</li>
-        <li>2 Stores</li>
+        <li>1 Store</li>
         <li>Unlimited Products</li>
+        <li>Sales Report</li>
+        <li>Profit Report</li>
+        <li>Report Download</li>
+        <li>Stock Adjustment</li>
+        <li>Reciept printing</li>
+        <li>Expence Tracking</li>
+        <li>Discount Management</li>  
+        <li>Barcode Support</li>      
+        <li>24/7 Support</li>
     </ul>
 
     @if($owner->plan == 'lite')
@@ -180,14 +198,24 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 <div class="plan-card">
     <div class="plan-title">Business</div>
 
-    <div class="plan-price" data-monthly="15000" data-yearly="150000">
-        ₦15,000/mo
+    <div class="plan-price" data-monthly="10000" data-yearly="100000">
+        ₦10,000/mo
     </div>
 
     <ul class="plan-features">
-        <li>Unlimited Users</li>
-        <li>Unlimited Locations</li>
+         <li>Unlimited Users</li>
+        <li>Unlimited Store</li>
         <li>Unlimited Products</li>
+        <li>Sales Report</li>
+        <li>Profit Report</li>
+        <li>Report Download</li>
+        <li>Stock Adjustment</li>
+        <li>Reciept printing</li>
+        <li>Expence Tracking</li>
+        <li>Customer Management</li>  
+        <li>Barcode Support</li>
+        <li>Discount Management</li>      
+        <li>24/7 Support</li>
     </ul>
 
     @if($owner->plan == 'business')
