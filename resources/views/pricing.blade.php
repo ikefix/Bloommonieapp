@@ -112,11 +112,11 @@ body{
     <a href="/admin-dashboard" class="close-btn">✖</a>
 </div>
 
-<h2 class="title">Choose Your Plan 🚀</h2>
+<h2 class="title">Choose Your Plan</h2>
 
 <div class="billing-toggle">
     <button id="monthlyBtn" class="active">Monthly</button>
-    <button id="yearlyBtn">Yearly 🔥</button>
+    <button id="yearlyBtn">Yearly</button>
 </div>
 
 @php
@@ -153,7 +153,7 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
 
 <!-- LITE -->
 <div class="plan-card featured">
-    <div class="plan-title">Lite 🔥</div>
+    <div class="plan-title">Lite</div>
 
     <div class="plan-price" data-monthly="10000" data-yearly="100000">
         ₦10,000/mo

@@ -82,6 +82,15 @@ class AdminController extends Controller
      */
     public function storeStaff(Request $request)
     {
+
+            if (!auth()->user()->canCreateMoreUsers()) {
+
+            return back()->with(
+                'error',
+                'Your current plan has reached its user limit. Upgrade your subscription.'
+            );
+        }
+
         // Validate the input
         $request->validate([
             'name' => 'required|string|max:255',
@@ -91,16 +100,16 @@ class AdminController extends Controller
             'shop_id' => 'required_unless:role,admin|exists:shops,id',
         ]);
 
-$ownerId = auth()->user()->getOwnerId();
+        $ownerId = auth()->user()->getOwnerId();
 
-$user = User::create([
-    'name' => $request->name,
-    'email' => $request->email,
-    'password' => bcrypt($request->password),
-    'role' => $request->role,
-    'shop_id' => $request->shop_id,
-    'owner_id' => $ownerId,
-]);
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+            'shop_id' => $request->shop_id,
+            'owner_id' => $ownerId,
+        ]);
     
         return redirect()->route('admin.register')->with('success', 'Staff registered successfully.');
     }

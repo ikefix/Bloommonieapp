@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Product;
+use App\Models\Shop;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -88,5 +90,88 @@ protected static function booted()
         }
     });
 }  
+
+public function getPlanLimits()
+{
+    $owner = $this->owner_id
+        ? User::find($this->owner_id)
+        : $this;
+
+    return config('plans.' . $owner->plan);
+}
+
+public function hasFeature($feature)
+{
+    $owner = $this->owner_id
+        ? User::find($this->owner_id)
+        : $this;
+
+    $plan = config('plans.' . $owner->plan);
+
+    if (!$plan) {
+        return false;
+    }
+
+    // enterprise access
+    if (in_array('*', $plan['features'])) {
+        return true;
+    }
+
+    return in_array($feature, $plan['features']);
+}
+
+public function canCreateMoreUsers()
+{
+    $owner = $this->owner_id
+        ? User::find($this->owner_id)
+        : $this;
+
+    $limits = $owner->getPlanLimits();
+
+    // unlimited
+    if (is_null($limits['users'])) {
+        return true;
+    }
+
+    $staffCount = User::where('owner_id', $owner->id)
+        ->whereIn('role', ['manager', 'cashier'])
+        ->count();
+
+    return $staffCount < $limits['users'];
+}
+
+public function canCreateMoreStores()
+{
+    $owner = $this->owner_id
+        ? User::find($this->owner_id)
+        : $this;
+
+    $limits = $owner->getPlanLimits();
+
+    if (is_null($limits['stores'])) {
+        return true;
+    }
+
+    $storeCount = Shop::where('owner_id', $owner->id)->count();
+
+    return $storeCount < $limits['stores'];
+}
+
+public function canCreateMoreProducts()
+{
+    $owner = $this->owner_id
+        ? User::find($this->owner_id)
+        : $this;
+
+    $limits = $owner->getPlanLimits();
+
+    if (is_null($limits['products'])) {
+        return true;
+    }
+
+    $productCount = Product::where('owner_id', $owner->id)->count();
+
+    return $productCount < $limits['products'];
+}
 }
 
