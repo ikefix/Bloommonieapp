@@ -32,9 +32,22 @@ class CategoryController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        // $request->validate([
+        //     'name' => 'required|unique:categories,name|max:100',
+        //     'product_id' => 'nullable|exists:products,id',
+        // ]);
+
         $request->validate([
-            'name' => 'required|unique:categories,name|max:100',
-            'product_id' => 'nullable|exists:products,id',
+            'name' => [
+                'required',
+                'max:100',
+                \Illuminate\Validation\Rule::unique('categories')
+                    ->where(function ($query) {
+                        return $query->where('owner_id', auth()->id());
+                    }),
+            ],
+            
+            // 'product_id' => 'nullable|exists:products,id',
         ]);
 
         $category = Category::create([
