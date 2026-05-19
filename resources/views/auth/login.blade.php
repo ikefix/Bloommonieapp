@@ -162,12 +162,12 @@
         <!-- Logo -->
         <div class="text-center mb-4">
             <h3 class="fw-bold">
-                <span style="color:#6f42c1;"> Bloom Mmonie</span>
+                <span style="color:#6f42c1;"> BloomMonnie</span>
             </h3>
         </div>
 
         <!-- Title -->
-        <h4 class="text-center mb-4 fw-semibold">Welcome Back 👋</h4>
+        <h4 class="text-center mb-4 fw-semibold">Welcome Back </h4>
 
         <form method="POST" action="{{ route('login') }}">
             @csrf
