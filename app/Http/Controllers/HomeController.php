@@ -39,6 +39,6 @@ class HomeController extends Controller
     }
 
     // CASHIER (default landing)
-    return view('cashier.dashboard');
+    return view('home');
 }
 }
