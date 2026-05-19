@@ -53,8 +53,6 @@ class HomeController extends Controller
 
         if ($user->role === 'manager') {
             return redirect('/manager-dashboard');
-        }
-
-        return redirect('/home'); 
+        } 
     }
 }
