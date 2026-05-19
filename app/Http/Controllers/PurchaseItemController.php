@@ -219,6 +219,7 @@ public function cashiersales(Request $request)
                 $endDate   . ' 23:59:59'
             ]);
         })
+        ->where('owner_id', $user->owner_id)
         ->where('shop_id', $user->shop_id)
         ->where('cashier_id', $user->id)   // 👈 NEW LINE (restrict to logged-in cashier)
         ->orderBy('created_at', 'desc')
