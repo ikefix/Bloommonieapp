@@ -54,5 +54,8 @@ class HomeController extends Controller
         if ($user->role === 'manager') {
             return redirect('/manager-dashboard');
         } 
+
+        // CASHIER OR DEFAULT ROLE (VERY IMPORTANT)
+        return redirect('/cashier-dashboard');
     }
 }
