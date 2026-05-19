@@ -106,7 +106,6 @@ public function store(Request $request)
                 // 🧍 Customer info
                 'customer_name'  => $validated['customer_name'] ?? null,
                 'customer_phone' => $validated['customer_phone'] ?? null,
-                'owner_id' => $cashier->owner_id,
                 'product_id'     => $product->id,
                 'category_id'    => $product->category_id,
                 'quantity'       => $quantityRequested,
@@ -118,6 +117,7 @@ public function store(Request $request)
                 'transaction_id' => $transactionId,
                 'shop_id'        => $product->shop_id,
                 'cashier_id'     => auth()->id(),
+                'owner_id' => auth()->user()->owner_id,
             ]);
 
             // 🔄 Update stock
