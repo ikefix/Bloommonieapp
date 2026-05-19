@@ -30,6 +30,7 @@ class HomeController extends Controller
         return redirect('/login');
     }
 
+    // activation check (optional but fine here)
     $owner = $user->owner_id
         ? \App\Models\User::find($user->owner_id)
         : $user;
@@ -38,7 +39,20 @@ class HomeController extends Controller
         return redirect('/show-product-key');
     }
 
-    // CASHIER (default landing)
+    // 🔥 ROLE ROUTING (THIS IS THE KEY FIX)
+    if ($user->role === 'superadmin') {
+        return redirect('/superadmin-dashboard');
+    }
+
+    if ($user->role === 'admin') {
+        return redirect('/admin-dashboard');
+    }
+
+    if ($user->role === 'manager') {
+        return redirect('/manager-dashboard');
+    }
+
+    // cashier default
     return view('home');
 }
 }
