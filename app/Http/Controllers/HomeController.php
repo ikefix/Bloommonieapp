@@ -23,42 +23,22 @@ class HomeController extends Controller
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
-    {
-       
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        if (!$user) {
-            return redirect('/login');
-        }
-
-        // SUPERADMIN
-        if ($user->role === 'superadmin') {
-            return redirect('/superadmin-dashboard');
-        }
-
-        // OWNER CHECK
-        $owner = $user->owner_id
-            ? \App\Models\User::find($user->owner_id)
-            : $user;
-
-        // ACTIVATION CHECK
-        if (!$owner->is_activated) {
-            return redirect('/show-product-key');
-        }
-
-        // ROLE REDIRECT
-        if ($user->role === 'admin') {
-            return redirect('/admin-dashboard');
-        }
-
-        if ($user->role === 'manager') {
-            return redirect('/manager-dashboard');
-        } 
-
-        Auth::logout();
-        session()->invalidate();
-        session()->regenerateToken();
-
+    if (!$user) {
         return redirect('/login');
     }
+
+    $owner = $user->owner_id
+        ? \App\Models\User::find($user->owner_id)
+        : $user;
+
+    if (!$owner->is_activated) {
+        return redirect('/show-product-key');
+    }
+
+    // CASHIER (default landing)
+    return view('cashier.dashboard');
+}
 }
