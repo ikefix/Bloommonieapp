@@ -55,7 +55,10 @@ class HomeController extends Controller
             return redirect('/manager-dashboard');
         } 
 
-        // CASHIER OR DEFAULT ROLE (VERY IMPORTANT)
-        return redirect('/cashier-dashboard');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
     }
 }
