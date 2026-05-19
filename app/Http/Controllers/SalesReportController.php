@@ -10,163 +10,305 @@ use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Shop;
 
-
 class SalesReportController extends Controller
 {
-public function index(Request $request)
-{
-    $shops = Shop::orderBy('name')->get();
+    public function index(Request $request)
+    {
+        // 🔒 ONLY OWNER SHOPS
+        $shops = Shop::where('owner_id', auth()->id())
+            ->orderBy('name')
+            ->get();
 
-    // Base query for cards & tables
-    $baseQuery = PurchaseItem::query();
+        // 🔒 OWNER FILTER
+        $baseQuery = PurchaseItem::query()
+            ->where('purchase_items.owner_id', auth()->id());
 
-    // Base query for chart
-    $chartQuery = PurchaseItem::query();
+        // 🔒 OWNER FILTER
+        $chartQuery = PurchaseItem::query()
+            ->where('purchase_items.owner_id', auth()->id());
 
-    // DATE FILTER
-    if ($request->filled('start_date') && $request->filled('end_date')) {
+        /**
+         * =========================
+         * DATE FILTER
+         * =========================
+         */
 
-        $start = Carbon::parse($request->start_date)->startOfDay();
-        $end   = Carbon::parse($request->end_date)->endOfDay();
+        if ($request->filled('start_date') && $request->filled('end_date')) {
 
-        $baseQuery->whereBetween('purchase_items.created_at', [$start, $end]);
-        $chartQuery->whereBetween('purchase_items.created_at', [$start, $end]);
+            $start = Carbon::parse($request->start_date)->startOfDay();
 
-        $chartStart = $start->copy();
-        $chartEnd   = $end->copy();
+            $end = Carbon::parse($request->end_date)->endOfDay();
 
-    } else {
-        // Cards = Today
-        $baseQuery->whereDate('purchase_items.created_at', Carbon::today());
+            $baseQuery->whereBetween(
+                'purchase_items.created_at',
+                [$start, $end]
+            );
 
-        // Chart = Last 7 days
-        $chartStart = Carbon::today()->subDays(6)->startOfDay();
-        $chartEnd   = Carbon::today()->endOfDay();
+            $chartQuery->whereBetween(
+                'purchase_items.created_at',
+                [$start, $end]
+            );
 
-        $chartQuery->whereBetween('purchase_items.created_at', [$chartStart, $chartEnd]);
-    }
+            $chartStart = $start->copy();
+            $chartEnd = $end->copy();
 
-    // SHOP FILTER
-    if ($request->filled('shop_id')) {
-        $baseQuery->where('purchase_items.shop_id', $request->shop_id);
-        $chartQuery->where('purchase_items.shop_id', $request->shop_id);
-    }
+        } else {
 
-    /**
-     * =========================
-     * CHART DATA (WITH ZERO DAYS)
-     * =========================
-     */
+            // Cards = Today
+            $baseQuery->whereDate(
+                'purchase_items.created_at',
+                Carbon::today()
+            );
 
-    // Get existing sales from DB
-    $dbSales = $chartQuery
-        ->select(
-            DB::raw('DATE(purchase_items.created_at) as date'),
-            DB::raw('SUM(purchase_items.total_price) as total')
-        )
-        ->groupBy('date')
-        ->pluck('total', 'date');
+            // Chart = Last 7 Days
+            $chartStart = Carbon::today()
+                ->subDays(6)
+                ->startOfDay();
 
-    // Force date range (7 days or selected range)
-    $salesByDay = collect();
+            $chartEnd = Carbon::today()
+                ->endOfDay();
 
-    $daysDiff = $chartStart->diffInDays($chartEnd);
+            $chartQuery->whereBetween(
+                'purchase_items.created_at',
+                [$chartStart, $chartEnd]
+            );
+        }
 
-    for ($i = 0; $i <= $daysDiff; $i++) {
-        $date = $chartStart->copy()->addDays($i)->toDateString();
+        /**
+         * =========================
+         * SHOP FILTER
+         * =========================
+         */
 
-        $salesByDay->push([
-            'date'  => $date,
-            'total' => $dbSales[$date] ?? 0
+        if ($request->filled('shop_id')) {
+
+            $baseQuery->where(
+                'purchase_items.shop_id',
+                $request->shop_id
+            );
+
+            $chartQuery->where(
+                'purchase_items.shop_id',
+                $request->shop_id
+            );
+        }
+
+        /**
+         * =========================
+         * CHART DATA
+         * =========================
+         */
+
+        $dbSales = $chartQuery
+            ->select(
+                DB::raw('DATE(purchase_items.created_at) as date'),
+                DB::raw('SUM(purchase_items.total_price) as total')
+            )
+            ->groupBy('date')
+            ->pluck('total', 'date');
+
+        $salesByDay = collect();
+
+        $daysDiff = $chartStart->diffInDays($chartEnd);
+
+        for ($i = 0; $i <= $daysDiff; $i++) {
+
+            $date = $chartStart
+                ->copy()
+                ->addDays($i)
+                ->toDateString();
+
+            $salesByDay->push([
+                'date'  => $date,
+                'total' => $dbSales[$date] ?? 0
+            ]);
+        }
+
+        return view('admin.report.sales_report', [
+
+            'shops' => $shops,
+
+            /**
+             * =========================
+             * TOTAL SALES
+             * =========================
+             */
+
+            'totalSales' => (clone $baseQuery)
+                ->sum('purchase_items.total_price'),
+
+            /**
+             * =========================
+             * TOTAL TRANSACTIONS
+             * =========================
+             */
+
+            'totalTransactions' => (clone $baseQuery)
+                ->distinct()
+                ->count('transaction_id'),
+
+            /**
+             * =========================
+             * TOP PRODUCTS
+             * =========================
+             */
+
+            'topProducts' => (clone $baseQuery)
+                ->join(
+                    'products',
+                    'purchase_items.product_id',
+                    '=',
+                    'products.id'
+                )
+                ->select(
+                    'products.name as product_name',
+                    DB::raw('SUM(purchase_items.quantity) as total_sold')
+                )
+                ->groupBy(
+                    'products.id',
+                    'products.name'
+                )
+                ->orderByDesc('total_sold')
+                ->limit(5)
+                ->get(),
+
+            /**
+             * =========================
+             * CHART
+             * =========================
+             */
+
+            'salesByDay' => $salesByDay,
         ]);
     }
 
-    return view('admin.report.sales_report', [
-        'shops' => $shops,
+    public function downloadPdf(Request $request)
+    {
+        $startDate = $request->start_date;
 
-        // Cards
-        'totalSales' => (clone $baseQuery)->sum('purchase_items.total_price'),
+        $endDate = $request->end_date;
 
-        'totalTransactions' => (clone $baseQuery)
-            ->distinct()
-            ->count('transaction_id'),
+        $shopId = $request->shop_id;
 
-        'topProducts' => (clone $baseQuery)
-            ->join('products', 'purchase_items.product_id', '=', 'products.id')
+        /**
+         * =========================
+         * BASE QUERY
+         * =========================
+         */
+
+        $query = DB::table('purchase_items')
+
+            ->join(
+                'products',
+                'purchase_items.product_id',
+                '=',
+                'products.id'
+            )
+
+            ->join(
+                'shops',
+                'purchase_items.shop_id',
+                '=',
+                'shops.id'
+            )
+
+            // 🔒 OWNER FILTER
+            ->where(
+                'purchase_items.owner_id',
+                auth()->id()
+            );
+
+        /**
+         * =========================
+         * DATE FILTER
+         * =========================
+         */
+
+        if ($startDate && $endDate) {
+
+            $query->whereBetween(
+                'purchase_items.created_at',
+                [
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59'
+                ]
+            );
+        }
+
+        /**
+         * =========================
+         * SHOP FILTER
+         * =========================
+         */
+
+        if ($shopId) {
+
+            $query->where(
+                'purchase_items.shop_id',
+                $shopId
+            );
+        }
+
+        /**
+         * =========================
+         * TOP PRODUCTS
+         * =========================
+         */
+
+        $topProducts = (clone $query)
+
             ->select(
                 'products.name as product_name',
                 DB::raw('SUM(purchase_items.quantity) as total_sold')
             )
-            ->groupBy('products.id', 'products.name')
+
+            ->groupBy('products.name')
+
             ->orderByDesc('total_sold')
-            ->limit(5)
-            ->get(),
 
-        // Chart (ZERO-SALES DAYS INCLUDED ✅)
-        'salesByDay' => $salesByDay,
-    ]);
-}
+            ->get();
 
+        /**
+         * =========================
+         * TOTAL SALES
+         * =========================
+         */
 
-public function downloadPdf(Request $request)
-{
-    $startDate = $request->start_date;
-    $endDate   = $request->end_date;
-    $shopId    = $request->shop_id;
+        $totalSales = (clone $query)
+            ->sum('purchase_items.total_price');
 
-    // BASE QUERY — REAL SALES TABLE
-    $query = DB::table('purchase_items')
-        ->join('products', 'purchase_items.product_id', '=', 'products.id')
-        ->join('shops', 'purchase_items.shop_id', '=', 'shops.id');
+        /**
+         * =========================
+         * TOTAL TRANSACTIONS
+         * =========================
+         */
 
-    // DATE FILTER
-    if ($startDate && $endDate) {
-        $query->whereBetween('purchase_items.created_at', [
-            $startDate . ' 00:00:00',
-            $endDate . ' 23:59:59'
-        ]);
+        $totalTransactions = (clone $query)
+
+            ->select('purchase_items.transaction_id')
+
+            ->distinct()
+
+            ->count();
+
+        $shop = $shopId
+            ? Shop::where('owner_id', auth()->id())
+                ->find($shopId)
+            : null;
+
+        $pdf = Pdf::loadView(
+            'admin.report.sales_report_pdf',
+
+            compact(
+                'topProducts',
+                'totalSales',
+                'totalTransactions',
+                'startDate',
+                'endDate',
+                'shop'
+            )
+        )->setPaper('a4', 'portrait');
+
+        return $pdf->download('sales_report.pdf');
     }
-
-    // SHOP FILTER
-    if ($shopId) {
-        $query->where('purchase_items.shop_id', $shopId);
-    }
-
-    // TOP PRODUCTS
-    $topProducts = (clone $query)
-        ->select(
-            'products.name as product_name',
-            DB::raw('SUM(purchase_items.quantity) as total_sold')
-        )
-        ->groupBy('products.name')
-        ->orderByDesc('total_sold')
-        ->get();
-
-    // TOTAL SALES
-    $totalSales = (clone $query)->sum('purchase_items.total_price');
-
-    // TOTAL TRANSACTIONS
-    $totalTransactions = (clone $query)
-        ->select('purchase_items.transaction_id')
-        ->distinct()
-        ->count();
-
-    $shop = $shopId ? Shop::find($shopId) : null;
-
-    $pdf = Pdf::loadView('admin.report.sales_report_pdf', compact(
-        'topProducts',
-        'totalSales',
-        'totalTransactions',
-        'startDate',
-        'endDate',
-        'shop'
-    ))->setPaper('a4', 'portrait');
-
-    return $pdf->download('sales_report.pdf');
 }
-
-
-
-
-}
-

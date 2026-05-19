@@ -71,6 +71,9 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
 
     Route::post('/create-admin', [SuperAdminController::class, 'store'])
         ->name('superadmin.store');
+
+    Route::get('/superadmin/subscriptions', [SuperAdminController::class, 'subscriptions'])
+        ->name('superadmin.subscriptions');
 });
 
 

@@ -66,4 +66,13 @@ class SuperAdminController extends Controller
 
         return back()->with('success', 'Admin created successfully');
     }
+
+    public function subscriptions()
+{
+    $admins = User::where('role', 'admin')
+        ->latest()
+        ->get();
+
+    return view('superadmin.subscriptions', compact('admins'));
+}
 }
