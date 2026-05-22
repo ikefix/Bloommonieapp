@@ -55,6 +55,6 @@ class HomeController extends Controller
             return redirect('/manager-dashboard');
         }
 
-        return redirect('/home'); 
+        return redirect('home'); 
     }
 }

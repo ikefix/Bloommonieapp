@@ -188,6 +188,8 @@ public function store(Request $request)
             $totalAfterDiscount = max($priceBeforeDiscount - $discountAmount, 0);
 
             $lastPurchase = PurchaseItem::create([
+                'owner_id' => auth()->user()->getOwnerId(),
+
                 // 🧍 Customer info
                 'customer_name'  => $validated['customer_name'] ?? null,
                 'customer_phone' => $validated['customer_phone'] ?? null,
