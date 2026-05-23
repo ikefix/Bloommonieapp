@@ -104,7 +104,15 @@
                                     <td>{{ Str::limit($customer->company ?? '-', 20) }}</td>
                                     <td>{{ Str::limit($customer->notes ?? '-', 30) }}</td>
                                     <td>
-                                        <form action="{{ auth()->user()->role === 'admin' ? route('admin.customers.destroy', $customer->id) : route('manager.customers.destroy', $customer->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                        @php
+                                            $deleteRoute = match(auth()->user()->role) {
+                                                'admin'   => route('admin.customers.destroy', $customer->id),
+                                                'manager' => route('manager.customers.destroy', $customer->id),
+                                                default   => route('cashier.customers.destroy', $customer->id),
+                                            };
+                                        @endphp
+
+                                        <form action="{{ $deleteRoute }}" method="POST" onsubmit="return confirm('Are you sure?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>

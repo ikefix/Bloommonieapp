@@ -56,91 +56,6 @@ public function searchReceipt(Request $request)
     return view('receipts.receipt', compact('items', 'total', 'cashier', 'shopName', 'transactionId'));
 }
 
-//     // Store the purchase item and update stock
-//  public function store(Request $request)
-// {
-//     try {
-//         $validated = $request->validate([
-//             'products' => 'required|array|min:1',
-//             'products.*.product_id' => 'required|exists:products,id',
-//             'products.*.quantity' => 'required|integer|min:1',
-//             'products.*.discount_type' => 'nullable|in:none,percentage,flat',
-//             'products.*.discount_value' => 'nullable|numeric|min:0',
-//             'payment_method' => 'required|in:cash,card,transfer',
-//         ]);
-
-//         $transactionId = 'TXN-' . now()->format('YmdHis') . '-' . rand(1000, 9999);
-//         $lastPurchase = null;
-
-//         foreach ($validated['products'] as $item) {
-//             $product = Product::findOrFail($item['product_id']);
-//             $quantityRequested = $item['quantity'];
-
-//             if ($product->stock_quantity < $quantityRequested) {
-//                 return response()->json([
-//                     'success' => false,
-//                     'message' => "Not enough stock for {$product->name}. Available: {$product->stock_quantity}"
-//                 ], 400);
-//             }
-
-//             // 🧮 Calculate discount properly
-//             $discountType = $item['discount_type'] ?? 'none';
-//             $discountValue = $item['discount_value'] ?? 0;
-//             $priceBeforeDiscount = $product->price * $quantityRequested;
-//             $discountAmount = 0;
-
-//             if ($discountType === 'percentage') {
-//                 $discountAmount = ($discountValue / 100) * $priceBeforeDiscount;
-//             } elseif ($discountType === 'flat') {
-//                 $discountAmount = $discountValue;
-//             }
-
-//             $totalAfterDiscount = max($priceBeforeDiscount - $discountAmount, 0);
-
-//             $lastPurchase = PurchaseItem::create([
-//                 'product_id'     => $product->id,
-//                 'category_id'    => $product->category_id,
-//                 'quantity'       => $quantityRequested,
-//                 'total_price'    => $totalAfterDiscount,
-//                 'discount'       => $discountAmount,
-//                 'discount_type'  => $discountType,
-//                 'discount_value' => $discountValue,
-//                 'payment_method' => $validated['payment_method'],
-//                 'transaction_id' => $transactionId,
-//                 'shop_id'        => $product->shop_id,
-//                 'cashier_id'     => auth()->id(), // ✅ add this line
-//             ]);
-
-//             // 🔄 Update stock
-//             $product->decrement('stock_quantity', $quantityRequested);
-
-//             // ⚠️ Low stock alert
-//             if ($product->stock_quantity <= $product->stock_limit) {
-//                 $admins = User::whereIn('role', ['admin', 'manager'])->get();
-//                 Notification::send($admins, new LowStockAlert($product));
-//             }
-//         }
-
-//         return response()->json([
-//             'success'    => true,
-//             'receipt_id' => $lastPurchase->id,
-//             'txn_id'     => $transactionId
-//         ]);
-
-//     } catch (\Illuminate\Validation\ValidationException $e) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => $e->errors(),
-//         ], 422);
-
-//     } catch (\Exception $e) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Server error: ' . $e->getMessage(),
-//         ], 500);
-//     }
-// }
-
 
 // Store the purchase item and update stock
 public function store(Request $request)
@@ -193,7 +108,6 @@ public function store(Request $request)
                 // 🧍 Customer info
                 'customer_name'  => $validated['customer_name'] ?? null,
                 'customer_phone' => $validated['customer_phone'] ?? null,
-
                 'product_id'     => $product->id,
                 'category_id'    => $product->category_id,
                 'quantity'       => $quantityRequested,
@@ -205,6 +119,7 @@ public function store(Request $request)
                 'transaction_id' => $transactionId,
                 'shop_id'        => $product->shop_id,
                 'cashier_id'     => auth()->id(),
+                'owner_id' => auth()->user()->owner_id,
             ]);
 
             // 🔄 Update stock
@@ -264,6 +179,62 @@ public function store(Request $request)
     }
 
 
+// public function cashiersales(Request $request)
+// {
+//     $user = auth()->user();
+
+//     $search     = $request->input('search');
+//     $startDate  = $request->input('start_date');
+//     $endDate    = $request->input('end_date');
+//     $quick      = $request->input('quick');
+
+//     // If no filter at all → DEFAULT TO TODAY
+//     if (!$startDate && !$endDate && !$quick) {
+//         $startDate = $endDate = now()->toDateString();
+//     }
+
+//     // QUICK FILTERS
+//     if ($quick === 'today') {
+//         $startDate = $endDate = now()->toDateString();
+//     }
+//     if ($quick === 'yesterday') {
+//         $startDate = $endDate = now()->subDay()->toDateString();
+//     }
+//     if ($quick === 'week') {
+//         $startDate = now()->startOfWeek()->toDateString();
+//         $endDate   = now()->endOfWeek()->toDateString();
+//     }
+//     if ($quick === 'month') {
+//         $startDate = now()->startOfMonth()->toDateString();
+//         $endDate   = now()->endOfMonth()->toDateString();
+//     }
+
+//     $sales = PurchaseItem::with(['product.category', 'shop'])
+//         ->when($search, function ($query, $search) {
+//             $query->whereHas('product', function ($q) use ($search) {
+//                 $q->where('name', 'like', "%{$search}%");
+//             });
+//         })
+//         ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+//             $query->whereBetween('created_at', [
+//                 $startDate . ' 00:00:00',
+//                 $endDate   . ' 23:59:59'
+//             ]);
+//         })
+//         ->where('owner_id', $user->owner_id)
+//         ->where('shop_id', $user->shop_id)
+//         ->where('cashier_id', $user->id)   // 👈 NEW LINE (restrict to logged-in cashier)
+//         ->orderBy('created_at', 'desc')
+//         ->get();
+
+//     if (auth()->user()->role === 'cashier') {
+//         return view('cashier.home-sales', compact('sales'));
+//     }
+
+//     return view('receipts.receipt', compact('sales'));
+
+// }
+
 public function cashiersales(Request $request)
 {
     $user = auth()->user();
@@ -273,7 +244,7 @@ public function cashiersales(Request $request)
     $endDate    = $request->input('end_date');
     $quick      = $request->input('quick');
 
-    // If no filter at all → DEFAULT TO TODAY
+    // DEFAULT TODAY
     if (!$startDate && !$endDate && !$quick) {
         $startDate = $endDate = now()->toDateString();
     }
@@ -282,41 +253,58 @@ public function cashiersales(Request $request)
     if ($quick === 'today') {
         $startDate = $endDate = now()->toDateString();
     }
+
     if ($quick === 'yesterday') {
         $startDate = $endDate = now()->subDay()->toDateString();
     }
+
     if ($quick === 'week') {
         $startDate = now()->startOfWeek()->toDateString();
         $endDate   = now()->endOfWeek()->toDateString();
     }
+
     if ($quick === 'month') {
         $startDate = now()->startOfMonth()->toDateString();
         $endDate   = now()->endOfMonth()->toDateString();
     }
 
     $sales = PurchaseItem::with(['product.category', 'shop'])
-        ->when($search, function ($query, $search) {
+
+        ->where('owner_id', $user->owner_id)
+
+        ->where('shop_id', $user->shop_id)
+
+        ->where('cashier_id', $user->id)
+
+        ->when($search, function ($query) use ($search) {
+
             $query->whereHas('product', function ($q) use ($search) {
+
                 $q->where('name', 'like', "%{$search}%");
             });
         })
-        ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('created_at', [
+
+        ->when(!empty($startDate) && !empty($endDate), function ($query) use ($startDate, $endDate) {
+
+            $query->whereBetween('purchase_items.created_at', [
                 $startDate . ' 00:00:00',
-                $endDate   . ' 23:59:59'
+                $endDate . ' 23:59:59'
             ]);
         })
-        ->where('shop_id', $user->shop_id)
-        ->where('cashier_id', $user->id)   // 👈 NEW LINE (restrict to logged-in cashier)
-        ->orderBy('created_at', 'desc')
+
+        ->latest()
+
         ->get();
 
-    if (auth()->user()->role === 'cashier') {
+    // DEBUG
+    // dd($sales);
+
+    if ($user->role === 'cashier') {
+
         return view('cashier.home-sales', compact('sales'));
     }
 
     return view('receipts.receipt', compact('sales'));
-
 }
 
 

@@ -35,19 +35,22 @@ class PurchaseItem extends Model
     | TENANT ISOLATION (GLOBAL SCOPE)
     |-------------------------------------------------
     */
-    protected static function booted()
-    {
-        static::addGlobalScope('owner', function ($query) {
+protected static function booted()
+{
+    static::addGlobalScope('owner', function ($query) {
+        if (auth()->check()) {
+            $user = auth()->user();
 
-            if (auth()->check()) {
+            // Use owner_id from the user, not the user's id
+            $ownerID = $user->owner_id ?? $user->id;
 
-                $query->where(
-                    'purchase_items.owner_id',
-                    auth()->id()
-                );
-            }
-        });
-    }
+            $query->where(
+                'purchase_items.owner_id',
+                $ownerID
+            );
+        }
+    });
+}
 
     /*
     |-------------------------------------------------

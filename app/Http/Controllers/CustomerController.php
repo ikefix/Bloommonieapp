@@ -46,21 +46,23 @@ public function index()
     public function store(Request $request)
 {
     $request->validate([
-        'name' => 'nullable|string|max:255',
-        'email' => 'nullable|email|unique:customers,email',
-        'phone' => 'nullable|string|max:20',
+        'name'    => 'nullable|string|max:255',
+        'email'   => 'nullable|email|unique:customers,email',
+        'phone'   => 'nullable|string|max:20',
         'address' => 'nullable|string|max:255',
         'company' => 'nullable|string|max:255',
-        'notes' => 'nullable|string|max:500',
+        'notes'   => 'nullable|string|max:500',
     ]);
 
     Customer::create($request->only([
-        'name','email','phone','address','company','notes'
+        'name', 'email', 'phone', 'address', 'company', 'notes'
     ]));
 
-    $redirect = auth()->user()->role === 'admin'
-        ? route('admin.customers.index')
-        : route('manager.customers.index');
+    $redirect = match(auth()->user()->role) {
+        'admin'   => route('admin.customers.index'),
+        'manager' => route('manager.customers.index'),
+        default   => route('cashier.customers.index'),
+    };
 
     return redirect($redirect)->with('success', 'Customer created successfully!');
 }
@@ -70,7 +72,15 @@ public function index()
     public function destroy(Customer $customer)
     {
         $customer->delete();
-        $redirect = auth()->user()->role === 'admin' ? route('admin.customers.index') : route('manager.customers.index');
+
+        $role = auth()->user()->role;
+
+        $redirect = match($role) {
+            'admin'   => route('admin.customers.index'),
+            'manager' => route('manager.customers.index'),
+            default   => route('cashier.customers.index'),
+        };
+
         return redirect($redirect)->with('success', 'Customer deleted successfully!');
     }
 }

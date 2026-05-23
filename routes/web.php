@@ -349,23 +349,6 @@ Route::get('/Managerexpenses/create', [ExpenseController::class, 'createmanager'
 Route::post('/Managerexpenses', [ExpenseController::class, 'storemanager'])->name('managerexpense.store');
 Route::delete('/Managerexpenses/{id}', [ExpenseController::class, 'destroymanager'])->name('managerexpense.destroy');
 
-//ROUTE FOR CREATE CUSTOMER
-
-// Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function() {
-//     Route::get('/customers', [CustomerController::class, 'index'])->name('admin.customers.index');
-//     Route::get('/customers/create', [CustomerController::class, 'create'])->name('admin.customers.create');
-//     Route::post('/customers', [CustomerController::class, 'store'])->name('admin.customers.store');
-//     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy');
-// });
-
-// // Manager Routes
-// Route::prefix('manager')->middleware(['auth', 'role:manager'])->group(function() {
-//     Route::get('/customers', [CustomerController::class, 'index'])->name('manager.customers.index');
-//     Route::get('/customers/create', [CustomerController::class, 'create'])->name('manager.customers.create');
-//     Route::post('/customers', [CustomerController::class, 'store'])->name('manager.customers.store');
-//     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('manager.customers.destroy');
-// });
-
 // Admin
 Route::prefix('admin')->middleware(['auth','role:admin'])->group(function(){
     Route::get('/customers', [CustomerController::class,'index'])->name('admin.customers.index');
@@ -385,6 +368,8 @@ Route::prefix('manager')->middleware(['auth','role:manager'])->group(function(){
 
     Route::get('/customers', [CustomerController::class,'index'])->name('cashier.customers.index');
     Route::post('/customers', [CustomerController::class,'store'])->name('cashier.customers.store');
+    
+    Route::delete('/customers/{customer}', [CustomerController::class,'destroy'])->name('cashier.customers.destroy');
 
 
 

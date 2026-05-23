@@ -149,6 +149,7 @@ public function store(Request $request)
             'total_price'    => $item['total_price'],
             'cashier_id'     => Auth::id(),
             'sale_type'      => 'invoice',
+            'owner_id' => auth()->user()->owner_id,
         ]);
     }
 

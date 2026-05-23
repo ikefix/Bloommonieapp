@@ -65,7 +65,7 @@ public function index()
 
 public function indexcash()
 {
-    $expenses = Expense::where('added_by', Auth::user()->name)
+    $expenses = Expense::where('added_by', Auth::user()->id)  // ✅ ID not name
                         ->latest()
                         ->paginate(10);
 
@@ -95,7 +95,7 @@ public function indexcash()
             'amount' => $request->amount,
             'description' => $request->description,
             'date' => $request->date,
-            'added_by' => Auth::user()->name ?? 'Cashier/Admin',
+            'added_by'    => Auth::user()->id,  
         ]);
 
 

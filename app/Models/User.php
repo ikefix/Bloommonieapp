@@ -21,6 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'shop_id', // Add shop_id here
         'plan',
+        'owner_id', // ADD THIS
         'plan_duration',
         'plan_start',
         'plan_end',
@@ -73,24 +74,6 @@ public function getOwnerAccount()
         ? self::find($this->owner_id) 
         : $this;
 }
-
-protected static function booted()
-{
-    static::creating(function ($user) {
-        // If no owner_id is provided, set temporary value
-        if (!$user->owner_id) {
-            $user->owner_id = 0; // temporary placeholder
-        }
-    });
-
-    static::created(function ($user) {
-        // After ID is generated, set owner_id to self
-        if ($user->owner_id == 0) {
-            $user->owner_id = $user->id;
-            $user->saveQuietly(); // avoids infinite loop
-        }
-    });
-}  
 
 public function getPlanLimits()
 {
