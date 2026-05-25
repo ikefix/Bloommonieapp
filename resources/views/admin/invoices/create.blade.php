@@ -195,12 +195,18 @@ productsWrapper.addEventListener('click', function(e) {
 // Update totals
 productsWrapper.addEventListener('change', updateAllTotals);
 productsWrapper.addEventListener('input', updateAllTotals);
-
 function updateAllTotals() {
     let allTotal = 0;
     const goodsArray = [];
 
+    const discount = Number(document.querySelector('#discount').value) || 0;
+    const tax = Number(document.querySelector('#tax').value) || 0;
+
+    let rawItems = [];
+
+    // STEP 1: collect raw items first
     productsWrapper.querySelectorAll('.product_row').forEach(row => {
+
         const select = row.querySelector('.product_select');
         const qty = Number(row.querySelector('.product_quantity').value) || 1;
         const price = parseFloat(select.selectedOptions[0]?.dataset.price || 0);
@@ -209,22 +215,35 @@ function updateAllTotals() {
         row.querySelector('.product_price').value = price.toFixed(2);
         row.querySelector('.product_total').value = total.toFixed(2);
 
-        if(select.value) {
-            goodsArray.push({
+        if (select.value) {
+            rawItems.push({
                 product_id: select.value,
                 name: select.selectedOptions[0].textContent,
                 quantity: qty,
                 price: price,
                 total_price: total
             });
+
             allTotal += total;
         }
     });
 
+    // STEP 2: apply discount proportionally per item
+    rawItems.forEach(item => {
+        const itemDiscount = (item.total_price / allTotal) * discount;
+        const finalItemTotal = item.total_price - itemDiscount;
+
+        goodsArray.push({
+            ...item,
+            discount: itemDiscount,
+            total_price: finalItemTotal
+        });
+    });
+
+    // STEP 3: update hidden input
     goodsInput.value = JSON.stringify(goodsArray);
 
-    const discount = Number(document.querySelector('#discount').value) || 0;
-    const tax = Number(document.querySelector('#tax').value) || 0;
+    // STEP 4: final total
     const finalTotal = allTotal - discount + tax;
     document.querySelector('#final_total').value = finalTotal.toFixed(2);
 

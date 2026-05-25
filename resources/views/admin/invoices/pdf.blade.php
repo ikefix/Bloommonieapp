@@ -149,15 +149,28 @@
                 </thead>
                 <tbody>
                     @php
-                        $product = \App\Models\Product::find($invoice->goods['product_id']);
+                        $goods = is_array($invoice->goods)
+                            ? $invoice->goods
+                            : json_decode($invoice->goods, true);
                     @endphp
-                    <tr>
-                        <td>{{ $product?->name ?? 'Unknown Product' }}</td>
-                        <td class="text-center">{{ $invoice->goods['quantity'] }}</td>
-                        <td class="text-right">
-                            ₦{{ number_format($invoice->goods['total_price'], 2) }}
-                        </td>
-                    </tr>
+
+                    @foreach($goods as $item)
+                        @php
+                            $product = \App\Models\Product::find($item['product_id'] ?? null);
+                        @endphp
+
+                        <tr>
+                            <td>{{ $product?->name ?? 'Unknown Product' }}</td>
+
+                            <td class="text-center">
+                                {{ $item['quantity'] ?? 0 }}
+                            </td>
+
+                            <td class="text-right">
+                                ₦{{ number_format($item['total_price'] ?? 0, 2) }}
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>

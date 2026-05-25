@@ -118,4 +118,11 @@ class Invoice extends Model
 
         return array_sum(array_column($goods, 'quantity'));
     }
+
+    public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
+    
 }

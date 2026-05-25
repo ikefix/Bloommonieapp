@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
+
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
@@ -32,60 +34,6 @@ class InvoiceController extends Controller
             return view('cashier.invoices.create', compact('customers', 'products', 'shops'));
         }
     }
-
-
-//     public function store(Request $request)
-// {
-//     $request->validate([
-//         'customer_id' => 'required|exists:customers,id',
-//         'shop_id' => 'required|exists:shops,id',
-//         'goods' => 'required|array',
-//         'discount' => 'nullable|numeric',
-//         'tax' => 'nullable|numeric',
-//         'total' => 'required|numeric',
-//         'payment_type' => 'required|in:full,part',
-//         'amount_paid' => 'nullable|numeric',
-//         'balance' => 'nullable|numeric',
-//     ]);
-
-//     // Extract product details
-//     $productId = $request->goods['product_id'];
-//     $qty = $request->goods['quantity'];
-
-//     // Fetch product
-//     $product = Product::findOrFail($productId);
-
-//     // CHECK IF ENOUGH STOCK EXISTS
-//     if ($product->stock_quantity < $qty) {
-//         return back()->with('error', 'Not enough stock available. Current stock: ' . $product->stock_quantity);
-//     }
-
-//     // DEDUCT STOCK
-//     $product->stock_quantity -= $qty;
-//     $product->save();
-
-//     // Determine payment status
-//     $status = ($request->balance > 0) ? 'owing' : 'paid';
-
-//     // Create invoice
-//     Invoice::create([
-//         'customer_id' => $request->customer_id,
-//         'user_id' => Auth::id(),
-//         'shop_id' => $request->shop_id,
-//         'invoice_number' => 'INV-' . time(),
-//         'invoice_date' => now(),
-//         'goods' => $request->goods,
-//         'discount' => $request->discount ?? 0,
-//         'tax' => $request->tax ?? 0,
-//         'total' => $request->total,
-//         'payment_type' => $request->payment_type,
-//         'amount_paid' => $request->amount_paid ?? 0,
-//         'balance' => $request->balance ?? 0,
-//         'payment_status' => $status,
-//     ]);
-
-//     return redirect()->back()->with('success', 'Invoice created successfully! Stock updated.');
-// }
 
 public function store(Request $request)
 {
@@ -139,7 +87,7 @@ public function store(Request $request)
         $product = Product::findOrFail($item['product_id']);
         $product->decrement('stock_quantity', $item['quantity']);
 
-        PurchaseItem::create([
+       PurchaseItem::create([
             'transaction_id' => $invoice->invoice_number,
             'invoice_id'     => $invoice->id,
             'product_id'     => $product->id,
@@ -147,9 +95,12 @@ public function store(Request $request)
             'shop_id'        => $request->shop_id,
             'quantity'       => $item['quantity'],
             'total_price'    => $item['total_price'],
+
+            'discount'       => $request->discount ?? 0,
+
             'cashier_id'     => Auth::id(),
             'sale_type'      => 'invoice',
-            'owner_id' => auth()->user()->owner_id,
+            'owner_id'       => auth()->user()->owner_id,
         ]);
     }
 
@@ -235,12 +186,59 @@ public function editPayment(Invoice $invoice)
     );
 }
 
-public function updatePayment(Invoice $invoice)
+public function updatePayment(Request $request, Invoice $invoice)
 {
+    $request->validate([
+        'amount_paid' => 'required|numeric|min:1',
+        'payment_type' => 'required',
+    ]);
+
+    // Existing values
+    $currentPaid = $invoice->amount_paid;
+    $currentBalance = $invoice->balance;
+
+    // New payment entered
+    $newPayment = $request->amount_paid;
+
+    // Prevent overpayment
+    if ($newPayment > $currentBalance) {
+        return back()->with('error', 'Payment exceeds remaining balance');
+    }
+
+    // Calculate new totals
+    $totalPaid = $currentPaid + $newPayment;
+    $newBalance = $invoice->total - $totalPaid;
+
+    // Determine payment status
+    $paymentStatus = $newBalance <= 0 ? 'paid' : 'owing';
+
+    // Update invoice
     $invoice->update([
-        'amount_paid' => $invoice->total,
+        'amount_paid' => $totalPaid,
+        'balance' => $newBalance,
+        'payment_status' => $paymentStatus,
+        'payment_type' => $request->payment_type,
+    ]);
+
+    return back()->with('success', 'Payment updated successfully');
+}
+
+public function markPaid(Invoice $invoice)
+{
+    // Already paid
+    if ($invoice->payment_status === 'paid') {
+        return back()->with('error', 'Invoice already paid');
+    }
+
+    // Add remaining balance to amount paid
+    $invoice->update([
+
+        'amount_paid' => $invoice->amount_paid + $invoice->balance,
+
         'balance' => 0,
+
         'payment_status' => 'paid',
+
         'payment_type' => 'full',
     ]);
 
@@ -259,43 +257,43 @@ public function editPaymentcash(Invoice $invoice)
 
 
 
-public function updatePaymentcash(Invoice $invoice)
+
+public function updatePaymentcash(Request $request, Invoice $invoice)
 {
-    $invoice->update([
-        'amount_paid' => $invoice->total,
-        'balance' => 0,
-        'payment_status' => 'paid',
-        'payment_type' => 'full',
+    $request->validate([
+        'amount_paid' => 'required|numeric|min:1',
+        'payment_type' => 'required',
     ]);
 
-    return back()->with('success', 'Invoice marked as paid');
+    // Existing values
+    $currentPaid = $invoice->amount_paid;
+    $currentBalance = $invoice->balance;
+
+    // New payment entered
+    $newPayment = $request->amount_paid;
+
+    // Prevent overpayment
+    if ($newPayment > $currentBalance) {
+        return back()->with('error', 'Payment exceeds remaining balance');
+    }
+
+    // Calculate new totals
+    $totalPaid = $currentPaid + $newPayment;
+    $newBalance = $invoice->total - $totalPaid;
+
+    // Determine payment status
+    $paymentStatus = $newBalance <= 0 ? 'paid' : 'owing';
+
+    // Update invoice
+    $invoice->update([
+        'amount_paid' => $totalPaid,
+        'balance' => $newBalance,
+        'payment_status' => $paymentStatus,
+        'payment_type' => $request->payment_type,
+    ]);
+
+    return back()->with('success', 'Payment updated successfully');
 }
-// Update payment
-// public function updatePaymentcash(Request $request, Invoice $invoice)
-// {
-//     $request->validate([
-//         'payment_type' => 'required|in:full,part',
-//         'amount_paid' => 'required|numeric|min:0',
-//     ]);
-
-//     $totalAmount = $invoice->total;
-//     $newAmountPaid = $invoice->amount_paid + $request->amount_paid;
-
-//     // Calculate new balance
-//     $balance = $totalAmount - $newAmountPaid;
-
-//     $invoice->amount_paid = $newAmountPaid;
-//     $invoice->balance = $balance;
-
-//     // Update payment type and status
-//     $invoice->payment_type = $request->payment_type;
-//     $invoice->payment_status = $balance <= 0 ? 'paid' : 'owing';
-
-//     $invoice->save();
-
-//     return redirect()->route(Auth::user()->role . '.invoices.owing')
-//                      ->with('success', 'Payment updated successfully!');
-// }
 
 
 

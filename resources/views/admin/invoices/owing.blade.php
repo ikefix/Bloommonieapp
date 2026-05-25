@@ -91,7 +91,7 @@
                                     <td>{{ $invoice->payment_status }}</td>
                                     <td>
                                         <a href="{{ route('admin.invoices.edit-payment', $invoice->id) }}" class="btn btn-sm btn-info">Edit</a>
-                                        <form action="{{ route('admin.invoices.update-payment', $invoice->id) }}" method="POST" class="d-inline-block">
+                                        <form action="{{ route('admin.invoices.mark-paid', $invoice->id) }}" method="POST" class="d-inline-block">
                                             @csrf
                                             <input type="hidden" name="payment_type" value="full">
                                             <button type="submit" class="btn btn-sm btn-success">
