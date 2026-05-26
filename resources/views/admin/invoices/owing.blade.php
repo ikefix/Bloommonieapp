@@ -42,6 +42,25 @@
         </div>
     </div>
 
+    <form action="{{ route('invoice.search') }}" method="GET" class="mb-3">
+
+        <div style="display:flex; gap:10px;">
+
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search customer name or phone..."
+            >
+
+            <button class="btn btn-primary">
+                Search
+            </button>
+
+        </div>
+
+    </form>
+
     {{-- Owing Invoices Table --}}
     <div class="row">
         <div class="col-12">
@@ -101,6 +120,20 @@
                                         <a href="{{ route('admin.invoices.preview', $invoice->id) }}" class="btn btn-sm btn-secondary">
                                             Preview
                                         </a>
+                                        <form action="{{ route('invoice.delete', $invoice->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Delete this invoice?')">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button class="btn btn-danger btn-sm">
+
+                                                Delete
+
+                                            </button>
+
+                                        </form>
                                     </td>
                                 </tr>
                                 @endforeach

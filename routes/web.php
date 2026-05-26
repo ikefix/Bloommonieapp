@@ -390,6 +390,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function() {
     Route::get('/invoices/{invoice}/edit-payment', [InvoiceController::class, 'editPayment'])->name('admin.invoices.edit-payment');
     Route::post('/invoices/{invoice}/update-payment', [InvoiceController::class, 'updatePayment'])->name('admin.invoices.update-payment');
     Route::post('/invoices/{invoice}/mark-paid',[InvoiceController::class, 'markPaid'])->name('admin.invoices.mark-paid');
+    Route::get('/invoice/search',[InvoiceController::class, 'searchCustomerInvoices'])->name('invoice.search');
+    Route::delete('/invoice/delete/{invoice}',[InvoiceController::class, 'deleteInvoice'])->name('invoice.delete');
 });
 
 // manager routes
