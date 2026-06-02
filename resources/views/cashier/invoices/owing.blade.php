@@ -5,7 +5,7 @@
 
     {{-- Dashboard Cards --}}
     <div class="row mb-4">
-        <div class="col-md-4">
+        <!-- <div class="col-md-4">
             <div class="card text-white bg-warning shadow-sm">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
@@ -15,7 +15,7 @@
                     <i class="fas fa-users fa-2x"></i>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div class="col-md-4">
             <div class="card text-white bg-danger shadow-sm">
