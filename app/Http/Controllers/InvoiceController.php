@@ -108,7 +108,16 @@ public function store(Request $request)
 }
 
 
+public function destroy(Invoice $invoice)
+{
+    if ($invoice->balance > 0) {
+        return back()->with('error', 'Cannot delete invoice with unpaid balance.');
+    }
 
+    $invoice->delete();
+
+    return back()->with('success', 'Invoice deleted successfully.');
+}
 
 
 
