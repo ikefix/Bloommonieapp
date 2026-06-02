@@ -147,6 +147,137 @@ public function generateShareLink(Invoice $invoice)
 
 
 
+/*
+|--------------------------------------------------------------------------
+| SEARCH CUSTOMER INVOICES
+|--------------------------------------------------------------------------
+*/
+public function searchCustomerInvoices(Request $request)
+{
+    $search = $request->search;
+
+    $invoices = Invoice::with(['customer', 'shop'])
+
+        ->when($search, function ($query) use ($search) {
+
+            $query->whereHas('customer', function ($q) use ($search) {
+
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+
+            });
+
+        })
+
+        ->latest()
+
+        ->get();
+
+    $owingInvoices = $invoices->where('payment_status', 'owing');
+
+    $totalInvoices = $invoices->count();
+
+    if (Auth::user()->role === 'admin') {
+
+        return view(
+            'admin.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    } elseif (Auth::user()->role === 'manager') {
+
+        return view(
+            'manager.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    } else {
+
+        return view(
+            'cashier.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| DELETE INVOICE
+|--------------------------------------------------------------------------
+*/
+
+public function deleteInvoice(Invoice $invoice)
+{
+    // CHECK IF STILL OWING
+    if ($invoice->balance > 0) {
+
+        return back()->with(
+            'error',
+            'Please pay the remaining balance before deleting this invoice.'
+        );
+    }
+
+    DB::beginTransaction();
+
+    try {
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN STOCK BACK
+        |--------------------------------------------------------------------------
+        */
+
+        foreach ($invoice->goods as $item) {
+
+            $product = Product::find($item['product_id']);
+
+            if ($product) {
+
+                $product->increment(
+                    'stock_quantity',
+                    $item['quantity']
+                );
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DELETE PURCHASE ITEMS
+        |--------------------------------------------------------------------------
+        */
+
+        PurchaseItem::where('invoice_id', $invoice->id)->delete();
+
+        /*
+        |--------------------------------------------------------------------------
+        | DELETE INVOICE
+        |--------------------------------------------------------------------------
+        */
+
+        $invoice->delete();
+
+        DB::commit();
+
+        return back()->with(
+            'success',
+            'Invoice deleted successfully.'
+        );
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return back()->with(
+            'error',
+            'Something went wrong: ' . $e->getMessage()
+        );
+    }
+}
+
+
+
 public function owing()
 {
     if (!in_array(Auth::user()->role, ['admin', 'manager', 'cashier'])) {

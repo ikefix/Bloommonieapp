@@ -42,11 +42,6 @@
         </div>
     </div>
 
-<div class="mb-3">
-    <input type="text" id="searchInput" class="form-control"
-           placeholder="Search by customer name...">
-</div>
-
     {{-- Owing Invoices Table --}}
     <div class="row">
         <div class="col-12">
@@ -106,18 +101,6 @@
                                         <a href="{{ route('admin.invoices.preview', $invoice->id) }}" class="btn btn-sm btn-secondary">
                                             Preview
                                         </a>
-                                        <form action="{{ route('admin.invoices.destroy', $invoice->id) }}"
-                                            method="POST"
-                                            class="d-inline-block"
-                                            onsubmit="return confirm('Are you sure you want to delete this invoice?')">
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                Delete
-                                            </button>
-                                        </form>
                                     </td>
                                 </tr>
                                 @endforeach
