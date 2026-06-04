@@ -435,7 +435,50 @@ public function updatePaymentcash(Request $request, Invoice $invoice)
     return back()->with('success', 'Payment updated successfully');
 }
 
+public function receivables(Request $request)
+{
+    $ownerId = auth()->user()->owner_id;
 
+    // Base query (ALL customers with invoices)
+    $query = Invoice::select(
+            'customer_id',
+            DB::raw('SUM(total) as total_invoice'),
+            DB::raw('SUM(amount_paid) as total_paid'),
+            DB::raw('SUM(balance) as total_owing'),
+            DB::raw('MAX(shop_id) as shop_id')
+        )
+        ->with(['customer', 'shop'])
+        ->where('owner_id', $ownerId)
+        ->groupBy('customer_id');
+
+    // SEARCH (customer name / phone)
+    if ($request->search) {
+        $search = $request->search;
+
+        $query->whereHas('customer', function ($q) use ($search) {
+            $q->where('name', 'like', "%$search%")
+              ->orWhere('phone', 'like', "%$search%");
+        });
+    }
+
+    // Paginate (10 rows)
+    $customers = $query->paginate(10)->withQueryString();
+
+    // ALL invoices for goods aggregation
+    $invoicesByCustomer = Invoice::where('owner_id', $ownerId)
+        ->with('shop')
+        ->get()
+        ->groupBy('customer_id');
+
+    // Total receivable
+    $totalReceivable = Invoice::where('owner_id', $ownerId)->sum('balance');
+
+    return view('admin.invoices.receivables', compact(
+        'customers',
+        'invoicesByCustomer',
+        'totalReceivable'
+    ));
+}
 
 
 }

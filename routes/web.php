@@ -484,6 +484,8 @@ Route::prefix('manager')->middleware(['auth','role:manager'])->group(function ()
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('manager.invoices.store');
 });
 
+Route::get('/admin/receivables', [InvoiceController::class, 'receivables'])
+    ->name('admin.invoices.receivables');
 
 
 // SALES REPORT

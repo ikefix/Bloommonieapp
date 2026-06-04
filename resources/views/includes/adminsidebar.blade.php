@@ -98,6 +98,10 @@
                     <span class="sidebar-icon"><i class='bx bx-file'></i></span>
                     <span class="sidebar-text">Create Invoice</span>
                 </a>  
+                <a href="{{ route('admin.invoices.receivables') }}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-search'></i></span>
+                    <span class="sidebar-text">Search History</span>
+                </a>  
             </div>
 
             <a class="sidebar-link collapsible-btn" onclick="toggleSubmenu(this)">
