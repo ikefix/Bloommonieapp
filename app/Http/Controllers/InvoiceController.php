@@ -439,8 +439,35 @@ public function receivables(Request $request)
 {
     $ownerId = auth()->user()->owner_id;
 
-    // Base query (ALL customers with invoices)
-    $query = Invoice::select(
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 1: GET CUSTOMER IDS (WITH SEARCH)
+    |--------------------------------------------------------------------------
+    */
+
+    $customerIdsQuery = Customer::query()
+        ->whereHas('invoices', function ($q) use ($ownerId) {
+            $q->where('owner_id', $ownerId);
+        });
+
+    if ($request->search) {
+        $search = $request->search;
+
+        $customerIdsQuery->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('phone', 'like', "%{$search}%");
+        });
+    }
+
+    $customerIds = $customerIdsQuery->pluck('id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 2: AGGREGATE INVOICES
+    |--------------------------------------------------------------------------
+    */
+
+    $customers = Invoice::select(
             'customer_id',
             DB::raw('SUM(total) as total_invoice'),
             DB::raw('SUM(amount_paid) as total_paid'),
@@ -449,28 +476,28 @@ public function receivables(Request $request)
         )
         ->with(['customer', 'shop'])
         ->where('owner_id', $ownerId)
-        ->groupBy('customer_id');
+        ->whereIn('customer_id', $customerIds) // 🔥 KEY FIX
+        ->groupBy('customer_id')
+        ->paginate(10)
+        ->withQueryString();
 
-    // SEARCH (customer name / phone)
-    if ($request->search) {
-        $search = $request->search;
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 3: GOODS (ALL INVOICES PER CUSTOMER)
+    |--------------------------------------------------------------------------
+    */
 
-        $query->whereHas('customer', function ($q) use ($search) {
-            $q->where('name', 'like', "%$search%")
-              ->orWhere('phone', 'like', "%$search%");
-        });
-    }
-
-    // Paginate (10 rows)
-    $customers = $query->paginate(10)->withQueryString();
-
-    // ALL invoices for goods aggregation
     $invoicesByCustomer = Invoice::where('owner_id', $ownerId)
         ->with('shop')
         ->get()
         ->groupBy('customer_id');
 
-    // Total receivable
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 4: TOTAL RECEIVABLE
+    |--------------------------------------------------------------------------
+    */
+
     $totalReceivable = Invoice::where('owner_id', $ownerId)->sum('balance');
 
     return view('admin.invoices.receivables', compact(
@@ -480,6 +507,78 @@ public function receivables(Request $request)
     ));
 }
 
+
+public function receivablesforcash(Request $request)
+{
+    $ownerId = auth()->user()->owner_id;
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 1: GET CUSTOMER IDS (WITH SEARCH)
+    |--------------------------------------------------------------------------
+    */
+
+    $customerIdsQuery = Customer::query()
+        ->whereHas('invoices', function ($q) use ($ownerId) {
+            $q->where('owner_id', $ownerId);
+        });
+
+    if ($request->search) {
+        $search = $request->search;
+
+        $customerIdsQuery->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('phone', 'like', "%{$search}%");
+        });
+    }
+
+    $customerIds = $customerIdsQuery->pluck('id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 2: AGGREGATE INVOICES
+    |--------------------------------------------------------------------------
+    */
+
+    $customers = Invoice::select(
+            'customer_id',
+            DB::raw('SUM(total) as total_invoice'),
+            DB::raw('SUM(amount_paid) as total_paid'),
+            DB::raw('SUM(balance) as total_owing'),
+            DB::raw('MAX(shop_id) as shop_id')
+        )
+        ->with(['customer', 'shop'])
+        ->where('owner_id', $ownerId)
+        ->whereIn('customer_id', $customerIds) // 🔥 KEY FIX
+        ->groupBy('customer_id')
+        ->paginate(10)
+        ->withQueryString();
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 3: GOODS (ALL INVOICES PER CUSTOMER)
+    |--------------------------------------------------------------------------
+    */
+
+    $invoicesByCustomer = Invoice::where('owner_id', $ownerId)
+        ->with('shop')
+        ->get()
+        ->groupBy('customer_id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 4: TOTAL RECEIVABLE
+    |--------------------------------------------------------------------------
+    */
+
+    $totalReceivable = Invoice::where('owner_id', $ownerId)->sum('balance');
+
+    return view('cashier.invoices.receivables', compact(
+        'customers',
+        'invoicesByCustomer',
+        'totalReceivable'
+    ));
+}
 
 }
 

@@ -487,6 +487,9 @@ Route::prefix('manager')->middleware(['auth','role:manager'])->group(function ()
 Route::get('/admin/receivables', [InvoiceController::class, 'receivables'])
     ->name('admin.invoices.receivables');
 
+Route::get('/cashier/receivables', [InvoiceController::class, 'receivablesforcash'])
+    ->name('cashier.invoices.receivables');
+
 
 // SALES REPORT
 Route::prefix('admin')

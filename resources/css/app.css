@@ -642,7 +642,7 @@ canvas {
 
 .admin-dash{
     display: flex;
-    gap: 1rem;
+    gap: .5rem;
     flex-direction: row !important;
 }
 

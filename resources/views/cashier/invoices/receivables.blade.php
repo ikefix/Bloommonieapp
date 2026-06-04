@@ -1,11 +1,11 @@
-@extends('layouts.adminapp')
+@extends('layouts.app')
 
-@section('admincontent')
+@section('content')
 
 <div class="container-fluid">
 
     <!-- Total Receivables -->
-    <div class="row mb-4">
+    <!-- <div class="row mb-4">
         <div class="col-md-12">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
@@ -16,7 +16,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Table -->
     <div class="card shadow-sm border-0">
@@ -131,7 +131,7 @@
 
                         <!-- Action -->
                         <td>
-                            <a href="{{ route('admin.customers.index', $customer->customer_id) }}"
+                            <a href="{{ route('cashier.customers.index', $customer->customer_id) }}"
                                class="btn btn-sm btn-primary">
                                 View Customer
                             </a>

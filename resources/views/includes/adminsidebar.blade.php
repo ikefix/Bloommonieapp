@@ -100,7 +100,7 @@
                 </a>  
                 <a href="{{ route('admin.invoices.receivables') }}" class="sidebar-link">
                     <span class="sidebar-icon"><i class='bx bx-search'></i></span>
-                    <span class="sidebar-text">Search History</span>
+                    <span class="sidebar-text">Receivables</span>
                 </a>  
             </div>
 

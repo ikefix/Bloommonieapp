@@ -37,6 +37,7 @@
                         <a href="{{ route('cashier.invoices.create') }}" class="nav-link">Create Invoice</a>
                         <a href="{{ route('cashier.invoices.owing') }}" class="nav-link">Credit Supply</a>
                         <a href="{{ route('cashier.customers.index') }}" class="nav-link">Create Customer</a>
+                        <a href="{{ route('cashier.invoices.receivables') }}" class="nav-link">Receivables</a>
                         <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                             {{ Auth::user()->name }}
                         </a>
