@@ -403,6 +403,8 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function()
 });
 
 
+    Route::get('/cashier/invoice/search',[InvoiceController::class, 'searchCashierCustomerInvoices'])->name('invoices.search');
+
 
 
 

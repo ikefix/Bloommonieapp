@@ -202,6 +202,55 @@ public function searchCustomerInvoices(Request $request)
 }
 
 
+public function searchCashierCustomerInvoices(Request $request)
+{
+    $search = $request->search;
+
+    $invoices = Invoice::with(['customer', 'shop'])
+
+        ->when($search, function ($query) use ($search) {
+
+            $query->whereHas('customer', function ($q) use ($search) {
+
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+
+            });
+
+        })
+
+        ->latest()
+
+        ->get();
+
+    $owingInvoices = $invoices->where('payment_status', 'owing');
+
+    $totalInvoices = $invoices->count();
+
+    if (Auth::user()->role === 'admin') {
+
+        return view(
+            'admin.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    } elseif (Auth::user()->role === 'manager') {
+
+        return view(
+            'manager.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    } else {
+
+        return view(
+            'cashier.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    }
+}
+
 /*
 |--------------------------------------------------------------------------
 | DELETE INVOICE
