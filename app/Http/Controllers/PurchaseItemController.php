@@ -126,9 +126,12 @@ public function store(Request $request)
             $product->decrement('stock_quantity', $quantityRequested);
 
             // ⚠️ Low stock alert
+            // if ($product->stock_quantity <= $product->stock_limit) {
+            //     $admins = User::whereIn('role', ['admin', 'manager'])->get();
+            //     Notification::send($admins, new LowStockAlert($product));
+            // }
             if ($product->stock_quantity <= $product->stock_limit) {
-                $admins = User::whereIn('role', ['admin', 'manager'])->get();
-                Notification::send($admins, new LowStockAlert($product));
+                Notification::send(auth()->user(), new LowStockAlert($product));
             }
         }
 

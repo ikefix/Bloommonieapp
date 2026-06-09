@@ -61,6 +61,7 @@ public function import(Request $request)
         'barcode' => 'required|string|unique:products,barcode', // ✅ must exist & unique
         'price' => 'required|numeric|min:0',
         'cost_price' => 'required|numeric|min:0',
+        'stock_limit' => 'required|numeric|min:0',
         'stock_quantity' => 'required|integer|min:0',
     ]);
 
@@ -83,6 +84,7 @@ public function import(Request $request)
         'barcode', // ✅ Added
         'price',
         'cost_price',
+        'stock_limit',
         'stock_quantity',
     ]);
 

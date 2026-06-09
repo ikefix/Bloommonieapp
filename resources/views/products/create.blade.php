@@ -45,7 +45,7 @@
                 </small>
             </form>
             <div class="mt-4">
-                <h6>``Excel Column Guide</h6>
+                <h6>Excel Column Guide</h6>
 
                 <ul class="text-muted">
                     <li>

@@ -102,6 +102,30 @@
                     <span class="sidebar-icon"><i class='bx bx-search'></i></span>
                     <span class="sidebar-text">Receivables</span>
                 </a>  
+                <a href="{{ route('admin.collectables') }}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-collection'></i></span>
+                    <span class="sidebar-text">Collectables</span>
+                </a>  
+            </div>
+
+             <a class="sidebar-link collapsible-btn" onclick="toggleSubmenu(this)">
+                <span class="sidebar-icon"><i class='bx bx-group'></i></span>
+                <span class="sidebar-text">Prod & Manu</span>
+                <span class="arrow">&#9662;</span> <!-- down arrow -->
+            </a>
+            <div class="submenu"> 
+                <a href="{{route('admin.production_type.index')}}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-credit-card-front'></i></span>
+                    <span class="sidebar-text">Production Type</span>
+                </a>
+                <a href="{{route('admin.production.index')}}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bxs-layer'></i></span>
+                    <span class="sidebar-text">Batch</span>
+                </a>    
+                <a href="{{route('admin.production_entries.index')}}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-credit-card-front'></i></span>
+                    <span class="sidebar-text">List </span>
+                </a>
             </div>
 
             <a class="sidebar-link collapsible-btn" onclick="toggleSubmenu(this)">

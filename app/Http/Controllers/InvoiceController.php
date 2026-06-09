@@ -9,11 +9,13 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Shop;
 use App\Models\User;
+use App\Models\Notification;
+use Illuminate\Support\Str;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\InvoicePaymentLog;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
@@ -409,6 +411,51 @@ public function updatePayment(Request $request, Invoice $invoice)
         'payment_type' => $request->payment_type,
     ]);
 
+    Notification::create([
+        'id' => Str::uuid()->toString(),
+        'notifiable_type' => User::class,
+        'notifiable_id' => Auth::id(),
+        'type' => 'invoice_payment_updated',
+        'data' => [
+            'type' => 'invoice_payment',
+            'message' => Auth::user()->name .
+                ' updated Invoice #' . $invoice->invoice_no,
+            'invoice_no' => $invoice->invoice_no,
+            'amount_added' => $newPayment,
+            'total_paid' => $totalPaid,
+            'balance' => $newBalance,
+            'updated_by' => Auth::user()->name,
+            'updated_at' => now()->format('d M Y h:i A'),
+        ],
+    ]);
+
+    InvoicePaymentLog::create([
+            'owner_id' => Auth::user()->owner_id,
+
+            'invoice_id' => $invoice->id,
+            'invoice_no' => $invoice->invoice_number,
+
+            'cashier_id' => Auth::id(),
+
+            'type' => 'invoice_payment',
+
+            'message' => Auth::user()->name .
+                ' updated Invoice #' .
+                $invoice->invoice_number,
+
+            'amount_added' => $newPayment,
+
+            'total_paid' => $totalPaid,
+
+            'balance' => $newBalance,
+
+            'updated_by' => Auth::user()->name,
+
+            'updated_by_id' => Auth::id(),
+
+            'payment_updated_at' => now(),
+        ]);
+
     return back()->with('success', 'Payment updated successfully');
 }
 
@@ -480,6 +527,67 @@ public function updatePaymentcash(Request $request, Invoice $invoice)
         'payment_status' => $paymentStatus,
         'payment_type' => $request->payment_type,
     ]);
+
+    $admin = User::where('id', Auth::user()->owner_id)
+             ->where('role', 'admin')
+             ->first();
+
+    if ($admin) {
+        Notification::create([
+            'id' => Str::uuid()->toString(),
+            'notifiable_type' => User::class,
+            'notifiable_id' => $admin->id,
+            'type' => 'invoice_payment_updated',
+            'data' => [
+                'type' => 'invoice_payment',
+
+                // ✅ FIXED
+                'invoice_id' => $invoice->id,
+                'invoice_no' => $invoice->invoice_number,
+
+                'cashier_id' => Auth::id(),
+
+                'message' => Auth::user()->name . ' updated Invoice #' . $invoice->invoice_number,
+
+                'amount_added' => $newPayment,
+                'total_paid' => $totalPaid,
+                'balance' => $newBalance,
+
+                'updated_by' => Auth::user()->name,
+                'updated_by_id' => Auth::id(),
+
+                'updated_at' => now()->format('d M Y h:i A'),
+            ],
+        ]);
+
+        InvoicePaymentLog::create([
+            'owner_id' => Auth::user()->owner_id,
+
+            'invoice_id' => $invoice->id,
+            'invoice_no' => $invoice->invoice_number,
+
+            'cashier_id' => Auth::id(),
+
+            'type' => 'invoice_payment',
+
+            'message' => Auth::user()->name .
+                ' updated Invoice #' .
+                $invoice->invoice_number,
+
+            'amount_added' => $newPayment,
+
+            'total_paid' => $totalPaid,
+
+            'balance' => $newBalance,
+
+            'updated_by' => Auth::user()->name,
+
+            'updated_by_id' => Auth::id(),
+
+            'payment_updated_at' => now(),
+        ]);
+    }
+
 
     return back()->with('success', 'Payment updated successfully');
 }
