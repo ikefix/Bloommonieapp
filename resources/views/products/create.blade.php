@@ -260,7 +260,7 @@
                 </div>
 
                 <!-- @include('products.partials.table') -->
-                 <div class="table-responsive">
+                 <div style="overflow-x:auto; width:100%;">
                     @include('products.partials.table')
                 </div>
             </div>
