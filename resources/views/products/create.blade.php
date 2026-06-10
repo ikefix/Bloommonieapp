@@ -259,7 +259,10 @@
                     </a>
                 </div>
 
-                @include('products.partials.table')
+                <!-- @include('products.partials.table') -->
+                 <div class="table-responsive">
+                    @include('products.partials.table')
+                </div>
             </div>
         
         </div>
