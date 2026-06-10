@@ -5,9 +5,11 @@
             <th>Category</th>
             <th>Selling Price (₦)</th>
             <th>Cost Price (₦)</th>
-            <th>Remaining Stock</th>
-            <th>Actions</th>
+            <th>Stock Quantity</th>
             <th>Shop</th>
+            <th>Stock Unit</th>
+            <th>Unit Size</th>
+            <th>Actions</th>
             <th>Barcode</th>
         </tr>
     </thead>
@@ -19,6 +21,9 @@
                 <td>{{ number_format($product->price, 2) }}</td>
                 <td>{{ number_format($product->cost_price, 2) }}</td>
                 <td>{{ $product->stock_quantity }}</td>
+                <td>{{ $product->shop->name ?? 'Not assigned' }}</td>
+                <td>{{ $product->stock_unit ?? 'Not assigned' }}</td>
+                <td>{{ $product->unit_size ?? 'Not assigned' }}</td>
                 <td class="product-btn">
                     <button type="button" class="btn btn-sm btn-warning edit-btn"
                         data-id="{{ $product->id }}"
@@ -39,7 +44,6 @@
                         </button>
                     </form>
                 </td>
-                <td>{{ $product->shop->name ?? 'Not assigned' }}</td>
                 <td>{{ $product->barcode ?? 'Not assigned' }}</td>
             </tr>
         @empty

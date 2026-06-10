@@ -169,13 +169,13 @@
         
             <!-- Price -->
             <div class="mb-3">
-                <label for="price" class="form-label">Price</label>
+                <label for="price" class="form-label">Price (Per Item)</label>
                 <input type="number" name="price" id="price" class="form-control" required>
             </div>
         
             <!-- Cost Price -->
             <div class="mb-3">
-                <label for="cost_price" class="form-label">Cost Price</label>
+                <label for="cost_price" class="form-label">Cost Price (Per Item)</label>
                 <input type="number" name="cost_price" id="cost_price" class="form-control" required>
             </div>
         
@@ -188,7 +188,30 @@
             <!-- Stock Limit -->
             <div class="mb-3">
                 <label for="stock_limit" class="form-label">Stock Limit</label>
-                <input type="number" name="stock_limit" id="stock_limit" class="form-control" value="{{ old('stock_limit') }}" required>
+                <input type="number" name="stock_limit" id="stock_limit" class="form-control" value="{{ old('stock_limit') }}">
+            </div>
+
+            <!-- Extra Manufacturing Fields Toggle -->
+            <div class="mb-3">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="toggle-extra-fields">
+                    + Show Unit Details
+                </button>
+            </div>
+
+            <div id="extra-fields" style="display:none;">
+
+                <!-- Stock Unit -->
+                <div class="mb-3">
+                    <label for="stock_unit">Stock Unit</label>
+                    <input type="text" name="stock_unit" id="stock_unit" class="form-control">
+                </div>
+
+                <!-- Unit Size -->
+                <div class="mb-3">
+                    <label for="unit_size">Unit Size</label>
+                    <input type="number" name="unit_size" id="unit_size" class="form-control" min="0">
+                </div>
+
             </div>
 
             <!-- Barcode Section -->
@@ -247,6 +270,18 @@
 
 
 <script>
+document.getElementById('toggle-extra-fields').addEventListener('click', function () {
+    const box = document.getElementById('extra-fields');
+
+    if (box.style.display === 'none') {
+        box.style.display = 'block';
+        this.innerText = '- Hide Unit Details';
+    } else {
+        box.style.display = 'none';
+        this.innerText = '+ Show Unit Details';
+    }
+});
+
     // Barcode generation
     document.getElementById('generate-barcode').addEventListener('click', function() {
         const code = 'BC' + Date.now();

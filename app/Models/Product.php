@@ -16,6 +16,8 @@ class Product extends Model
         'name',
         'barcode',
         'price',
+        'stock_unit',
+        'unit_size',
         'cost_price',
         'stock_quantity',
         'stock_limit',

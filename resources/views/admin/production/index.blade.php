@@ -26,6 +26,7 @@
                         <th>Batch No</th>
                         <th>Production Type</th>
                         <th>Title</th>
+                        <th>Warehouse</th>
                         <th>Status</th>
                         <th>Start Date</th>
                         <th>End Date</th>
@@ -49,6 +50,10 @@
 
                         <td>
                             {{ $production->title }}
+                        </td>
+
+                        <td>
+                            {{ $production->shop->name }} 
                         </td>
 
                         <td>

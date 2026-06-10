@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Production extends Model
 {
+
     protected $fillable = [
+        'shop_id',
         'batch_no',
         'production_type_id',
         'title',
@@ -14,7 +16,7 @@ class Production extends Model
         'start_date',
         'end_date',
         'status',
-        'created_by'
+        'created_by',
     ];
 
     public function productionType()
@@ -25,5 +27,15 @@ class Production extends Model
     public function entries()
 {
     return $this->hasMany(ProductionEntry::class);
+}
+
+public function shop()
+{
+    return $this->belongsTo(Shop::class);
+}
+
+public function warehouse()
+{
+    return $this->belongsTo(Warehouse::class);
 }
 }

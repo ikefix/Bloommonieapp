@@ -18,6 +18,28 @@
                 @csrf
 
                 <div class="mb-3">
+                    <label>Shop</label>
+
+                    <select name="shop_id"
+                            class="form-control"
+                            required>
+
+                        <option value="">
+                            Select Shop
+                        </option>
+
+                        @foreach($shops as $shop)
+
+                            <option value="{{ $shop->id }}">
+                                {{ $shop->name }}
+                            </option>>
+
+                        @endforeach
+
+                    </select>
+                </div>
+
+                <div class="mb-3">
                     <label>Production Type</label>
 
                     <select name="production_type_id"

@@ -12,6 +12,10 @@ return new class extends Migration
 
             $table->id();
 
+            $table->foreignId('shop_id')
+                ->constrained('shops')
+                ->cascadeOnDelete();
+
             $table->string('batch_no')->unique();
 
             $table->foreignId('production_type_id')
@@ -37,6 +41,7 @@ return new class extends Migration
 
             $table->timestamps();
         });
+        
     }
 
     public function down(): void

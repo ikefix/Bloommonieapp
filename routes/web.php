@@ -18,6 +18,7 @@ use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\StockReportController;
 use App\Http\Controllers\ProfitReportController;
 use App\Http\Controllers\ProductionTypeController;
+use App\Http\Controllers\ProductionReportController;
 use Milon\Barcode\DNS1D;
 use App\Http\Controllers\ProductionController;
 use App\Models\Product;
@@ -421,6 +422,8 @@ Route::prefix('productions')->group(function(){
 
 });
 
+Route::put('production/{production}/status',[ProductionController::class, 'updateStatus'])->name('admin.production.status');
+
 
 Route::get('/production-entries/{production}/fill', [ProductionEntryController::class, 'fill'])->name('admin.production_entries.fill');
 
@@ -441,6 +444,17 @@ Route::prefix('admin/production-entries')->group(function () {
         ->name('admin.production_entries.store');
 
 });
+
+Route::get('/products/{id}/price', function ($id) {
+    $product = \App\Models\Product::findOrFail($id);
+
+    return response()->json([
+        'cost_price' => $product->cost_price
+    ]);
+});
+
+Route::post('production-entries/{productionId}/update', [ProductionEntryController::class, 'update'])
+     ->name('admin.production_entries.update');
 
 Route::get('/production-entries/{production}/edit',[ProductionEntryController::class, 'edit'])->name('admin.production_entries.edit');
 
@@ -465,7 +479,8 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function()
     Route::get('/cashier/invoice/search',[InvoiceController::class, 'searchCashierCustomerInvoices'])->name('invoices.search');
 
 
-
+Route::get('reports/production',     [ProductionReportController::class, 'productionReport'])->name('admin.report.production_report');
+Route::get('reports/production/pdf', [ProductionReportController::class, 'productionReportPdf'])->name('admin.report.pdf.production_report.pdf');
 
 
 
