@@ -15,7 +15,8 @@ class ProductionEntry extends Model
         'price',
         'total',
         'meta',
-        'notes'
+        'notes',
+        'owner_id'
     ];
 
     // Auto convert JSON column to array

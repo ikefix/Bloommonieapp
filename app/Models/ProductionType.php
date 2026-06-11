@@ -11,7 +11,8 @@ class ProductionType extends Model
         'name',
         'description',
         'status',
-        'created_by'
+        'created_by',
+        'owner_id'
     ];
 
 

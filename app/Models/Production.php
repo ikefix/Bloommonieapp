@@ -18,6 +18,7 @@ class Production extends Model
         'end_date',
         'status',
         'created_by',
+        'owner_id',
     ];
 
         public function creator()
