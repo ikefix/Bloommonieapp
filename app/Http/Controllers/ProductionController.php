@@ -63,7 +63,7 @@ public function index()
             'end_date' => $request->end_date,
             'status' => $request->status ?? 'planned',
             'created_by' => auth()->id(),
-            'owner_id'       => auth()->user()->owner_id,
+            'owner_id' => auth()->user()->owner_id ?: auth()->id(),
         ]);
 
         return redirect()

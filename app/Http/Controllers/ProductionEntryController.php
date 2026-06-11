@@ -131,7 +131,7 @@ public function store(Request $request, $productionId)
                 'production_id' => $productionId,
                 'entry_type'    => $request->entry_type,
                 'meta'          => ['items' => $request->items],
-                'owner_id'       => auth()->user()->owner_id,
+                'owner_id' => auth()->user()->owner_id ?: auth()->id(),
             ]);
         }
     });
