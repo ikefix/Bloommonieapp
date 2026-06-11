@@ -67,7 +67,7 @@
                     <span class="sidebar-text">Sales Report</span>
                 </a>
                 <a href="{{route('admin.report.stock_report')}}" class="sidebar-link">
-                    <span class="sidebar-icon"><i class='bx bx-category'></i></span>
+                    <span class="sidebar-icon"><i class='bx bx-candles'></i></span>
                     <span class="sidebar-text">Stock Report</span>
                 </a>
                 <a href="{{route('admin.report.profit_loss')}}" class="sidebar-link">
@@ -177,7 +177,7 @@
                 </a>
             </div>
             <a href="{{ route('complaints.create') }}" class="sidebar-link">
-                <span class="sidebar-icon"><i class='bx bx-user-circle'></i></span>
+                <span class="sidebar-icon"><i class='bx bx-support'></i></span>
                 <span class="sidebar-text">Customer Care</span>
             </a>
             <a href="{{ route('admin.profile') }}" class="sidebar-link">
