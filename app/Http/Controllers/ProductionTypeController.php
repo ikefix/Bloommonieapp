@@ -48,6 +48,7 @@ public function index()
             'description' => $request->description,
             'status' => $request->status ?? 'active',
             'created_by' => auth()->id(),
+            'owner_id'       => auth()->user()->owner_id,
         ]);
 
         return redirect()

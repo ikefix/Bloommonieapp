@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Production;
 use App\Models\Product;
 use App\Models\ProductionEntry;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ProductionEntryController extends Controller
@@ -13,7 +14,11 @@ class ProductionEntryController extends Controller
 
 public function index()
 {
-    $productions = Production::latest()->get();
+    $ownerId = auth()->user()->owner_id ?: auth()->id();
+
+    $productions = Production::where('owner_id', $ownerId)
+        ->latest()
+        ->get();
 
     return view('admin.production_entries.index', compact('productions'));
 }
@@ -126,6 +131,7 @@ public function store(Request $request, $productionId)
                 'production_id' => $productionId,
                 'entry_type'    => $request->entry_type,
                 'meta'          => ['items' => $request->items],
+                'owner_id'       => auth()->user()->owner_id,
             ]);
         }
     });

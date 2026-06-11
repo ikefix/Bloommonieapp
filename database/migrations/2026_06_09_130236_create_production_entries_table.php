@@ -41,6 +41,9 @@ return new class extends Migration
 
             // OPTIONAL NOTES
             $table->text('notes')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();
+
+            $table->unsignedBigInteger('owner_id')->nullable();
 
             $table->timestamps();
         });

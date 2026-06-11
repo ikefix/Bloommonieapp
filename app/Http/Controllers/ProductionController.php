@@ -6,38 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Production;
 use App\Models\ProductionType;
 use App\Models\Shop;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ProductionController extends Controller
 {
 public function index()
 {
-    $user = auth()->user();
-
-    $ownerId = $user->owner_id ?: $user->id;
+    $ownerId = auth()->user()->owner_id ?: auth()->id();
 
     $productions = Production::with([
             'productionType',
             'shop'
         ])
-        ->whereHas('creator', function ($query) use ($ownerId) {
-
-            $query->where('id', $ownerId)
-                  ->orWhere('owner_id', $ownerId);
-
-        })
+        ->where('owner_id', $ownerId)
         ->latest()
         ->paginate(20);
 
-    $shops = Shop::whereHas('users', function ($query) use ($ownerId) {
-        $query->where('id', $ownerId)
-              ->orWhere('owner_id', $ownerId);
-    })->get();
+    $shops = Shop::all();
 
-    return view(
-        'admin.production.index',
-        compact('productions', 'shops')
-    );
+    return view('admin.production.index', compact('productions', 'shops'));
 }
 
    public function create()
@@ -75,6 +63,7 @@ public function index()
             'end_date' => $request->end_date,
             'status' => $request->status ?? 'planned',
             'created_by' => auth()->id(),
+            'owner_id'       => auth()->user()->owner_id,
         ]);
 
         return redirect()
