@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Production;
 use App\Models\Product;
 use App\Models\ProductionEntry;
+use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +19,7 @@ public function index()
 
     $productions = Production::where('owner_id', $ownerId)
         ->latest()
-        ->get();
+        ->paginate(20);
 
     return view('admin.production_entries.index', compact('productions'));
 }

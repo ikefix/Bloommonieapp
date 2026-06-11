@@ -52,9 +52,9 @@
                                             class="form-select form-select-sm"
                                             onchange="this.form.submit()">
 
-                                        <option value="pending"
-                                            {{ $production->status == 'pending' ? 'selected' : '' }}>
-                                            Pending
+                                        <option value="planned"
+                                            {{ $production->status == 'planned' ? 'selected' : '' }}>
+                                            Planned
                                         </option>
 
                                         <option value="in_progress"
@@ -90,6 +90,10 @@
 
             </table>
 
+            {{-- PAGINATION --}}
+            <div class="mt-3">
+                {{ $productions->links() }}
+            </div>
 
         </div>
 

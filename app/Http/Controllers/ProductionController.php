@@ -11,17 +11,47 @@ use Illuminate\Http\Request;
 
 class ProductionController extends Controller
 {
-public function index()
+// public function index()
+// {
+//     $ownerId = auth()->user()->owner_id ?: auth()->id();
+
+//     $productions = Production::with([
+//             'productionType',
+//             'shop'
+//         ])
+//         ->where('owner_id', $ownerId)
+//         ->latest()
+//         ->paginate(20);
+
+//     $shops = Shop::all();
+
+//     return view('admin.production.index', compact('productions', 'shops'));
+// }
+
+public function index(Request $request)
 {
     $ownerId = auth()->user()->owner_id ?: auth()->id();
 
-    $productions = Production::with([
+    $query = Production::with([
             'productionType',
             'shop'
         ])
-        ->where('owner_id', $ownerId)
-        ->latest()
-        ->paginate(20);
+        ->where('owner_id', $ownerId);
+
+    // 🔍 Search by batch number or title
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('batch_no', 'like', '%' . $request->search . '%')
+              ->orWhere('title', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    // 🏬 Filter by shop
+    if ($request->filled('shop_id')) {
+        $query->where('shop_id', $request->shop_id);
+    }
+
+    $productions = $query->latest()->paginate(20);
 
     $shops = Shop::all();
 
@@ -74,10 +104,10 @@ public function index()
             ->with('success', 'Production Batch Created');
     }
 
-    public function updateStatus(Request $request, Production $production)
+public function updateStatus(Request $request, Production $production)
 {
     $request->validate([
-        'status' => 'required|in:pending,in_progress,completed,cancelled'
+        'status' => 'required|in:planned,in_progress,completed,cancelled'
     ]);
 
     $production->update([
