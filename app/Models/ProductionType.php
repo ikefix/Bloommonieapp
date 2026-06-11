@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class ProductionType extends Model
 {
@@ -12,6 +13,7 @@ class ProductionType extends Model
         'status',
         'created_by'
     ];
+
 
     public function creator()
     {

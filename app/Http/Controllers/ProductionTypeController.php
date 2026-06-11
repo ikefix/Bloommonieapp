@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\ProductionType;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class ProductionTypeController extends Controller
 {
@@ -12,18 +13,21 @@ public function index()
 {
     $user = auth()->user();
 
-    if ($user->role === 'admin') {
+    $ownerId = $user->owner_id ?: $user->id;
 
-        $productionTypes = ProductionType::latest()->paginate(20);
+    $productionTypes = ProductionType::whereHas('creator', function ($query) use ($ownerId) {
 
-    } else {
+        $query->where('id', $ownerId)
+              ->orWhere('owner_id', $ownerId);
 
-        $productionTypes = ProductionType::where('created_by', $user->id)
-            ->latest()
-            ->paginate(20);
-    }
+    })
+    ->latest()
+    ->paginate(20);
 
-    return view('admin.production_type.index', compact('productionTypes'));
+    return view(
+        'admin.production_type.index',
+        compact('productionTypes')
+    );
 }
 
     public function create()
