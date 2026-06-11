@@ -14,18 +14,40 @@ class ProductionReportController extends Controller
 {
     public function productionReport(Request $request)
     {
+    
         $shops      = Shop::all();
         $startDate  = $request->start_date;
         $endDate    = $request->end_date;
         $shopId     = $request->shop_id;
+        $search     = $request->search;
 
         $query = Production::with(['entries', 'productionType', 'shop'])
-            ->when($startDate, fn($q) => $q->whereDate('start_date', '>=', $startDate))
-            ->when($endDate,   fn($q) => $q->whereDate('end_date',   '<=', $endDate))
-            ->when($shopId,    fn($q) => $q->where('shop_id', $shopId))
+
+            ->when($startDate, fn($q) =>
+                $q->whereDate('start_date', '>=', $startDate)
+            )
+
+            ->when($endDate, fn($q) =>
+                $q->whereDate('end_date', '<=', $endDate)
+            )
+
+            ->when($shopId, fn($q) =>
+                $q->where('shop_id', $shopId)
+            )
+
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+
+                    $sub->where('batch_no', 'like', "%{$search}%")
+                        ->orWhere('title', 'like', "%{$search}%");
+
+                });
+            })
+
             ->latest();
 
         $productions = $query->get();
+
 
         // ── Summary ───────────────────────────────────────────────────────────
         $totalProductions  = $productions->count();
@@ -107,7 +129,7 @@ class ProductionReportController extends Controller
             'totalProductions', 'completedCount', 'inProgressCount', 'pendingCount',
             'totalInputCost', 'totalOutputValue', 'totalLossValue', 'netValue',
             'outputTotals', 'byType',
-            'startDate', 'endDate', 'shopId', 'chartLabels', 'chartCounts'
+            'startDate', 'endDate', 'shopId', 'chartLabels', 'chartCounts', 'search'
         ));
     }
 

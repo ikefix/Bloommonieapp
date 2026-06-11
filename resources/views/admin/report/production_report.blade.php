@@ -163,6 +163,36 @@
 
     </div>
 
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" action="">
+                <div class="row">
+                    <div class="col-md-6">
+                        <input
+                            type="text"
+                            name="search"
+                            class="form-control"
+                            placeholder="Search Batch No or Title..."
+                            value="{{ request('search') }}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100">
+                            Search
+                        </button>
+                    </div>
+
+                    <div class="col-md-2">
+                        <a href="{{ url()->current() }}"
+                        class="btn btn-secondary w-100">
+                            Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- PRODUCTION BATCH DETAILS --}}
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white"><strong>Production Batch Details</strong></div>
