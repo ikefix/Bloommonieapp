@@ -113,7 +113,7 @@
             </div>
 
              <a class="sidebar-link collapsible-btn" onclick="toggleSubmenu(this)">
-                <span class="sidebar-icon"><i class='bx bx-group'></i></span>
+                <span class="sidebar-icon"><i class='bx bxs-factory'></i></span>
                 <span class="sidebar-text">Prod & Manu</span>
                 <span class="arrow">&#9662;</span> <!-- down arrow -->
             </a>
@@ -127,7 +127,7 @@
                     <span class="sidebar-text">Batch</span>
                 </a>    
                 <a href="{{route('admin.production_entries.index')}}" class="sidebar-link">
-                    <span class="sidebar-icon"><i class='bx bx-credit-card-front'></i></span>
+                    <span class="sidebar-icon"><i class='bx bx-clipboard'></i></span>
                     <span class="sidebar-text">List </span>
                 </a>
             </div>
