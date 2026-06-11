@@ -172,7 +172,7 @@
                             type="text"
                             name="search"
                             class="form-control"
-                            placeholder="Search Batch No or Title..."
+                            placeholder="BATCH-001"
                             value="{{ request('search') }}">
                     </div>
 
