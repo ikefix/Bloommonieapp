@@ -402,7 +402,7 @@ Route::prefix('production-type')->group(function () {
         ->name('admin.production_type.create');
 
     Route::post('/store', [ProductionTypeController::class, 'store'])
-        ->name('admin.production.store');
+        ->name('admin.production_type.store');
 
     Route::delete('/{id}', [ProductionTypeController::class, 'destroy'])
         ->name('admin.production.destroy');

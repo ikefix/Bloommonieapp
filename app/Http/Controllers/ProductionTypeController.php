@@ -24,12 +24,14 @@ class ProductionTypeController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:production_types,name',
+            'status' => 'required|in:active,inactive',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         ProductionType::create([
             'name' => $request->name,
             'description' => $request->description,
-            'status' => $request->status ?? 1,
+            'status' => $request->status ?? 'active',
             'created_by' => auth()->id(),
         ]);
 

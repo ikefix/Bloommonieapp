@@ -11,7 +11,7 @@
 
         <div class="card-body">
 
-            <form action="{{ route('admin.production.store') }}" method="POST">
+            <form action="{{ route('admin.production_type.store') }}" method="POST">
                 @csrf
 
                 <div class="mb-3">
@@ -38,8 +38,8 @@
                     <label>Status</label>
 
                     <select name="status" class="form-control">
-                        <option value="1">Active</option>
-                        <option value="0">Inactive</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
                     </select>
                 </div>
 
