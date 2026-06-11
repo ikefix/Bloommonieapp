@@ -8,12 +8,23 @@ use Illuminate\Http\Request;
 
 class ProductionTypeController extends Controller
 {
-    public function index()
-    {
+public function index()
+{
+    $user = auth()->user();
+
+    if ($user->role === 'admin') {
+
         $productionTypes = ProductionType::latest()->paginate(20);
 
-        return view('admin.production_type.index', compact('productionTypes'));
+    } else {
+
+        $productionTypes = ProductionType::where('created_by', $user->id)
+            ->latest()
+            ->paginate(20);
     }
+
+    return view('admin.production_type.index', compact('productionTypes'));
+}
 
     public function create()
     {
