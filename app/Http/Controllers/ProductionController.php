@@ -53,6 +53,9 @@ public function index()
 
         $batchNo = 'BATCH-' . str_pad($next, 3, '0', STR_PAD_LEFT);
 
+        $user = auth()->user();
+        $ownerId = $user->owner_id ?: $user->id;
+
         Production::create([
             'shop_id' => $request->shop_id,
             'batch_no' => $batchNo,
@@ -63,7 +66,7 @@ public function index()
             'end_date' => $request->end_date,
             'status' => $request->status ?? 'planned',
             'created_by' => auth()->id(),
-            'owner_id' => auth()->user()->owner_id ?: auth()->id(),
+            'owner_id' => $ownerId,
         ]);
 
         return redirect()
