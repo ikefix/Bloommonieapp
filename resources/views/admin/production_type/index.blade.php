@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between mb-3">
         <h4>Production Types</h4>
 
-        <a href="{{ route('admin.production.create') }}"
+        <a href="{{ route('admin.production_type.create') }}"
            class="btn btn-primary">
             Add Production Type
         </a>
