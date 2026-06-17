@@ -12,22 +12,6 @@ use Illuminate\Http\Request;
 
 class ProductionController extends Controller
 {
-// public function index()
-// {
-//     $ownerId = auth()->user()->owner_id ?: auth()->id();
-
-//     $productions = Production::with([
-//             'productionType',
-//             'shop'
-//         ])
-//         ->where('owner_id', $ownerId)
-//         ->latest()
-//         ->paginate(20);
-
-//     $shops = Shop::all();
-
-//     return view('admin.production.index', compact('productions', 'shops'));
-// }
 
 public function index(Request $request)
 {
@@ -54,15 +38,21 @@ public function index(Request $request)
 
     $productions = $query->latest()->paginate(20);
 
-    $shops = Shop::all();
+   $shops = Shop::where('owner_id', $ownerId)->get();
 
     return view('admin.production.index', compact('productions', 'shops'));
 }
 
    public function create()
 {
-    $productionTypes = ProductionType::where('status', 1)->get();
-    $shops = Shop::all();
+
+    $ownerId = auth()->user()->owner_id ?: auth()->id();
+
+    $productionTypes = ProductionType::where(
+        'owner_id',
+        $ownerId
+    )->get();
+    $shops = Shop::where('owner_id', $ownerId)->get();
 
     return view('admin.production.create', compact(
         'productionTypes',
