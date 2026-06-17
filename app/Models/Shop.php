@@ -53,6 +53,11 @@ class Shop extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    public function products()
+{
+    return $this->hasMany(\App\Models\Product::class, 'shop_id');
+}
+
     public function users()
     {
         return $this->hasMany(User::class, 'shop_id');

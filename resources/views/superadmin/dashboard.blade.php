@@ -120,7 +120,7 @@
                         <i class="bx bx-user-plus text-success"></i>
                         Recently Joined
                     </h6>
-                    <a href="{{ route('superadmin.admins.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                    <a href="" class="btn btn-sm btn-outline-primary">View All</a>
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
@@ -167,8 +167,6 @@
                             <tr>
                                 <th>#</th>
                                 <th>Admin</th>
-                                <th class="text-center">Productions</th>
-                                <th class="text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -182,16 +180,6 @@
                                     <td>
                                         <div class="fw-semibold" style="font-size:0.88rem;">{{ $admin->name }}</div>
                                         <div class="text-muted" style="font-size:0.77rem;">{{ $admin->email }}</div>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-primary rounded-pill">{{ $admin->productions_count }}</span>
-                                    </td>
-                                    <td class="text-center">
-                                        @if($admin->status === 'active')
-                                            <span class="badge bg-success">Active</span>
-                                        @else
-                                            <span class="badge bg-secondary">Inactive</span>
-                                        @endif
                                     </td>
                                 </tr>
                             @empty

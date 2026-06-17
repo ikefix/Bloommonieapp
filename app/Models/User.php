@@ -48,6 +48,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Shop::class);
     }
+    
+
+    public function productions()
+{
+    return $this->hasMany(\App\Models\Production::class, 'user_id');
+}
 
     public function stockTransfers()
     {
