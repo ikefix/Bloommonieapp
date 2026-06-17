@@ -60,40 +60,91 @@ public function index(Request $request)
     ));
 }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'shop_id' => 'required|exists:shops,id',
-            'production_type_id' => 'required|exists:production_types,id',
-            'title' => 'required|string|max:255',
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'shop_id' => 'required|exists:shops,id',
+    //         'production_type_id' => 'required|exists:production_types,id',
+    //         'title' => 'required|string|max:255',
+    //     ]);
 
-        $last = Production::latest('id')->first();
+    //     $last = Production::latest('id')->first();
 
-        $next = $last ? $last->id + 1 : 1;
+    //     $next = $last ? $last->id + 1 : 1;
 
-        $batchNo = 'BATCH-' . str_pad($next, 3, '0', STR_PAD_LEFT);
+    //     $batchNo = 'BATCH-' . str_pad($next, 3, '0', STR_PAD_LEFT);
 
-        $user = auth()->user();
-        $ownerId = $user->owner_id ?: $user->id;
+    //     $user = auth()->user();
+    //     $ownerId = $user->owner_id ?: $user->id;
 
-        Production::create([
-            'shop_id' => $request->shop_id,
-            'batch_no' => $batchNo,
-            'production_type_id' => $request->production_type_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'status' => $request->status ?? 'planned',
-            'created_by' => auth()->id(),
-            'owner_id' => $ownerId,
-        ]);
+    //     Production::create([
+    //         'shop_id' => $request->shop_id,
+    //         'batch_no' => $batchNo,
+    //         'production_type_id' => $request->production_type_id,
+    //         'title' => $request->title,
+    //         'description' => $request->description,
+    //         'start_date' => $request->start_date,
+    //         'end_date' => $request->end_date,
+    //         'status' => $request->status ?? 'planned',
+    //         'created_by' => auth()->id(),
+    //         'owner_id' => $ownerId,
+    //     ]);
 
-        return redirect()
-            ->route('admin.production.index')
-            ->with('success', 'Production Batch Created');
+    //     return redirect()
+    //         ->route('admin.production.index')
+    //         ->with('success', 'Production Batch Created');
+    // }
+
+public function store(Request $request)
+{
+    $request->validate([
+        'shop_id' => 'required|exists:shops,id',
+        'production_type_id' => 'required|exists:production_types,id',
+        'title' => 'required|string|max:255',
+    ]);
+
+    $user = auth()->user();
+    $ownerId = $user->owner_id ?: $user->id;
+
+    // Get last batch for THIS owner only
+    $lastProduction = Production::where('owner_id', $ownerId)
+        ->orderByDesc('id')
+        ->first();
+
+    $nextNumber = 1;
+
+    if ($lastProduction) {
+        $nextNumber = (int) preg_replace(
+            '/[^0-9]/',
+            '',
+            $lastProduction->batch_no
+        ) + 1;
     }
+
+    $batchNo = 'BATCH-' . str_pad(
+        $nextNumber,
+        3,
+        '0',
+        STR_PAD_LEFT
+    );
+
+    Production::create([
+        'shop_id'            => $request->shop_id,
+        'batch_no'           => $batchNo,
+        'production_type_id' => $request->production_type_id,
+        'title'              => $request->title,
+        'description'        => $request->description,
+        'start_date'         => $request->start_date,
+        'end_date'           => $request->end_date,
+        'status'             => $request->status ?? 'planned',
+        'created_by'         => $user->id,
+        'owner_id'           => $ownerId,
+    ]);
+
+    return redirect()
+        ->route('admin.production.index')
+        ->with('success', 'Production Batch Created Successfully');
+}
 
 public function updateStatus(Request $request, Production $production)
 {
