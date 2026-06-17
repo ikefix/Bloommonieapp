@@ -33,6 +33,7 @@ use App\Http\Controllers\Auth\ProductKeyController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\ProductionEntryController;
 use App\Http\Controllers\CollectableController;
+use App\Http\Controllers\UnitController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -81,6 +82,11 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
         ->name('superadmin.subscriptions');
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/units', [UnitController::class, 'index'])->name('admin.units.index');
+    Route::post('/admin/units', [UnitController::class, 'store'])->name('admin.units.store');
+    Route::delete('/admin/units/{id}', [UnitController::class, 'destroy'])->name('admin.units.destroy');
+});
 
 Route::middleware(['auth'])->group(function () {
 

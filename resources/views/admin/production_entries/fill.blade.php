@@ -10,6 +10,10 @@
             Fill Production Entry - {{ $production->batch_no }}
         </h4>
 
+        <h5>
+            <a href="{{ route('admin.units.index') }}">Create Unit</a>
+        </h5>
+
         @if(session('success'))
             <div class="alert alert-success py-1 px-3 mb-0">
                 {{ session('success') }}
@@ -130,41 +134,64 @@ const productOptions = `
 @endforeach
 `;
 
+const unitOptions = `
+<option value="">Select Unit</option>
+@foreach($units as $unit)
+    <option value="{{ $unit->id }}">
+        {{ $unit->name }} ({{ $unit->symbol }})
+    </option>
+@endforeach
+`;
+
 let rowIndex = 0;
 
 function addRow(tableId, type) {
     const index = rowIndex++;
+
     const isBOM = type === 'input';
+    const isOutput = type === 'output';
 
     const itemField = isBOM
         ? `<select name="items[${index}][item_id]" class="form-control product-select">
                ${productOptions}
            </select>`
-        : `<input type="text" name="items[${index}][item_name]" 
+        : `<input type="text" name="items[${index}][item_name]"
                   class="form-control" placeholder="Enter item name">`;
+
+    const unitField = isOutput
+        ? `<select name="items[${index}][unit_id]" class="form-control">
+               ${unitOptions}
+           </select>`
+        : `<input name="items[${index}][unit]"
+                  class="form-control" placeholder="kg, bags, pcs">`;
 
     const row = `
         <tr data-type="${type}">
+
             <td>${itemField}</td>
+
             <td>
                 <input type="number" step="0.01"
                        name="items[${index}][quantity]"
                        class="form-control quantity-input">
             </td>
+
             <td>
-                <input name="items[${index}][unit]"
-                       class="form-control" placeholder="kg, bags, pcs">
+                ${unitField}
             </td>
+
             <td>
                 <input type="number" step="0.01"
                        name="items[${index}][price]"
                        class="form-control price-input"
-                       ${isBOM ? 'readonly placeholder="Auto-calculated"' : 'placeholder="Enter cost"'}>
+                       ${isBOM ? 'readonly placeholder="Auto-calculated"' : 'placeholder="Enter cost"'} >
             </td>
+
             <td>
                 <button type="button" class="btn btn-sm btn-outline-danger"
                         onclick="this.closest('tr').remove()">X</button>
             </td>
+
         </tr>
     `;
 
@@ -177,16 +204,16 @@ document.addEventListener('input', function (e) {
     if (!row) return;
 
     const tbody = row.closest('tbody');
-    if (!tbody || tbody.id !== 'inputBody') return; // 👈 Only BOM fires fetch
+    if (!tbody || tbody.id !== 'inputBody') return;
 
     const productSelect = row.querySelector('.product-select');
     const quantityInput = row.querySelector('.quantity-input');
-    const priceInput    = row.querySelector('.price-input');
+    const priceInput = row.querySelector('.price-input');
 
     if (!productSelect || !quantityInput || !priceInput) return;
 
     const productId = productSelect.value;
-    const quantity  = parseFloat(quantityInput.value || 0);
+    const quantity = parseFloat(quantityInput.value || 0);
 
     if (!productId || quantity <= 0) {
         priceInput.value = '';
@@ -199,7 +226,9 @@ document.addEventListener('input', function (e) {
             const cost = parseFloat(data.cost_price || 0);
             priceInput.value = (cost * quantity).toFixed(2);
         })
-        .catch(() => { priceInput.value = ''; });
+        .catch(() => {
+            priceInput.value = '';
+        });
 });
 
 addRow('inputBody', 'input');

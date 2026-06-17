@@ -76,4 +76,9 @@ class Shop extends Model
 {
     return $this->hasMany(Production::class);
 }
+
+public function units()
+{
+    return $this->hasMany(Unit::class);
+}
 }

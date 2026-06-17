@@ -138,7 +138,18 @@
                         <tr>
                             <td>{{ $item['item_name'] }}</td>
                             <td class="text-center">{{ $item['quantity'] ?? '-' }}</td>
-                            <td class="text-center">{{ $item['unit'] ?? '-' }}</td>
+                            <td class="text-center">
+
+                                @php
+                                    $unit = null;
+
+                                    if (!empty($item['unit_id'])) {
+                                        $unit = \App\Models\Unit::find($item['unit_id']);
+                                    }
+                                @endphp
+
+                                {{ $unit?->name ?? ($item['unit'] ?? '-') }}
+                            </td>
                             <td class="text-center">₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
                             <td class="text-center">
                                 @if(!empty($item['added_at']))

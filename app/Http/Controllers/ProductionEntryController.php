@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductionEntry;
 use App\Models\Shop;
 use App\Models\User;
+use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
 
 class ProductionEntryController extends Controller
@@ -47,9 +48,14 @@ public function fill(Production $production)
         ->orderBy('name')
         ->get();
 
+    // ✅ load units for this admin (owner-based system)
+    $units = Unit::where('owner_id', auth()->id())
+        ->orderBy('name')
+        ->get();
+
     return view(
         'admin.production_entries.fill',
-        compact('production', 'products')
+        compact('production', 'products', 'units')
     );
 }
 
@@ -61,9 +67,13 @@ public function edit(Production $production)
         ->orderBy('name')
         ->get();
 
+    $units = Unit::where('owner_id', auth()->id())
+    ->orderBy('name')
+    ->get();
+
     return view(
         'admin.production_entries.edit',
-        compact('production', 'products')
+        compact('production', 'products', 'units')
     );
 }
 
