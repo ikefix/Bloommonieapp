@@ -16,7 +16,7 @@ return new class extends Migration
                 ->constrained('shops')
                 ->cascadeOnDelete();
 
-            $table->string('batch_no')->unique();
+            $table->string('batch_no');
 
             $table->foreignId('production_type_id')
                 ->constrained('production_types')

@@ -21,6 +21,12 @@
                 <span class="sidebar-icon"><i class='bx bxs-dashboard bx-tada' ></i></span>
                 <span class="sidebar-text">Create Admin</span>
             </a>
+
+            
+            <a href="{{ route('superadmin.subscriptions')}}" class="sidebar-link">
+                <span class="sidebar-icon"><i class='bx bxs-dashboard bx-tada' ></i></span>
+                <span class="sidebar-text">Subscriptions</span>
+            </a>
             
             <a id="navbarDropdown" class="sidebar-link" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                 <span class="sidebar-icon"><i class='bx bxs-user'></i></span> <!-- Profile Icon -->
