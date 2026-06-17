@@ -7,6 +7,7 @@ use App\Models\Production;
 use App\Models\ProductionType;
 use App\Models\Shop;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class ProductionController extends Controller
