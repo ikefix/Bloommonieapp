@@ -18,13 +18,13 @@
             </a>
 
             <a href="{{ route('superadmin.create')}}" class="sidebar-link">
-                <span class="sidebar-icon"><i class='bx bxs-dashboard bx-tada' ></i></span>
+                <span class="sidebar-icon"><i class='bx bx-edit'></i></span>
                 <span class="sidebar-text">Create Admin</span>
             </a>
 
             
             <a href="{{ route('superadmin.subscriptions')}}" class="sidebar-link">
-                <span class="sidebar-icon"><i class='bx bxs-dashboard bx-tada' ></i></span>
+                <span class="sidebar-icon"><i class='bx bxs-calendar'></i></span>
                 <span class="sidebar-text">Subscriptions</span>
             </a>
             

@@ -11,10 +11,44 @@ use App\Mail\AdminCreatedMail;
 
 class SuperAdminController extends Controller
 {
-    public function dashboard()
-    {
-        return view('superadmin.dashboard');
-    }
+public function dashboard()
+{
+    $totalAdmins        = \App\Models\User::where('role', 'admin')->count();
+    $activeAdmins       = \App\Models\User::where('role', 'admin')->where('status', 'active')->count();
+    $inactiveAdmins     = \App\Models\User::where('role', 'admin')->where('status', 'inactive')->count();
+
+    $subscribedAdmins   = \App\Models\User::where('role', 'admin')
+                            ->whereHas('subscription', fn($q) => $q->where('status', 'active'))
+                            ->count();
+
+    $overdueAdmins      = \App\Models\User::where('role', 'admin')
+                            ->whereHas('subscription', fn($q) => $q->where('status', 'overdue'))
+                            ->count();
+
+    $recentAdmins       = \App\Models\User::where('role', 'admin')
+                            ->latest()
+                            ->take(5)
+                            ->get();
+
+    $mostActiveAdmins   = \App\Models\User::where('role', 'admin')
+                            ->withCount('productions')
+                            ->orderByDesc('productions_count')
+                            ->take(5)
+                            ->get();
+
+    $monthlySignups     = \App\Models\User::where('role', 'admin')
+                            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                            ->whereYear('created_at', now()->year)
+                            ->groupBy('month')
+                            ->orderBy('month')
+                            ->pluck('count', 'month');
+
+    return view('superadmin.dashboard', compact(
+        'totalAdmins', 'activeAdmins', 'inactiveAdmins',
+        'subscribedAdmins', 'overdueAdmins',
+        'recentAdmins', 'mostActiveAdmins', 'monthlySignups'
+    ));
+}
 
     public function create()
     {
