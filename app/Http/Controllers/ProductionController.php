@@ -36,7 +36,7 @@ public function index(Request $request)
             'productionType',
             'shop'
         ])
-        ->where('owner_id', $ownerId);
+        ->where('owner_id', auth()->user()->owner_id);
 
     // 🔍 Search by batch number or title
     if ($request->filled('search')) {
