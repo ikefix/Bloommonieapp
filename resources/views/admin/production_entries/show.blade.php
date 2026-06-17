@@ -63,10 +63,10 @@
                 <thead class="table-light">
                     <tr>
                         <th>Item</th>
-                        <th>Qty</th>
-                        <th>Unit</th>
-                        <th>Price</th>
-                        <th>Date & Time Added</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-center">Unit</th>
+                        <th class="text-center">Price</th>
+                        <th class="text-center">Date & Time Added</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -80,17 +80,31 @@
                                     {{ \App\Models\Product::find($item['item_id'])?->name ?? 'Unknown' }}
                                 @endif
                             </td>
-                            <td>{{ $item['quantity'] ?? '-' }}</td>
-                            <td>{{ $item['unit'] ?? '-' }}</td>
-                            <td>₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
-                            <td>
+                            <td class="text-center">{{ $item['quantity'] ?? '-' }}</td>
+                            <td class="text-center">{{ $item['unit'] ?? '-' }}</td>
+                            <td class="text-center">₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
+                            <td class="text-center">
                                 @if(!empty($item['added_at']))
-                                    <span class="text-muted" style="white-space:nowrap; font-size:0.85rem;">
-                                        <i class="bx bx-time-five"></i>
-                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y, h:i A') }}
+                                    <span style="
+                                        display: inline-flex;
+                                        align-items: center;
+                                        gap: 5px;
+                                        background: #f0f4ff;
+                                        border: 1px solid #d0d9f0;
+                                        border-radius: 20px;
+                                        padding: 3px 10px;
+                                        font-size: 0.78rem;
+                                        color: #4a5568;
+                                        white-space: nowrap;
+                                    ">
+                                        <i class="bx bx-calendar" style="font-size:0.85rem; color:#6c7ee1;"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y') }}
+                                        &nbsp;
+                                        <i class="bx bx-time-five" style="font-size:0.85rem; color:#6c7ee1;"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('h:i A') }}
                                     </span>
                                 @else
-                                    <span class="text-muted">—</span>
+                                    <span style="color:#ccc; font-size:0.8rem;">Not recorded</span>
                                 @endif
                             </td>
                         </tr>
@@ -112,10 +126,10 @@
                 <thead class="table-light">
                     <tr>
                         <th>Item</th>
-                        <th>Qty</th>
-                        <th>Unit</th>
-                        <th>Price</th>
-                        <th>Date & Time Added</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-center">Unit</th>
+                        <th class="text-center">Price</th>
+                        <th class="text-center">Date & Time Added</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,17 +137,31 @@
                         @continue(!is_array($item) || empty($item['item_name']))
                         <tr>
                             <td>{{ $item['item_name'] }}</td>
-                            <td>{{ $item['quantity'] ?? '-' }}</td>
-                            <td>{{ $item['unit'] ?? '-' }}</td>
-                            <td>₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
-                            <td>
+                            <td class="text-center">{{ $item['quantity'] ?? '-' }}</td>
+                            <td class="text-center">{{ $item['unit'] ?? '-' }}</td>
+                            <td class="text-center">₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
+                            <td class="text-center">
                                 @if(!empty($item['added_at']))
-                                    <span class="text-muted" style="white-space:nowrap; font-size:0.85rem;">
-                                        <i class="bx bx-time-five"></i>
-                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y, h:i A') }}
+                                    <span style="
+                                        display: inline-flex;
+                                        align-items: center;
+                                        gap: 5px;
+                                        background: #f0f4ff;
+                                        border: 1px solid #d0d9f0;
+                                        border-radius: 20px;
+                                        padding: 3px 10px;
+                                        font-size: 0.78rem;
+                                        color: #4a5568;
+                                        white-space: nowrap;
+                                    ">
+                                        <i class="bx bx-calendar" style="font-size:0.85rem; color:#6c7ee1;"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y') }}
+                                        &nbsp;
+                                        <i class="bx bx-time-five" style="font-size:0.85rem; color:#6c7ee1;"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('h:i A') }}
                                     </span>
                                 @else
-                                    <span class="text-muted">—</span>
+                                    <span style="color:#ccc; font-size:0.8rem;">Not recorded</span>
                                 @endif
                             </td>
                         </tr>
@@ -155,10 +183,10 @@
                 <thead class="table-light">
                     <tr>
                         <th>Item</th>
-                        <th>Qty</th>
-                        <th>Unit</th>
-                        <th>Price</th>
-                        <th>Date & Time Added</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-center">Unit</th>
+                        <th class="text-center">Price</th>
+                        <th class="text-center">Date & Time Added</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -166,17 +194,31 @@
                         @continue(!is_array($item) || empty($item['item_name']))
                         <tr>
                             <td>{{ $item['item_name'] }}</td>
-                            <td>{{ $item['quantity'] ?? '-' }}</td>
-                            <td>{{ $item['unit'] ?? '-' }}</td>
-                            <td>₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
-                            <td>
+                            <td class="text-center">{{ $item['quantity'] ?? '-' }}</td>
+                            <td class="text-center">{{ $item['unit'] ?? '-' }}</td>
+                            <td class="text-center">₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
+                            <td class="text-center">
                                 @if(!empty($item['added_at']))
-                                    <span class="text-muted" style="white-space:nowrap; font-size:0.85rem;">
-                                        <i class="bx bx-time-five"></i>
-                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y, h:i A') }}
+                                    <span style="
+                                        display: inline-flex;
+                                        align-items: center;
+                                        gap: 5px;
+                                        background: #f0f4ff;
+                                        border: 1px solid #d0d9f0;
+                                        border-radius: 20px;
+                                        padding: 3px 10px;
+                                        font-size: 0.78rem;
+                                        color: #4a5568;
+                                        white-space: nowrap;
+                                    ">
+                                        <i class="bx bx-calendar" style="font-size:0.85rem; color:#6c7ee1;"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y') }}
+                                        &nbsp;
+                                        <i class="bx bx-time-five" style="font-size:0.85rem; color:#6c7ee1;"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('h:i A') }}
                                     </span>
                                 @else
-                                    <span class="text-muted">—</span>
+                                    <span style="color:#ccc; font-size:0.8rem;">Not recorded</span>
                                 @endif
                             </td>
                         </tr>
