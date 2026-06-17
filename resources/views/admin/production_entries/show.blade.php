@@ -16,14 +16,12 @@
         if (is_string($items)) $items = json_decode($items, true) ?? [];
         if (empty($items)) return [];
 
-        // Valid if each item has (item_name OR item_id) AND quantity
         if (isset($items[0]) && is_array($items[0]) &&
             (isset($items[0]['item_name']) || isset($items[0]['item_id'])) &&
             isset($items[0]['quantity'])) {
             return $items;
         }
 
-        // Rebuild flat chunks
         $rebuilt = [];
         $current = [];
         foreach ($items as $chunk) {
@@ -68,6 +66,7 @@
                         <th>Qty</th>
                         <th>Unit</th>
                         <th>Price</th>
+                        <th>Date & Time Added</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -84,10 +83,20 @@
                             <td>{{ $item['quantity'] ?? '-' }}</td>
                             <td>{{ $item['unit'] ?? '-' }}</td>
                             <td>₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
+                            <td>
+                                @if(!empty($item['added_at']))
+                                    <span class="text-muted" style="white-space:nowrap; font-size:0.85rem;">
+                                        <i class="bx bx-time-five"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y, h:i A') }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-muted text-center py-3">No inputs recorded</td>
+                            <td colspan="5" class="text-muted text-center py-3">No inputs recorded</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -106,6 +115,7 @@
                         <th>Qty</th>
                         <th>Unit</th>
                         <th>Price</th>
+                        <th>Date & Time Added</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,10 +126,20 @@
                             <td>{{ $item['quantity'] ?? '-' }}</td>
                             <td>{{ $item['unit'] ?? '-' }}</td>
                             <td>₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
+                            <td>
+                                @if(!empty($item['added_at']))
+                                    <span class="text-muted" style="white-space:nowrap; font-size:0.85rem;">
+                                        <i class="bx bx-time-five"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y, h:i A') }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-muted text-center py-3">No outputs recorded</td>
+                            <td colspan="5" class="text-muted text-center py-3">No outputs recorded</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -138,6 +158,7 @@
                         <th>Qty</th>
                         <th>Unit</th>
                         <th>Price</th>
+                        <th>Date & Time Added</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -148,10 +169,20 @@
                             <td>{{ $item['quantity'] ?? '-' }}</td>
                             <td>{{ $item['unit'] ?? '-' }}</td>
                             <td>₦{{ number_format((float) str_replace(',', '', $item['price'] ?? 0)) }}</td>
+                            <td>
+                                @if(!empty($item['added_at']))
+                                    <span class="text-muted" style="white-space:nowrap; font-size:0.85rem;">
+                                        <i class="bx bx-time-five"></i>
+                                        {{ \Carbon\Carbon::parse($item['added_at'])->format('d M Y, h:i A') }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-muted text-center py-3">No losses recorded</td>
+                            <td colspan="5" class="text-muted text-center py-3">No losses recorded</td>
                         </tr>
                     @endforelse
                 </tbody>
