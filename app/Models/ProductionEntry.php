@@ -39,6 +39,8 @@ class ProductionEntry extends Model
         $this->attributes['total'] = $value * $price;
     }
 
+    
+
     public function setPriceAttribute($value)
     {
         $this->attributes['price'] = $value;

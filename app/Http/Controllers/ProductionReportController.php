@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\ProductionType;
 use App\Models\ProductionEntry;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class ProductionReportController extends Controller
@@ -21,7 +22,7 @@ class ProductionReportController extends Controller
         $shopId     = $request->shop_id;
         $search     = $request->search;
 
-        $query = Production::with(['entries', 'productionType', 'shop'])
+        $query = Production::with(['entries', 'productionType', 'shop'])->where('owner_id', auth()->user()->owner_id)
 
             ->when($startDate, fn($q) =>
                 $q->whereDate('start_date', '>=', $startDate)
