@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
 
             // 🏪 shop relation
-            $table->unsignedBigInteger('shop_id')->nullable();
+            // $table->unsignedBigInteger('shop_id')->nullable();
 
             // 👤 roles
             $table->enum('role', ['superadmin', 'admin', 'manager', 'cashier'])
@@ -41,10 +41,10 @@ return new class extends Migration
             $table->string('product_key')->nullable()->unique();
 
             // foreign key
-            $table->foreign('shop_id')
-                  ->references('id')
-                  ->on('shops')
-                  ->onDelete('set null');
+            // $table->foreign('shop_id')
+            //       ->references('id')
+            //       ->on('shops')
+            //       ->onDelete('set null');
         });
     }
 
