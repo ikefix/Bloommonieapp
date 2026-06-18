@@ -9,11 +9,13 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Shop;
 use App\Models\User;
+use App\Models\Notification;
+use Illuminate\Support\Str;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\InvoicePaymentLog;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
@@ -108,7 +110,16 @@ public function store(Request $request)
 }
 
 
+public function destroy(Invoice $invoice)
+{
+    if ($invoice->balance > 0) {
+        return back()->with('error', 'Cannot delete invoice with unpaid balance.');
+    }
 
+    $invoice->delete();
+
+    return back()->with('success', 'Invoice deleted successfully.');
+}
 
 
 
@@ -192,6 +203,55 @@ public function searchCustomerInvoices(Request $request)
     }
 }
 
+
+public function searchCashierCustomerInvoices(Request $request)
+{
+    $search = $request->search;
+
+    $invoices = Invoice::with(['customer', 'shop'])
+
+        ->when($search, function ($query) use ($search) {
+
+            $query->whereHas('customer', function ($q) use ($search) {
+
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+
+            });
+
+        })
+
+        ->latest()
+
+        ->get();
+
+    $owingInvoices = $invoices->where('payment_status', 'owing');
+
+    $totalInvoices = $invoices->count();
+
+    if (Auth::user()->role === 'admin') {
+
+        return view(
+            'admin.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    } elseif (Auth::user()->role === 'manager') {
+
+        return view(
+            'manager.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    } else {
+
+        return view(
+            'cashier.invoices.owing',
+            compact('invoices', 'owingInvoices', 'totalInvoices')
+        );
+
+    }
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -351,6 +411,51 @@ public function updatePayment(Request $request, Invoice $invoice)
         'payment_type' => $request->payment_type,
     ]);
 
+    Notification::create([
+        'id' => Str::uuid()->toString(),
+        'notifiable_type' => User::class,
+        'notifiable_id' => Auth::id(),
+        'type' => 'invoice_payment_updated',
+        'data' => [
+            'type' => 'invoice_payment',
+            'message' => Auth::user()->name .
+                ' updated Invoice #' . $invoice->invoice_no,
+            'invoice_no' => $invoice->invoice_no,
+            'amount_added' => $newPayment,
+            'total_paid' => $totalPaid,
+            'balance' => $newBalance,
+            'updated_by' => Auth::user()->name,
+            'updated_at' => now()->format('d M Y h:i A'),
+        ],
+    ]);
+
+    InvoicePaymentLog::create([
+            'owner_id' => Auth::user()->owner_id,
+
+            'invoice_id' => $invoice->id,
+            'invoice_no' => $invoice->invoice_number,
+
+            'cashier_id' => Auth::id(),
+
+            'type' => 'invoice_payment',
+
+            'message' => Auth::user()->name .
+                ' updated Invoice #' .
+                $invoice->invoice_number,
+
+            'amount_added' => $newPayment,
+
+            'total_paid' => $totalPaid,
+
+            'balance' => $newBalance,
+
+            'updated_by' => Auth::user()->name,
+
+            'updated_by_id' => Auth::id(),
+
+            'payment_updated_at' => now(),
+        ]);
+
     return back()->with('success', 'Payment updated successfully');
 }
 
@@ -423,11 +528,214 @@ public function updatePaymentcash(Request $request, Invoice $invoice)
         'payment_type' => $request->payment_type,
     ]);
 
+    $admin = User::where('id', Auth::user()->owner_id)
+             ->where('role', 'admin')
+             ->first();
+
+    if ($admin) {
+        Notification::create([
+            'id' => Str::uuid()->toString(),
+            'notifiable_type' => User::class,
+            'notifiable_id' => $admin->id,
+            'type' => 'invoice_payment_updated',
+            'data' => [
+                'type' => 'invoice_payment',
+
+                // ✅ FIXED
+                'invoice_id' => $invoice->id,
+                'invoice_no' => $invoice->invoice_number,
+
+                'cashier_id' => Auth::id(),
+
+                'message' => Auth::user()->name . ' updated Invoice #' . $invoice->invoice_number,
+
+                'amount_added' => $newPayment,
+                'total_paid' => $totalPaid,
+                'balance' => $newBalance,
+
+                'updated_by' => Auth::user()->name,
+                'updated_by_id' => Auth::id(),
+
+                'updated_at' => now()->format('d M Y h:i A'),
+            ],
+        ]);
+
+        InvoicePaymentLog::create([
+            'owner_id' => Auth::user()->owner_id,
+
+            'invoice_id' => $invoice->id,
+            'invoice_no' => $invoice->invoice_number,
+
+            'cashier_id' => Auth::id(),
+
+            'type' => 'invoice_payment',
+
+            'message' => Auth::user()->name .
+                ' updated Invoice #' .
+                $invoice->invoice_number,
+
+            'amount_added' => $newPayment,
+
+            'total_paid' => $totalPaid,
+
+            'balance' => $newBalance,
+
+            'updated_by' => Auth::user()->name,
+
+            'updated_by_id' => Auth::id(),
+
+            'payment_updated_at' => now(),
+        ]);
+    }
+
+
     return back()->with('success', 'Payment updated successfully');
 }
 
+public function receivables(Request $request)
+{
+    $ownerId = auth()->user()->owner_id;
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 1: GET CUSTOMER IDS (WITH SEARCH)
+    |--------------------------------------------------------------------------
+    */
+
+    $customerIdsQuery = Customer::query()
+        ->whereHas('invoices', function ($q) use ($ownerId) {
+            $q->where('owner_id', $ownerId);
+        });
+
+    if ($request->search) {
+        $search = $request->search;
+
+        $customerIdsQuery->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('phone', 'like', "%{$search}%");
+        });
+    }
+
+    $customerIds = $customerIdsQuery->pluck('id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 2: AGGREGATE INVOICES
+    |--------------------------------------------------------------------------
+    */
+
+    $customers = Invoice::select(
+            'customer_id',
+            DB::raw('SUM(total) as total_invoice'),
+            DB::raw('SUM(amount_paid) as total_paid'),
+            DB::raw('SUM(balance) as total_owing'),
+            DB::raw('MAX(shop_id) as shop_id')
+        )
+        ->with(['customer', 'shop'])
+        ->where('owner_id', $ownerId)
+        ->whereIn('customer_id', $customerIds) // 🔥 KEY FIX
+        ->groupBy('customer_id')
+        ->paginate(10)
+        ->withQueryString();
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 3: GOODS (ALL INVOICES PER CUSTOMER)
+    |--------------------------------------------------------------------------
+    */
+
+    $invoicesByCustomer = Invoice::where('owner_id', $ownerId)
+        ->with('shop')
+        ->get()
+        ->groupBy('customer_id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 4: TOTAL RECEIVABLE
+    |--------------------------------------------------------------------------
+    */
+
+    $totalReceivable = Invoice::where('owner_id', $ownerId)->sum('balance');
+
+    return view('admin.invoices.receivables', compact(
+        'customers',
+        'invoicesByCustomer',
+        'totalReceivable'
+    ));
+}
 
 
+public function receivablesforcash(Request $request)
+{
+    $ownerId = auth()->user()->owner_id;
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 1: GET CUSTOMER IDS (WITH SEARCH)
+    |--------------------------------------------------------------------------
+    */
+
+    $customerIdsQuery = Customer::query()
+        ->whereHas('invoices', function ($q) use ($ownerId) {
+            $q->where('owner_id', $ownerId);
+        });
+
+    if ($request->search) {
+        $search = $request->search;
+
+        $customerIdsQuery->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('phone', 'like', "%{$search}%");
+        });
+    }
+
+    $customerIds = $customerIdsQuery->pluck('id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 2: AGGREGATE INVOICES
+    |--------------------------------------------------------------------------
+    */
+
+    $customers = Invoice::select(
+            'customer_id',
+            DB::raw('SUM(total) as total_invoice'),
+            DB::raw('SUM(amount_paid) as total_paid'),
+            DB::raw('SUM(balance) as total_owing'),
+            DB::raw('MAX(shop_id) as shop_id')
+        )
+        ->with(['customer', 'shop'])
+        ->where('owner_id', $ownerId)
+        ->whereIn('customer_id', $customerIds) // 🔥 KEY FIX
+        ->groupBy('customer_id')
+        ->paginate(10)
+        ->withQueryString();
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 3: GOODS (ALL INVOICES PER CUSTOMER)
+    |--------------------------------------------------------------------------
+    */
+
+    $invoicesByCustomer = Invoice::where('owner_id', $ownerId)
+        ->with('shop')
+        ->get()
+        ->groupBy('customer_id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 4: TOTAL RECEIVABLE
+    |--------------------------------------------------------------------------
+    */
+
+    $totalReceivable = Invoice::where('owner_id', $ownerId)->sum('balance');
+
+    return view('cashier.invoices.receivables', compact(
+        'customers',
+        'invoicesByCustomer',
+        'totalReceivable'
+    ));
+}
 
 }
 

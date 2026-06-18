@@ -30,14 +30,14 @@ public function index()
             'date' => 'required|date',
         ]);
 
-        Expense::create([
-            'shop_id' => $request->shop_id,
-            'title' => $request->title,
-            'amount' => $request->amount,
-            'description' => $request->description,
-            'date' => $request->date,
-            'added_by' => Auth::user()->name ?? 'Cashier/Admin',
-        ]);
+Expense::create([
+    'shop_id' => $request->shop_id,
+    'title' => $request->title,
+    'amount' => $request->amount,
+    'description' => $request->description,
+    'date' => $request->date,
+    'added_by' => Auth::id(),
+]);
 
 
         return redirect()->route('expenses.index')->with('success', 'Expense added successfully!');
@@ -89,14 +89,14 @@ public function indexcash()
             'date' => 'required|date',
         ]);
 
-        Expense::create([
-            'shop_id' => $request->shop_id,
-            'title' => $request->title,
-            'amount' => $request->amount,
-            'description' => $request->description,
-            'date' => $request->date,
-            'added_by'    => Auth::user()->id,  
-        ]);
+Expense::create([
+    'shop_id' => $request->shop_id,
+    'title' => $request->title,
+    'amount' => $request->amount,
+    'description' => $request->description,
+    'date' => $request->date,
+    'added_by' => Auth::id(),
+]);
 
 
         return redirect()->route('cashierexpense.index')->with('success', 'Expense added successfully!');

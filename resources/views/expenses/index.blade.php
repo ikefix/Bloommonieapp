@@ -38,7 +38,7 @@
                     <td>{{ $expense->title }}</td>
                     <td>₦{{ number_format($expense->amount, 2) }}</td>
                     <td>{{ \Carbon\Carbon::parse($expense->date)->format('M d, Y') }}</td>
-                    <td>{{ $expense->added_by }}</td>
+                    <td>{{ $expense->user->name ?? 'Unknown User' }}</td>
                     <td>{{ $expense->description ?? '—' }}</td>
                     <td>
                         <form action="{{ route('cashierexpense.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('Delete this expense?')">

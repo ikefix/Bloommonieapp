@@ -120,20 +120,6 @@
                                         <a href="{{ route('admin.invoices.preview', $invoice->id) }}" class="btn btn-sm btn-secondary">
                                             Preview
                                         </a>
-                                        <form action="{{ route('invoice.delete', $invoice->id) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Delete this invoice?')">
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button class="btn btn-danger btn-sm">
-
-                                                Delete
-
-                                            </button>
-
-                                        </form>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -148,4 +134,21 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('searchInput').addEventListener('input', function () {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+        let customer = row.children[1].textContent.toLowerCase();
+
+        if (customer.includes(filter)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
 @endsection

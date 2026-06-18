@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        {{-- <div class="col-md-4">
+        <!-- <div class="col-md-4">
             <div class="card text-white bg-danger shadow-sm">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
@@ -27,7 +27,11 @@
                     <i class="fas fa-money-bill-wave fa-2x"></i>
                 </div>
             </div>
+<<<<<<< HEAD
         </div> --}}
+=======
+        </div> -->
+>>>>>>> a7dfc173231aee63cc9c5850a7a9406b0265fadc
 
         <div class="col-md-4">
             <div class="card text-white bg-info shadow-sm">
@@ -41,6 +45,25 @@
             </div>
         </div>
     </div>
+
+    <form action="{{ route('invoices.search') }}" method="GET" class="mb-3">
+
+        <div style="display:flex; gap:10px;">
+
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search customer name or phone..."
+            >
+
+            <button class="btn btn-primary">
+                Search
+            </button>
+
+        </div>
+
+    </form>
 
     {{-- Owing Invoices Table --}}
     <div class="row">

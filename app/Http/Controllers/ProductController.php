@@ -30,18 +30,91 @@ public function import(Request $request)
 }
     
 
-    public function store(Request $request)
+//     public function store(Request $request)
+// {
+//     $user = Auth::user();
+
+//     // Authorization logic
+//     if ($user->role === 'manager') {
+//         $hasPermission = \App\Models\ProductPermission::where('manager_id', $user->id)->exists();
+
+//         if (!$hasPermission) {
+//             abort(403, 'You are not allowed to add products.');
+//         }
+//     } elseif ($user->role !== 'admin') {
+//         abort(403, 'Unauthorized action.');
+//     }
+
+//     if (!auth()->user()->canCreateMoreProducts()) {
+
+//         return back()->with(
+//             'error',
+//             'Product limit reached for your plan.'
+//         );
+//     }
+
+//     // ✅ Validation
+//     $request->validate([
+//         'category_id' => 'required|exists:categories,id',
+//         'shop_id' => 'required|exists:shops,id',
+//         'name' => 'required|string|max:255',
+//         'barcode' => 'required|string|unique:products,barcode', // ✅ must exist & unique
+//         'price' => 'required|numeric|min:0',
+//         'cost_price' => 'required|numeric|min:0',
+//         'stock_limit' => 'required|numeric|min:0',
+//         'stock_quantity' => 'required|integer|min:0',
+//     ]);
+
+//     // Check if product already exists in same shop & category
+//     $existingProduct = Product::where('name', $request->name)
+//         ->where('shop_id', $request->shop_id)
+//         ->where('category_id', $request->category_id)
+//         ->first();
+
+//     if ($existingProduct) {
+//         session()->flash('error', 'Product already exists in this shop and category.');
+//         return redirect()->back()->withInput();
+//     }
+
+//     // ✅ Safe creation (now includes barcode)
+//     $data = $request->only([
+//         'category_id',
+//         'shop_id',
+//         'name',
+//         'barcode', // ✅ Added
+//         'price',
+//         'cost_price',
+//         'stock_limit',
+//         'stock_quantity',
+//     ]);
+
+//     $product = Product::create($data);
+
+//     // Stock check
+//     $this->checkStockNotification($product);
+
+//     session()->flash('success', 'Product stocked successfully!');
+//     return redirect()->route('products.create');
+// }
+
+public function store(Request $request)
 {
     $user = Auth::user();
 
     // Authorization logic
     if ($user->role === 'manager') {
-        $hasPermission = \App\Models\ProductPermission::where('manager_id', $user->id)->exists();
+
+        $hasPermission = \App\Models\ProductPermission::where(
+            'manager_id',
+            $user->id
+        )->exists();
 
         if (!$hasPermission) {
             abort(403, 'You are not allowed to add products.');
         }
+
     } elseif ($user->role !== 'admin') {
+
         abort(403, 'Unauthorized action.');
     }
 
@@ -55,13 +128,20 @@ public function import(Request $request)
 
     // ✅ Validation
     $request->validate([
-        'category_id' => 'required|exists:categories,id',
-        'shop_id' => 'required|exists:shops,id',
-        'name' => 'required|string|max:255',
-        'barcode' => 'required|string|unique:products,barcode', // ✅ must exist & unique
-        'price' => 'required|numeric|min:0',
-        'cost_price' => 'required|numeric|min:0',
-        'stock_quantity' => 'required|integer|min:0',
+        'category_id'    => 'required|exists:categories,id',
+        'shop_id'        => 'required|exists:shops,id',
+        'name'           => 'required|string|max:255',
+        'barcode'        => 'required|string|unique:products,barcode',
+        'price'          => 'required|numeric|min:0',
+        'cost_price'     => 'required|numeric|min:0',
+        'stock_limit'    => 'required|numeric|min:0',
+
+        // changed from integer to numeric
+        'stock_quantity' => 'required|numeric|min:0',
+
+        // Manufacturing fields (optional)
+        'stock_unit'     => 'nullable|string|max:50',
+        'unit_size'      => 'nullable|numeric|min:0',
     ]);
 
     // Check if product already exists in same shop & category
@@ -71,30 +151,43 @@ public function import(Request $request)
         ->first();
 
     if ($existingProduct) {
-        session()->flash('error', 'Product already exists in this shop and category.');
-        return redirect()->back()->withInput();
+
+        session()->flash(
+            'error',
+            'Product already exists in this shop and category.'
+        );
+
+        return redirect()
+            ->back()
+            ->withInput();
     }
 
-    // ✅ Safe creation (now includes barcode)
     $data = $request->only([
         'category_id',
         'shop_id',
         'name',
-        'barcode', // ✅ Added
+        'barcode',
         'price',
         'cost_price',
+        'stock_limit',
         'stock_quantity',
+
+        // Manufacturing fields
+        'stock_unit',
+        'unit_size',
     ]);
 
     $product = Product::create($data);
 
-    // Stock check
     $this->checkStockNotification($product);
 
-    session()->flash('success', 'Product stocked successfully!');
+    session()->flash(
+        'success',
+        'Product stocked successfully!'
+    );
+
     return redirect()->route('products.create');
 }
-
 
 
 // 

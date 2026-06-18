@@ -372,7 +372,7 @@ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .submenu.show {
-    max-height: 200px; /* adjust as needed */
+    max-height: 290px; /* adjust as needed */
     padding: 10px 0;
 }
 
@@ -642,7 +642,7 @@ canvas {
 
 .admin-dash{
     display: flex;
-    gap: 1rem;
+    gap: .5rem;
     flex-direction: row !important;
 }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Product;
+use App\Models\User;
 
 class Invoice extends Model
 {
@@ -81,6 +82,11 @@ class Invoice extends Model
     {
         return $this->belongsTo(Shop::class);
     }
+
+public function cashier()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
 
     /*
     |-------------------------------------------------

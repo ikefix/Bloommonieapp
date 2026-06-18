@@ -8,13 +8,70 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AdminCreatedMail;
+use Illuminate\Support\Facades\DB;
 
 class SuperAdminController extends Controller
 {
-    public function dashboard()
-    {
-        return view('superadmin.dashboard');
-    }
+
+public function dashboard()
+{
+    $adminQuery = \App\Models\User::where('role', 'admin');
+
+    $totalAdmins    = (clone $adminQuery)->count();
+
+    $activeAdmins   = (clone $adminQuery)
+                        ->where('is_activated', true)
+                        ->count();
+
+    $inactiveAdmins = (clone $adminQuery)
+                        ->where('is_activated', false)
+                        ->count();
+
+    // Subscription logic (based on your schema, NOT relationship)
+    $subscribedAdmins = (clone $adminQuery)
+                        ->whereNotNull('plan')
+                        ->where('plan_end', '>=', now())
+                        ->count();
+
+    $overdueAdmins = (clone $adminQuery)
+                        ->whereNotNull('plan')
+                        ->where('plan_end', '<', now())
+                        ->count();
+
+    $recentAdmins = (clone $adminQuery)
+                        ->latest()
+                        ->take(5)
+                        ->get();
+
+$mostActiveAdmins = \App\Models\User::where('role', 'admin')
+    ->withCount([
+        'shops as products_count' => function ($query) {
+            $query->select(\DB::raw('COUNT(products.id)'))
+                  ->join('products', 'products.shop_id', '=', 'shops.id');
+        }
+    ])
+    ->orderByDesc('products_count')
+    ->take(5)
+    ->get();
+
+    $monthlySignups = (clone $adminQuery)
+                        ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                        ->whereYear('created_at', now()->year)
+                        ->groupByRaw('MONTH(created_at)')
+                        ->orderByRaw('MONTH(created_at)')
+                        ->pluck('count', 'month');
+
+    return view('superadmin.dashboard', compact(
+        'totalAdmins',
+        'activeAdmins',
+        'inactiveAdmins',
+        'subscribedAdmins',
+        'overdueAdmins',
+        'recentAdmins',
+        'mostActiveAdmins',
+        'monthlySignups'
+    ));
+}
 
     public function create()
     {

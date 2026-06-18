@@ -17,7 +17,10 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\StockReportController;
 use App\Http\Controllers\ProfitReportController;
+use App\Http\Controllers\ProductionTypeController;
+use App\Http\Controllers\ProductionReportController;
 use Milon\Barcode\DNS1D;
+use App\Http\Controllers\ProductionController;
 use App\Models\Product;
 use App\Http\Controllers\ComplaintController;
 use App\Exports\ProductsExport;
@@ -28,6 +31,9 @@ use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Auth\ProductKeyController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\ProductionEntryController;
+use App\Http\Controllers\CollectableController;
+use App\Http\Controllers\UnitController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -76,6 +82,11 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
         ->name('superadmin.subscriptions');
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/units', [UnitController::class, 'index'])->name('admin.units.index');
+    Route::post('/admin/units', [UnitController::class, 'store'])->name('admin.units.store');
+    Route::delete('/admin/units/{id}', [UnitController::class, 'destroy'])->name('admin.units.destroy');
+});
 
 Route::middleware(['auth'])->group(function () {
 
@@ -385,11 +396,80 @@ Route::get('/manager/products', [ManagerController::class, 'viewProducts'])->nam
 //INVOICE ROUTE
 
 // web.php (admin routes)
+Route::get('/admin/collectables', [CollectableController::class, 'index'])->name('admin.collectables');
+Route::get('/collectables/pdf',[CollectableController::class, 'downloadPdf'])->name('admin.collectables.pdf');
+
+Route::prefix('production-type')->group(function () {
+
+    Route::get('/', [ProductionTypeController::class, 'index'])
+        ->name('admin.production_type.index');
+
+    Route::get('/create', [ProductionTypeController::class, 'create'])
+        ->name('admin.production_type.create');
+
+    Route::post('/store', [ProductionTypeController::class, 'store'])
+        ->name('admin.production_type.store');
+
+    Route::delete('/{id}', [ProductionTypeController::class, 'destroy'])
+        ->name('admin.production.destroy');
+
+});
+
+Route::prefix('productions')->group(function(){
+
+    Route::get('/', [ProductionController::class,'index'])
+        ->name('admin.production.index');
+
+    Route::get('/create', [ProductionController::class,'create'])
+        ->name('admin.production.create');
+
+    Route::post('/store', [ProductionController::class,'store'])
+        ->name('admin.production.store');
+
+});
+
+Route::put('production/{production}/status',[ProductionController::class, 'updateStatus'])->name('admin.production.status');
+
+
+Route::get('/production-entries/{production}/fill', [ProductionEntryController::class, 'fill'])->name('admin.production_entries.fill');
+
+Route::post('/production-entries/{production}', [ProductionEntryController::class, 'store'])->name('admin.production_entries.store');
+
+Route::prefix('admin/production-entries')->group(function () {
+
+    // 1. LIST BATCHES (default page)
+    Route::get('/', [ProductionEntryController::class, 'index'])
+        ->name('admin.production_entries.index');
+
+    // 2. OPEN SINGLE BATCH (your fill page)
+    Route::get('/{production}', [ProductionEntryController::class, 'show'])
+        ->name('admin.production_entries.show');
+
+    // 3. SAVE ENTRIES
+    Route::post('/{production}', [ProductionEntryController::class, 'store'])
+        ->name('admin.production_entries.store');
+
+});
+
+Route::get('/products/{id}/price', function ($id) {
+    $product = \App\Models\Product::findOrFail($id);
+
+    return response()->json([
+        'cost_price' => $product->cost_price
+    ]);
+});
+
+Route::post('production-entries/{productionId}/update', [ProductionEntryController::class, 'update'])
+     ->name('admin.production_entries.update');
+
+Route::get('/production-entries/{production}/edit',[ProductionEntryController::class, 'edit'])->name('admin.production_entries.edit');
+
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function() {
     Route::get('/invoices/owing', [InvoiceController::class, 'owing'])->name('admin.invoices.owing');
     Route::get('/invoices/{invoice}/edit-payment', [InvoiceController::class, 'editPayment'])->name('admin.invoices.edit-payment');
     Route::post('/invoices/{invoice}/update-payment', [InvoiceController::class, 'updatePayment'])->name('admin.invoices.update-payment');
     Route::post('/invoices/{invoice}/mark-paid',[InvoiceController::class, 'markPaid'])->name('admin.invoices.mark-paid');
+    Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('admin.invoices.destroy');
     Route::get('/invoice/search',[InvoiceController::class, 'searchCustomerInvoices'])->name('invoice.search');
     Route::delete('/invoice/delete/{invoice}',[InvoiceController::class, 'deleteInvoice'])->name('invoice.delete');
 });
@@ -402,8 +482,11 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function()
 });
 
 
+    Route::get('/cashier/invoice/search',[InvoiceController::class, 'searchCashierCustomerInvoices'])->name('invoices.search');
 
 
+Route::get('reports/production',     [ProductionReportController::class, 'productionReport'])->name('admin.report.production_report');
+Route::get('reports/production/pdf', [ProductionReportController::class, 'productionReportPdf'])->name('admin.report.pdf.production_report.pdf');
 
 
 
@@ -483,6 +566,11 @@ Route::prefix('manager')->middleware(['auth','role:manager'])->group(function ()
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('manager.invoices.store');
 });
 
+Route::get('/admin/receivables', [InvoiceController::class, 'receivables'])
+    ->name('admin.invoices.receivables');
+
+Route::get('/cashier/receivables', [InvoiceController::class, 'receivablesforcash'])
+    ->name('cashier.invoices.receivables');
 
 
 // SALES REPORT

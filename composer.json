@@ -12,7 +12,7 @@
         "barryvdh/laravel-dompdf": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.0",
-        "laravel/sanctum": "^3.0",
+        "laravel/sanctum": "*",
         "laravel/tinker": "^2.7",
         "laravel/ui": "^4.6",
         "maatwebsite/excel": "*",

@@ -67,12 +67,16 @@
                     <span class="sidebar-text">Sales Report</span>
                 </a>
                 <a href="{{route('admin.report.stock_report')}}" class="sidebar-link">
-                    <span class="sidebar-icon"><i class='bx bx-category'></i></span>
+                    <span class="sidebar-icon"><i class='bx bx-candles'></i></span>
                     <span class="sidebar-text">Stock Report</span>
                 </a>
                 <a href="{{route('admin.report.profit_loss')}}" class="sidebar-link">
                     <span class="sidebar-icon"><i class='bx bx-category'></i></span>
                     <span class="sidebar-text">P & L Report</span>
+                </a>
+                <a href="{{route('admin.report.production_report')}}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-category'></i></span>
+                    <span class="sidebar-text">Prod & Manu Report</span>
                 </a>
             </div>
             <a href="{{route('stock-transfers.create')}}" class="sidebar-link">
@@ -98,6 +102,34 @@
                     <span class="sidebar-icon"><i class='bx bx-file'></i></span>
                     <span class="sidebar-text">Create Invoice</span>
                 </a>  
+                <a href="{{ route('admin.invoices.receivables') }}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-search'></i></span>
+                    <span class="sidebar-text">Receivables</span>
+                </a>  
+                <a href="{{ route('admin.collectables') }}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-collection'></i></span>
+                    <span class="sidebar-text">Collectables</span>
+                </a>  
+            </div>
+
+             <a class="sidebar-link collapsible-btn" onclick="toggleSubmenu(this)">
+                <span class="sidebar-icon"><i class='bx bxs-factory'></i></span>
+                <span class="sidebar-text">Prod & Manu</span>
+                <span class="arrow">&#9662;</span> <!-- down arrow -->
+            </a>
+            <div class="submenu"> 
+                <a href="{{route('admin.production_type.index')}}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-credit-card-front'></i></span>
+                    <span class="sidebar-text">Production Type</span>
+                </a>
+                <a href="{{route('admin.production.index')}}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bxs-layer'></i></span>
+                    <span class="sidebar-text">Batch</span>
+                </a>    
+                <a href="{{route('admin.production_entries.index')}}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-clipboard'></i></span>
+                    <span class="sidebar-text">List </span>
+                </a>
             </div>
 
             <a class="sidebar-link collapsible-btn" onclick="toggleSubmenu(this)">
@@ -145,7 +177,7 @@
                 </a>
             </div>
             <a href="{{ route('complaints.create') }}" class="sidebar-link">
-                <span class="sidebar-icon"><i class='bx bx-user-circle'></i></span>
+                <span class="sidebar-icon"><i class='bx bx-support'></i></span>
                 <span class="sidebar-text">Customer Care</span>
             </a>
             <a href="{{ route('admin.profile') }}" class="sidebar-link">
