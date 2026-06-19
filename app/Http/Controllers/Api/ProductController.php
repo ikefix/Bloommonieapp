@@ -24,20 +24,7 @@ class ProductController extends Controller
 {
 public function index()
 {
-    $user = Auth::user();
-
-    $shop = Shop::where('owner_id', $user->owner_id)->first();
-
-    if (!$shop) {
-        return response()->json([
-            'status' => true,
-            'data' => [] // IMPORTANT: don't break frontend
-        ]);
-    }
-
-    $products = Product::where('shop_id', $shop->id)
-        ->latest()
-        ->get();
+    $products = Product::latest()->get();
 
     return response()->json([
         'status' => true,

@@ -61,10 +61,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     // User.php
-public function shop()
-{
-    return $this->belongsTo(Shop::class);
-}
 
 public function complaints()
 {
