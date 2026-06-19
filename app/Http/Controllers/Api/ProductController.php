@@ -22,6 +22,20 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
+    public function index()
+    {
+        $user = Auth::user();
+
+        $products = Product::where('shop_id', $user->shop_id)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $products
+        ]);
+    }
+
     // IMPORT PRODUCTS
     public function import(Request $request)
     {
