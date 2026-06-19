@@ -111,7 +111,12 @@ class ProductController extends Controller
             ], 409);
         }
 
-        $product = Product::create($request->all());
+        $ownerId = $user->owner_id ?? $user->id;
+
+        $data = $request->all();
+        $data['owner_id'] = $ownerId;
+
+        $product = Product::create($data);
 
         $this->checkStockNotification($product);
 
@@ -202,8 +207,9 @@ class ProductController extends Controller
     // SEARCH SUGGESTIONS
     public function searchSuggestions(Request $request)
     {
+        $user = Auth::user();
+        $ownerId = $user->owner_id ?? $user->id;
         $query = strtolower(trim($request->input('query')));
-        $shopId = auth()->user()->shop_id ?? null;
 
         if (!$query) {
             return response()->json([
@@ -212,7 +218,7 @@ class ProductController extends Controller
             ]);
         }
 
-        $products = Product::where('shop_id', $shopId)
+        $products = Product::where('owner_id', $ownerId)
             ->where(function ($q) use ($query) {
                 $q->whereRaw('LOWER(name) LIKE ?', ["%{$query}%"])
                   ->orWhere('barcode', 'LIKE', "%{$query}%");
@@ -220,7 +226,7 @@ class ProductController extends Controller
             ->limit(10)
             ->get(['id', 'name', 'price', 'barcode']);
 
-        $exact = Product::where('shop_id', $shopId)
+        $exact = Product::where('owner_id', $ownerId)
             ->where('barcode', $query)
             ->first(['id', 'name', 'price', 'barcode']);
 
@@ -266,7 +272,7 @@ class ProductController extends Controller
             'total_price'    => $product->price * $request->quantity,
             'payment_method' => $request->payment_method,
             'transaction_id' => $transactionId,
-            'shop_id'        => auth()->user()->shop_id,
+            'shop_id'        => $product->shop_id,
         ]);
 
         $this->updateStockAndNotify($product, $request->quantity);
