@@ -22,19 +22,29 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::user();
+public function index()
+{
+    $user = Auth::user();
 
-        $products = Product::where('shop_id', $user->shop_id)
-            ->latest()
-            ->get();
+    // Get the shop that belongs to this user
+    $shop = Shop::where('user_id', $user->id)->first();
 
+    if (!$shop) {
         return response()->json([
-            'status' => true,
-            'data' => $products
-        ]);
+            'status' => false,
+            'message' => 'No shop found for this user'
+        ], 404);
     }
+
+    $products = Product::where('shop_id', $shop->id)
+        ->latest()
+        ->get();
+
+    return response()->json([
+        'status' => true,
+        'data' => $products
+    ]);
+}
 
     // IMPORT PRODUCTS
     public function import(Request $request)
