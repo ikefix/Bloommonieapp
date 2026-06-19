@@ -62,4 +62,15 @@ class LoginController extends Controller
             'owner_id' => $user->owner_id
         ]);
     }
+
+    // LOGOUT
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Logged out successfully'
+        ]);
+    }
 }
