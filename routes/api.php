@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,4 +51,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ADMIN DASHBOARD
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+
+    // PRODUCTS
+    Route::get('/products/{id}', [ProductController::class, 'show']);
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::put('/products/{id}', [ProductController::class, 'update']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+
+    // IMPORT
+    Route::post('/products/import', [ProductController::class, 'import']);
+
+    // STOCK
+    Route::get('/products/{id}/stock', [ProductController::class, 'getStock']);
+
+    // SELL
+    Route::post('/products/{id}/sell', [ProductController::class, 'sellProduct']);
+
+    // SEARCH
+    Route::get('/products/search/suggestions', [ProductController::class, 'searchSuggestions']);
 });
