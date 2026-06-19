@@ -26,14 +26,13 @@ public function index()
 {
     $user = Auth::user();
 
-    // Get the shop that belongs to this user
-    $shop = Shop::where('user_id', $user->id)->first();
+    $shop = Shop::where('owner_id', $user->owner_id)->first();
 
     if (!$shop) {
         return response()->json([
-            'status' => false,
-            'message' => 'No shop found for this user'
-        ], 404);
+            'status' => true,
+            'data' => [] // IMPORTANT: don't break frontend
+        ]);
     }
 
     $products = Product::where('shop_id', $shop->id)
