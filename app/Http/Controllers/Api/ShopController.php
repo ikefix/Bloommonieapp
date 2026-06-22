@@ -5,20 +5,24 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Shop;
+use App\Models\User;
 
 class ShopController extends Controller
 {
 
     // GET ALL SHOPS FOR LOGGED IN USER
-    public function index(Request $request)
-    {
-        $shops = $request->user()->shops ?? collect();
+public function index(Request $request)
+{
+    $user = $request->user();
+    $ownerId = $user->owner_id ?? $user->id;
 
-        return response()->json([
-            'status' => true,
-            'shops' => $shops,
-        ]);
-    }
+    $shops = Shop::where('owner_id', $ownerId)->get();
+
+    return response()->json([
+        'status' => true,
+        'shops' => $shops,
+    ]);
+}
 
     // CREATE SHOP
     public function store(Request $request)

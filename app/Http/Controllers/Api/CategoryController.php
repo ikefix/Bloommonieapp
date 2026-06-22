@@ -13,8 +13,11 @@ class CategoryController extends Controller
 
     // GET ALL CATEGORIES FOR LOGGED IN OWNER
     public function index(Request $request)
-    {
-        $categories = Category::where('owner_id', $request->user()->owner_id)
+    {   
+        $user = $request->user();
+        $ownerId = $user->owner_id ?? $user->id;
+
+        $categories = Category::where('owner_id', $ownerId)
             ->latest()
             ->get();
 
