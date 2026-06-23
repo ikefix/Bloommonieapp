@@ -91,7 +91,7 @@
                     Already have an account?
                     <a href="{{ route('login') }}" 
                     style="font-weight:950; color:#1d4ed8; text-decoration:none; margin-left:5px; letter-spacing:0.5px;">
-                        SIGN IN
+                        Sign In
                     </a>
                 </div>
             </div>

@@ -91,7 +91,7 @@
                     Don’t have an account?
                     <a href="{{ route('register') }}" 
                     style="font-weight:950; color:#1d4ed8; text-decoration:none; margin-left:5px; letter-spacing:0.5px;">
-                        CREATE ACCOUNT
+                        Create Account
                     </a>
                 </div>
             </div>
