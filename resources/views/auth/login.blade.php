@@ -239,12 +239,12 @@
 
             <!-- Register -->
             <div class="text-center mt-2">
-                <small class="fw-semibold">
+                <small class="fw-semibold" style="font-size:14px;">
                     Don’t have an account?
                     <a href="{{ route('register') }}" 
-                    class="fw-bold text-primary text-decoration-none"
-                    style="font-weight:800;">
-                        Sign Up
+                    class="fw-bold text-primary"
+                    style="font-weight:900; letter-spacing:0.3px;">
+                        Create Account
                     </a>
                 </small>
             </div>
