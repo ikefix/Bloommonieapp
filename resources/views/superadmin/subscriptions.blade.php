@@ -79,25 +79,10 @@
     display:inline-block;
 }
 
-.plan-business{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.plan-lite{
-    background:#dbeafe;
-    color:#1d4ed8;
-}
-
-.plan-basic{
-    background:#fef3c7;
-    color:#92400e;
-}
-
-.plan-free_trial{
-    background:#fee2e2;
-    color:#991b1b;
-}
+.plan-business{ background:#dcfce7; color:#166534; }
+.plan-lite{ background:#dbeafe; color:#1d4ed8; }
+.plan-basic{ background:#fef3c7; color:#92400e; }
+.plan-free_trial{ background:#fee2e2; color:#991b1b; }
 
 .status-active{
     color:#16a34a;
@@ -143,6 +128,7 @@
                 <thead>
                     <tr>
                         <th>Admin</th>
+                        <th>Phone</th>
                         <th>Plan</th>
                         <th>Duration</th>
                         <th>Started</th>
@@ -157,23 +143,13 @@
                     @forelse($admins as $admin)
 
                         @php
-
-                            $expired = false;
-
-                            if($admin->plan_end){
-                                $expired = now()->gt($admin->plan_end);
-                            }
-
-                            $daysLeft = null;
-
-                            if($admin->plan_end){
-                                $daysLeft = now()->diffInDays($admin->plan_end, false);
-                            }
-
+                            $expired = $admin->plan_end ? now()->gt($admin->plan_end) : false;
+                            $daysLeft = $admin->plan_end ? now()->diffInDays($admin->plan_end, false) : null;
                         @endphp
 
                         <tr>
 
+                            <!-- ADMIN -->
                             <td>
                                 <div class="admin-box">
 
@@ -182,80 +158,66 @@
                                     </div>
 
                                     <div>
-                                        <strong>
-                                            {{ $admin->name }}
-                                        </strong>
-
-                                        <div class="admin-email">
-                                            {{ $admin->email }}
-                                        </div>
+                                        <strong>{{ $admin->name }}</strong>
+                                        <div class="admin-email">{{ $admin->email }}</div>
                                     </div>
 
                                 </div>
                             </td>
 
+                            <!-- PHONE (FIXED) -->
                             <td>
+                                {{ $admin->phone ?? '---' }}
+                            </td>
 
+                            <!-- PLAN -->
+                            <td>
                                 <span class="plan-badge plan-{{ $admin->plan }}">
                                     {{ ucfirst(str_replace('_',' ', $admin->plan)) }}
                                 </span>
-
                             </td>
 
+                            <!-- DURATION -->
                             <td>
                                 {{ $admin->plan_duration ?? 'Trial Plan' }}
                             </td>
 
+                            <!-- STARTED -->
                             <td>
                                 {{ $admin->plan_start ?? '---' }}
                             </td>
 
+                            <!-- ENDING -->
                             <td>
-
                                 @if($admin->plan_end)
 
                                     {{ $admin->plan_end }}
 
-                                    @if($daysLeft <= 5 && $daysLeft >= 0)
-
+                                    @if($daysLeft !== null && $daysLeft <= 5 && $daysLeft >= 0)
                                         <div class="expire-soon">
                                             Expiring Soon
                                         </div>
-
                                     @endif
 
                                 @else
-
                                     Unlimited
-
                                 @endif
-
                             </td>
 
+                            <!-- STATUS -->
                             <td>
-
                                 @if($expired)
-
-                                    <span class="status-expired">
-                                        Expired
-                                    </span>
-
+                                    <span class="status-expired">Expired</span>
                                 @else
-
-                                    <span class="status-active">
-                                        Active
-                                    </span>
-
+                                    <span class="status-active">Active</span>
                                 @endif
-
                             </td>
 
+                            <!-- PRODUCT KEY -->
                             <td>
-
                                 <span class="product-key">
                                     {{ $admin->product_key }}
                                 </span>
-
                             </td>
 
                         </tr>
@@ -263,9 +225,10 @@
                     @empty
 
                         <tr>
-                            <td colspan="7" class="text-center py-5">
+                            <td colspan="8" class="text-center py-5">
                                 No Admins Found
                             </td>
+
                         </tr>
 
                     @endforelse
