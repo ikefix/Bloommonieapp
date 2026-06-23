@@ -305,7 +305,7 @@
                     {{-- ACTIVITY LOG --}}
                     <div class="section-title">Payment Update History (Permanent Audit Log)</div>
 
-                    <div class="table-responsive">
+                    <!-- <div class="table-responsive">
                         <table class="table table-sm table-hover">
 
                             <thead>
@@ -356,7 +356,82 @@
                             </tbody>
 
                         </table>
-                    </div>
+                    </div> -->
+
+                    <div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Total Added</h6>
+                <h4 class="positive mb-0">
+                    ₦{{ number_format($logs->sum('amount_added'), 2) }}
+                </h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Total Balance</h6>
+                <h4 class="negative mb-0">
+                    ₦{{ number_format($logs->sum(fn($log) => $log->invoice->balance ?? 0), 2) }}
+                </h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+
+        <thead>
+            <tr>
+                <th>Invoice</th>
+                <th>Added</th>
+                <th>Total Paid</th>
+                <th>Total Balance</th>
+                <th>Updated By</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @forelse($logs as $log)
+                <tr>
+                    <td>#{{ $log->invoice_no }}</td>
+
+                    <td class="positive">
+                        ₦{{ number_format($log->amount_added, 2) }}
+                    </td>
+
+                    <td>
+                        ₦{{ number_format($log->invoice->amount_paid ?? 0, 2) }}
+                    </td>
+
+                    <td class="negative">
+                        ₦{{ number_format($log->invoice->balance ?? 0, 2) }}
+                    </td>
+
+                    <td>
+                        {{ $log->updated_by }}
+                    </td>
+
+                    <td>
+                        {{ \Carbon\Carbon::parse($log->payment_updated_at)->format('d M Y h:i A') }}
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No updates recorded
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+
+    </table>
+</div>
 
                 </div>
             </div>
