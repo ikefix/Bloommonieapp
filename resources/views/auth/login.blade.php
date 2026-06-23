@@ -1,155 +1,3 @@
-{{-- 
-
-@extends('layouts.app')
-
-@section('content')
-<style>
-
-
-    .auth-card {
-        background: rgba(255, 255, 255, 0.1); /* Transparent white */
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 40px;
-        border-radius: 12px;
-        max-width: 500px;
-        width: 100%;
-        color: #fff;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .auth-card h2 {
-        text-align: center;
-        margin-bottom: 30px;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: #f0f0f0;
-    }
-
-    input,
-    select {
-        width: 100%;
-        padding: 12px 15px;
-        border: none;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        margin-bottom: 20px;
-    }
-
-    input:focus,
-    select:focus {
-        outline: none;
-        border: 1px solid #00bcd4;
-    }
-
-    .form-check {
-        margin-bottom: 20px;
-        display: flex;
-        text-align: center;
-        align-items: center;
-    }
-
-    .form-check input {
-        margin-right: 10px;
-        margin-bottom: 0;
-        width: 15px;
-    }
-
-    .form-check label{
-        margin-bottom: 0
-    }
-
-    .btn-submit {
-        background: #00bcd4;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 6px;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-        width: 100%;
-        transition: background 0.3s ease;
-    }
-
-    .btn-submit:hover {
-        background: #0097a7;
-    }
-
-    .forgot-link {
-        display: inline-block;
-        margin-top: 15px;
-        font-size: 14px;
-        text-align: center;
-        color: #ddd;
-        text-decoration: underline;
-    }
-
-    .invalid-feedback {
-        color: #ffaaaa;
-        font-size: 13px;
-        margin-top: -15px;
-        margin-bottom: 10px;
-    }
-
-    option{
-        color: black
-    }
-</style>
-
-<div class="login-container hero">
-    <div class="auth-card">
-        <h2>{{ __('Login') }}</h2>
-
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
-
-            <label for="email">{{ __('Email Address') }}</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Enter your email">
-            @error('email')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-
-            <label for="password">{{ __('Password') }}</label>
-            <input id="password" type="password" name="password" required placeholder="Enter your password">
-            @error('password')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-
-            <label for="role">{{ __('Login As') }}</label>
-            <select id="role" name="role" required>
-                <option value="cashier">Cashier</option>
-                <option value="manager">Manager</option>
-                <option value="admin">Admin</option>
-                <option value="superadmin"></option>
-            </select>
-
-            <div class="form-check">
-                <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                <label for="remember">{{ __('Remember Me') }}</label>
-            </div>
-
-            <button type="submit" class="btn-submit">{{ __('Login') }}</button>
-
-            @if (Route::has('password.request'))
-                <a class="forgot-link" href="{{ route('password.request') }}">
-                    {{ __('Forgot Your Password?') }}
-                </a>
-            @endif
-
-            <div>
-                <a href="{{route('register')}}">Create An Account</a>
-            </div>
-        </form>
-    </div>
-</div>
-@endsection --}}
-
-
 
 @extends('layouts.app')
 
@@ -162,7 +10,7 @@
         <!-- Logo -->
         <div class="text-center mb-4">
             <h3 class="fw-bold">
-                <span style="color:#6f42c1;"> BloomMonnie</span>
+                <span style="color:#6f42c1;"> Bloommonie</span>
             </h3>
         </div>
 
@@ -177,7 +25,7 @@
                 <i class="bi bi-envelope position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                 <input type="email" name="email"
                     class="form-control border-0 border-bottom ps-5 rounded-0"
-                    placeholder="Phone or Email"
+                    placeholder="Please enter your email"
                     value="{{ old('email') }}"
                     required autofocus>
 
@@ -239,14 +87,13 @@
 
             <!-- Register -->
             <div class="text-center mt-2">
-                <small class="fw-semibold" style="font-size:14px;">
+                <div style="font-size:16px; font-weight:800; color:#111827;">
                     Don’t have an account?
                     <a href="{{ route('register') }}" 
-                    class="fw-bold text-primary"
-                    style="font-weight:900; letter-spacing:0.3px;">
-                        Create Account
+                    style="font-weight:950; color:#1d4ed8; text-decoration:none; margin-left:5px; letter-spacing:0.5px;">
+                        CREATE ACCOUNT
                     </a>
-                </small>
+                </div>
             </div>
 
             <!-- Divider -->

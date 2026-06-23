@@ -9,7 +9,7 @@
         <!-- Logo -->
         <div class="text-center mb-4">
             <h3 class="fw-bold">
-                <span style="color:#6f42c1;"> Bloom Monie</span>
+                <span style="color:#6f42c1;"> Bloommonie</span>
             </h3>
         </div>
 
@@ -87,10 +87,13 @@
 
             <!-- Login link -->
             <div class="text-center mt-3">
-                <small>
-                    Already have account?
-                    <a href="{{ route('login') }}" class="fw-bold text-dark">Sign In</a>
-                </small>
+                <div style="font-size:16px; font-weight:800; color:#111827;">
+                    Already have an account?
+                    <a href="{{ route('login') }}" 
+                    style="font-weight:950; color:#1d4ed8; text-decoration:none; margin-left:5px; letter-spacing:0.5px;">
+                        SIGN IN
+                    </a>
+                </div>
             </div>
 
             <div class="d-flex align-items-center my-4">
