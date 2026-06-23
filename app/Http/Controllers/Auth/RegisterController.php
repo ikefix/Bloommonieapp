@@ -63,6 +63,13 @@ class RegisterController extends Controller
                 'unique:users'
             ],
 
+             'phone' => [
+                'nullable',
+                'string',
+                'max:20',
+                'unique:users'
+            ],
+
             'password' => [
                 'required',
                 'string',
@@ -105,6 +112,7 @@ class RegisterController extends Controller
             'name' => $data['name'],
 
             'email' => $data['email'],
+            'phone' => $data['phone'], // 
 
             'password' => Hash::make($data['password']),
 

@@ -1,231 +1,110 @@
-@extends('layouts.adminapp')
+{{-- @extends('layouts.app')
 
-@section('admincontent')
+@section('content')
+<style>
 
-<div class="container">
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-
-        <h4 class="mb-0">
-            Fill Production Entry - {{ $production->batch_no }}
-        </h4>
-
-        @if(session('success'))
-            <div class="alert alert-success py-1 px-3 mb-0">
-                {{ session('success') }}
-            </div>
-        @endif
-
-    </div>
-
-    <hr>
-
-    {{-- ================= INPUTS ================= --}}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">B O M</div>
-
-        <div class="card-body">
-
-            <form method="POST" action="{{ route('admin.production_entries.store', $production->id) }}">
-                @csrf
-                <input type="hidden" name="entry_type" value="input">
-
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Unit</th>
-                            <th>Cost</th>
-                            <th width="80">
-                                <button type="button" class="btn btn-sm btn-primary" onclick="addRow('inputBody')">+</button>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="inputBody"></tbody>
-                </table>
-
-                <button class="btn btn-primary w-100">Save Inputs</button>
-            </form>
-
-        </div>
-    </div>
-
-    {{-- ================= OUTPUTS ================= --}}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-success text-white">OUTPUTS</div>
-
-        <div class="card-body">
-
-            <form method="POST" action="{{ route('admin.production_entries.store', $production->id) }}">
-                @csrf
-                <input type="hidden" name="entry_type" value="output">
-
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Unit</th>
-                            <th>Cost</th>
-                            <th width="80">
-                                <button type="button" class="btn btn-sm btn-success" onclick="addRow('outputBody')">+</button>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="outputBody"></tbody>
-                </table>
-
-                <button class="btn btn-success w-100">Save Outputs</button>
-            </form>
-
-        </div>
-    </div>
-
-    {{-- ================= LOSSES ================= --}}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-danger text-white">LOSSES</div>
-
-        <div class="card-body">
-
-            <form method="POST" action="{{ route('admin.production_entries.store', $production->id) }}">
-                @csrf
-                <input type="hidden" name="entry_type" value="loss">
-
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Unit</th>
-                            <th>Cost</th>
-                            <th width="80">
-                                <button type="button" class="btn btn-sm btn-danger" onclick="addRow('lossBody')">+</button>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="lossBody"></tbody>
-                </table>
-
-                <button class="btn btn-danger w-100">Save Losses</button>
-            </form>
-
-        </div>
-    </div>
-
-</div>
-
-{{-- ================= JAVASCRIPT ================= --}}
-<script>
-
-const productOptions = `
-<option value="">Select Product</option>
-@foreach($products as $product)
-    <option value="{{ $product->id }}">
-        {{ $product->product_name ?? $product->name }}
-    </option>
-@endforeach
-`;
-
-// FIXED ROW INDEX (VERY IMPORTANT)
-let rowIndex = 0;
-
-function addRow(tableId) {
-
-    const index = rowIndex++;
-
-    const row = `
-        <tr>
-
-            <td>
-                <select name="items[${index}][item_id]" class="form-control product-select" required>
-                    ${productOptions}
-                </select>
-            </td>
-
-            <td>
-                <input type="number"
-                       step="0.01"
-                       name="items[${index}][quantity]"
-                       class="form-control quantity-input"
-                       required>
-            </td>
-
-            <td>
-                <input name="items[${index}][unit]"
-                       class="form-control"
-                       placeholder="kg, bags, pcs">
-            </td>
-
-            <td>
-                <input type="number"
-                       step="0.01"
-                       name="items[${index}][price]"
-                       class="form-control price-input"
-                       readonly>
-            </td>
-
-            <td>
-                <button type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        onclick="this.closest('tr').remove()">
-                    X
-                </button>
-            </td>
-
-        </tr>
-    `;
-
-    document.getElementById(tableId).insertAdjacentHTML('beforeend', row);
+.auth-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
+.auth-card h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
 
-// ================= AUTO PRICE CALC =================
-document.addEventListener('input', function (e) {
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #f0f0f0;
+}
 
-    const isTarget =
-        e.target.classList.contains('quantity-input') ||
-        e.target.classList.contains('product-select');
+input {
+    width: 100%;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    margin-bottom: 20px;
+}
 
-    if (!isTarget) return;
+input:focus {
+    outline: none;
+    border: 1px solid #00bcd4;
+}
 
-    const row = e.target.closest('tr');
-    if (!row) return;
+.btn-submit {
+    background: #00bcd4;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+}
 
-    const productSelect = row.querySelector('.product-select');
-    const quantityInput = row.querySelector('.quantity-input');
-    const priceInput = row.querySelector('.price-input');
+.btn-submit:hover {
+    background: #0097a7;
+}
 
-    if (!productSelect || !quantityInput || !priceInput) return;
+.invalid-feedback {
+    color: #ffaaaa;
+    font-size: 13px;
+    margin-top: -15px;
+    margin-bottom: 10px;
+}
 
-    const productId = productSelect.value;
-    const quantity = parseFloat(quantityInput.value || 0);
+</style>
 
-    if (!productId || quantity <= 0) {
-        priceInput.value = '';
-        return;
-    }
+<div class="login-container hero">
+    <div class="auth-card">
 
-    fetch(`/products/${productId}/price`)
-        .then(res => res.json())
-        .then(data => {
+        <h2>Create Account 🚀</h2>
 
-            const cost = parseFloat(data.cost_price || 0);
-            const total = cost * quantity;
+        <form method="POST" action="{{ route('register') }}">
+            @csrf
 
-            priceInput.value = total.toFixed(2);
-        })
-        .catch(() => {
-            priceInput.value = '';
-        });
-});
+            <label>Full Name</label>
+            <input type="text" name="name" value="{{ old('name') }}" required>
+            @error('name')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
 
+            <label>Email</label>
+            <input type="email" name="email" value="{{ old('email') }}" required>
+            @error('email')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
 
-// Auto add first rows
-addRow('inputBody');
-addRow('outputBody');
-addRow('lossBody');
+            <label>Password</label>
+            <input type="password" name="password" required>
+            @error('password')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
 
-</script>
+            <label>Confirm Password</label>
+            <input type="password" name="password_confirmation" required>
 
-@endsection
+            <button type="submit" class="btn-submit">
+                Start Free Trial
+            </button>
+
+            <div style="margin-top: 15px; text-align:center;">
+                <a href="{{ route('login') }}">Already have an account?</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+@endsection --}}
