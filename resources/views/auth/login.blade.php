@@ -239,9 +239,11 @@
 
             <!-- Register -->
             <div class="text-center mt-2">
-                <small>
+                <small class="fw-semibold">
                     Don’t have an account?
-                    <a href="{{ route('register') }}" class="fw-bold text-dark">
+                    <a href="{{ route('register') }}" 
+                    class="fw-bold text-primary text-decoration-none"
+                    style="font-weight:800;">
                         Sign Up
                     </a>
                 </small>
@@ -250,12 +252,12 @@
             <!-- Divider -->
             <div class="d-flex align-items-center my-4">
                 <hr class="flex-grow-1">
-                <span class="mx-2 small text-muted">Or Login with</span>
+                <span class="mx-2 small text-muted"></span>
                 <hr class="flex-grow-1">
             </div>
 
             <!-- Social -->
-            <div class="d-flex justify-content-center gap-3">
+            <!-- <div class="d-flex justify-content-center gap-3">
                 <button type="button" class="btn btn-light shadow-sm">
                     <i class="bi bi-google"></i>
                 </button>
@@ -265,7 +267,7 @@
                 <button type="button" class="btn btn-light shadow-sm">
                     <i class="bi bi-facebook"></i>
                 </button>
-            </div>
+            </div> -->
 
         </form>
 
