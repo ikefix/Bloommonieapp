@@ -70,4 +70,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // SEARCH
     Route::get('/products/search/suggestions', [ProductController::class, 'searchSuggestions']);
+
+    // SALES
+    Route::get('/admin/sales-page', [AdminController::class, 'salesPage']);
+    Route::get('/admin/filter-sales', [AdminController::class, 'filterSales']);
+    Route::delete('/admin/sales/{id}', [AdminController::class, 'deleteSale']);
+
+    // STAFF MANAGEMENT
+    Route::get('/admin/register-form', [AdminController::class, 'showRegisterForm']);
+    Route::post('/admin/store-staff', [AdminController::class, 'storeStaff']);
 });
