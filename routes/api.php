@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,4 +80,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // STAFF MANAGEMENT
     Route::get('/admin/register-form', [AdminController::class, 'showRegisterForm']);
     Route::post('/admin/store-staff', [AdminController::class, 'storeStaff']);
+
+    // ROLE MANAGEMENT
+    Route::get('/admin/users', [RoleController::class, 'index']);
+    Route::patch('/admin/users/{id}/role', [RoleController::class, 'updateRole']);
+    Route::delete('/admin/users/{id}', [RoleController::class, 'deleteUser']);
+    Route::patch('/admin/users/{id}/shop', [RoleController::class, 'updateShop']);
 });
