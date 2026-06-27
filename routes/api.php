@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -109,4 +110,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customers/{id}',           [CustomerController::class, 'show']);
     Route::put('/customers/{id}',           [CustomerController::class, 'update']);
     Route::delete('/customers/{id}',        [CustomerController::class, 'destroy']);
+
+    // NOTIFICATIONS
+    Route::get('/notifications',                [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read',     [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all',      [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{id}',        [NotificationController::class, 'destroy']);
+    Route::delete('/notifications',             [NotificationController::class, 'destroyAll']);
 });
