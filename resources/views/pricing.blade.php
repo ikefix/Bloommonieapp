@@ -149,7 +149,7 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
         
     </ul>
 
-    @if($owner->plan == 'basic')
+    @if($owner->plan == 'basic' && $owner->subscription_ends_at && now()->lt($owner->subscription_ends_at))
         <button class="plan-btn active-plan">Chosen Plan</button>
     @else
         <a href="{{ route('subscribe.plan',['plan'=>'basic','billing'=>'monthly']) }}"
@@ -183,7 +183,7 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
         <li>24/7 Support</li>
     </ul>
 
-    @if($owner->plan == 'lite')
+    @if($owner->plan == 'lite' && $owner->subscription_ends_at && now()->lt($owner->subscription_ends_at))
         <button class="plan-btn active-plan">Chosen Plan</button>
     @else
         <a href="{{ route('subscribe.plan',['plan'=>'lite','billing'=>'monthly']) }}"
@@ -218,7 +218,7 @@ $owner = $user->owner_id ? \App\Models\User::find($user->owner_id) : $user;
         <li>24/7 Support</li>
     </ul>
 
-    @if($owner->plan == 'business')
+    @if($owner->plan == 'business' && $owner->subscription_ends_at && now()->lt($owner->subscription_ends_at))
         <button class="plan-btn active-plan">Chosen Plan</button>
     @else
         <a href="{{ route('subscribe.plan',['plan'=>'business','billing'=>'monthly']) }}"

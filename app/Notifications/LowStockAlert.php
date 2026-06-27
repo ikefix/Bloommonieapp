@@ -28,6 +28,17 @@ class LowStockAlert extends Notification
             'message' => 'Stock is low for ' . $this->product->name,
         ];
     }
+
+    public function toFcm($notifiable)
+    {
+        return \Kreait\Firebase\Messaging\CloudMessage::withTarget(
+            'token',
+            $notifiable->fcm_token
+        )->withNotification([
+            'title' => '⚠️ Low Stock Alert',
+            'body'  => "{$this->product->name} is running low — only {$this->product->stock_quantity} left.",
+        ]);
+    }
 }
 
 

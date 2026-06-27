@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\FCMTokenController.php;
 
 /*
 |--------------------------------------------------------------------------
@@ -117,4 +118,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notifications/read-all',      [NotificationController::class, 'markAllAsRead']);
     Route::delete('/notifications/{id}',        [NotificationController::class, 'destroy']);
     Route::delete('/notifications',             [NotificationController::class, 'destroyAll']);
+
+    Route::post('/fcm-token', [FCMTokenController::class, 'store']);
 });
