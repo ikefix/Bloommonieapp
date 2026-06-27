@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,4 +88,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/admin/users/{id}/role', [RoleController::class, 'updateRole']);
     Route::delete('/admin/users/{id}', [RoleController::class, 'deleteUser']);
     Route::patch('/admin/users/{id}/shop', [RoleController::class, 'updateShop']);
+
+    // INVOICES
+    Route::get('/invoices/create',          [InvoiceController::class, 'create']);       // get customers/shops/products
+    Route::post('/invoices',                [InvoiceController::class, 'store']);        // create invoice
+    Route::get('/invoices',                 [InvoiceController::class, 'owing']);        // all + owing invoices
+    Route::get('/invoices/search',          [InvoiceController::class, 'search']);       // search by customer
+    Route::get('/invoices/receivables',     [InvoiceController::class, 'receivables']); // grouped by customer
+    Route::get('/invoices/{id}',            [InvoiceController::class, 'show']);         // single invoice
+    Route::delete('/invoices/{id}',         [InvoiceController::class, 'destroy']);      // delete + return stock
+    Route::post('/invoices/{id}/payment',   [InvoiceController::class, 'updatePayment']); // add payment
+    Route::post('/invoices/{id}/mark-paid', [InvoiceController::class, 'markPaid']);    // mark fully paid
+    Route::get('/invoices/{id}/preview',  [InvoiceController::class, 'preview']);
+    Route::get('/invoices/{id}/download', [InvoiceController::class, 'download']);
+
+    // CUSTOMERS
+    Route::get('/customers',                [CustomerController::class, 'index']);
+    Route::post('/customers',               [CustomerController::class, 'store']);
+    Route::get('/customers/search',         [CustomerController::class, 'search']);  // ← specific first
+    Route::get('/customers/{id}',           [CustomerController::class, 'show']);
+    Route::put('/customers/{id}',           [CustomerController::class, 'update']);
+    Route::delete('/customers/{id}',        [CustomerController::class, 'destroy']);
 });
