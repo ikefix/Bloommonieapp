@@ -83,6 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //PROFILE
     Route::put('/profile/update', [AdminController::class, 'updateProfile']);
+    Route::get('/profile', [AdminController::class, 'editProfile']);
 
     // STAFF MANAGEMENT
     Route::get('/admin/register-form', [AdminController::class, 'showRegisterForm']);
