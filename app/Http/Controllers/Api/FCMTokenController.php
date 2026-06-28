@@ -8,48 +8,48 @@ use Illuminate\Support\Facades\Auth;
 
 class FCMTokenController extends Controller
 {
-    public function saveFcmToken(Request $request)
-    {
+    // public function saveFcmToken(Request $request)
+    // {
+    //     $request->validate([
+    //         'fcm_token' => 'required|string',
+    //     ]);
+
+    //     Auth::user()->update([
+    //         'fcm_token' => $request->fcm_token,
+    //     ]);
+
+    //     return response()->json([
+    //         'status'  => true,
+    //         'message' => 'FCM token saved',
+    //     ]);
+    // }
+
+public function saveFcmToken(Request $request)
+{
+    try {
+
         $request->validate([
             'fcm_token' => 'required|string',
         ]);
 
-        Auth::user()->update([
-            'fcm_token' => $request->fcm_token,
-        ]);
+        $user = $request->user();
+
+        $user->fcm_token = $request->fcm_token;
+        $user->save();
 
         return response()->json([
-            'status'  => true,
-            'message' => 'FCM token saved',
+            'status' => true,
+            'message' => 'Saved successfully',
         ]);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
     }
-
-// public function saveFcmToken(Request $request)
-// {
-//     try {
-
-//         $request->validate([
-//             'fcm_token' => 'required|string',
-//         ]);
-
-//         $user = $request->user();
-
-//         $user->fcm_token = $request->fcm_token;
-//         $user->save();
-
-//         return response()->json([
-//             'status' => true,
-//             'message' => 'Saved successfully',
-//         ]);
-
-//     } catch (\Throwable $e) {
-
-//         return response()->json([
-//             'error' => $e->getMessage(),
-//             'file' => $e->getFile(),
-//             'line' => $e->getLine(),
-//             'trace' => $e->getTraceAsString(),
-//         ], 500);
-//     }
-// }
+}
 }
