@@ -8,40 +8,48 @@ use Illuminate\Support\Facades\Auth;
 
 class FCMTokenController extends Controller
 {
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'fcm_token' => 'required|string',
-    //     ]);
+    public function saveFcmToken(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
 
-    //     Auth::user()->update([
-    //         'fcm_token' => $request->fcm_token,
-    //     ]);
+        Auth::user()->update([
+            'fcm_token' => $request->fcm_token,
+        ]);
 
-    //     return response()->json([
-    //         'status'  => true,
-    //         'message' => 'FCM token saved',
-    //     ]);
-    // }
+        return response()->json([
+            'status'  => true,
+            'message' => 'FCM token saved',
+        ]);
+    }
 
-public function saveFcmToken(Request $request)
-{
-    $request->validate([
-        'fcm_token' => 'required|string',
-    ]);
+// public function saveFcmToken(Request $request)
+// {
+//     try {
 
-    $user = $request->user();
+//         $request->validate([
+//             'fcm_token' => 'required|string',
+//         ]);
 
-    logger()->info([
-        'user_id' => optional($user)->id,
-        'token_length' => strlen($request->fcm_token),
-    ]);
+//         $user = $request->user();
 
-    $user->fcm_token = $request->fcm_token;
-    $user->save();
+//         $user->fcm_token = $request->fcm_token;
+//         $user->save();
 
-    return response()->json([
-        'status' => true,
-    ]);
-}
+//         return response()->json([
+//             'status' => true,
+//             'message' => 'Saved successfully',
+//         ]);
+
+//     } catch (\Throwable $e) {
+
+//         return response()->json([
+//             'error' => $e->getMessage(),
+//             'file' => $e->getFile(),
+//             'line' => $e->getLine(),
+//             'trace' => $e->getTraceAsString(),
+//         ], 500);
+//     }
+// }
 }
