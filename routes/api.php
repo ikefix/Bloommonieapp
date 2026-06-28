@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\FCMTokenController.php;
+use App\Http\Controllers\Api\FCMTokenController;
 
 /*
 |--------------------------------------------------------------------------
