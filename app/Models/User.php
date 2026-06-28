@@ -30,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'owner_id',
 
         'email_verified_at', // 👈 ADD THIS
+        'fcm_token',
     ];
 
     protected $hidden = [
