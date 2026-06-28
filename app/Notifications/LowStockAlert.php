@@ -16,7 +16,7 @@ class LowStockAlert extends Notification
     // Notification via database
     public function via($notifiable)
     {
-        return ['database']; // Ensure you're sending it through the 'database' channel
+        return ['database', 'fcm'];
     }
 
     // Store the notification in the database

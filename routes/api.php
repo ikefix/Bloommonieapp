@@ -123,5 +123,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/notifications/{id}',        [NotificationController::class, 'destroy']);
     Route::delete('/notifications',             [NotificationController::class, 'destroyAll']);
 
-    Route::post('/fcm-token', [FCMTokenController::class, 'store']);
+    // Route::post('/fcm-token', [FCMTokenController::class, 'store']);
+    Route::post('/fcm-token', [FCMTokenController::class, 'saveFcmToken']);
 });

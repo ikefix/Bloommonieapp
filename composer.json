@@ -11,6 +11,7 @@
         "php": "^8.0.2",
         "barryvdh/laravel-dompdf": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
+        "kreait/laravel-firebase": "5.10",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "*",
         "laravel/tinker": "^2.7",
