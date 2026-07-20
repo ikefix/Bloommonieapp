@@ -9,7 +9,7 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <div class="row-two">
+    <div class="">
         {{-- Left Column: Form --}}
         <div class="form-fess">
             <div class="card p-3 mb-3">
