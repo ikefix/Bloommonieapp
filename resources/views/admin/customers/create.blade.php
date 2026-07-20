@@ -75,6 +75,14 @@
         <div class="row-three">
             <div class="card p-3">
                 <h4>All Customers</h4>
+                <div class="mb-3">
+                    <input
+                        type="text"
+                        id="customerSearch"
+                        class="form-control"
+                        placeholder="Search by name, email, phone, company..."
+                    >
+                </div>
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <table class="table table-bordered table-striped table-sm mb-0">
                         <thead class="table-light">
@@ -88,7 +96,7 @@
                                 <th style="width: 80px;">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="customerTable">
                             @forelse($customers as $customer)
                                 <tr>
                                     <td>{{ $customer->name }}</td>
@@ -117,5 +125,27 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('customerSearch').addEventListener('keyup', function () {
+
+    let searchValue = this.value.toLowerCase();
+
+    let rows = document.querySelectorAll('#customerTable tr');
+
+    rows.forEach(function (row) {
+
+        let text = row.textContent.toLowerCase();
+
+        if (text.includes(searchValue)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+
+    });
+
+});
+</script>
 
 @endsection
