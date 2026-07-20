@@ -48,7 +48,7 @@
             </div>
 
             <!-- Role -->
-            <div class="mb-4 position-relative">
+            <!-- <div class="mb-4 position-relative">
                 <i class="bi bi-person-badge position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                 <select name="role"
                     class="form-control border-0 border-bottom ps-5 rounded-0"
@@ -59,16 +59,16 @@
                     <option value="manager">Manager</option>
                     <option value="admin">Admin</option>
                 </select>
-            </div>
+            </div> -->
 
             <!-- Remember -->
-            <div class="form-check mb-3">
+            <!-- <div class="form-check mb-3">
                 <input class="form-check-input" type="checkbox" name="remember" id="remember"
                     {{ old('remember') ? 'checked' : '' }}>
                 <label class="form-check-label">
                     Remember Me
                 </label>
-            </div>
+            </div> -->
 
             <!-- Button -->
             <button class="btn w-100 text-white fw-semibold"
