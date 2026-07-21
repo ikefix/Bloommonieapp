@@ -260,8 +260,9 @@
                 </div>
 
                 <!-- @include('products.partials.table') -->
-                 <div style="overflow-x:auto; width:100%;">
+                 <div class="table-responsive">
                     @include('products.partials.table')
+                    @include('products.partials.pagination')
                 </div>
             </div>
         

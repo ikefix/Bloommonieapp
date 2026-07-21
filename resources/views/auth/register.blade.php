@@ -1,115 +1,3 @@
-{{-- @extends('layouts.app')
-
-@section('content')
-<style>
-
-.auth-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 40px;
-    border-radius: 12px;
-    max-width: 500px;
-    width: 100%;
-    color: #fff;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-}
-
-.auth-card h2 {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #f0f0f0;
-}
-
-input {
-    width: 100%;
-    padding: 12px 15px;
-    border: none;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    margin-bottom: 20px;
-}
-
-input:focus {
-    outline: none;
-    border: 1px solid #00bcd4;
-}
-
-.btn-submit {
-    background: #00bcd4;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    width: 100%;
-    transition: background 0.3s ease;
-}
-
-.btn-submit:hover {
-    background: #0097a7;
-}
-
-.invalid-feedback {
-    color: #ffaaaa;
-    font-size: 13px;
-    margin-top: -15px;
-    margin-bottom: 10px;
-}
-
-</style>
-
-<div class="login-container hero">
-    <div class="auth-card">
-
-        <h2>Create Account 🚀</h2>
-
-        <form method="POST" action="{{ route('register') }}">
-            @csrf
-
-            <label>Full Name</label>
-            <input type="text" name="name" value="{{ old('name') }}" required>
-            @error('name')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-
-            <label>Email</label>
-            <input type="email" name="email" value="{{ old('email') }}" required>
-            @error('email')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-
-            <label>Password</label>
-            <input type="password" name="password" required>
-            @error('password')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-
-            <label>Confirm Password</label>
-            <input type="password" name="password_confirmation" required>
-
-            <button type="submit" class="btn-submit">
-                Start Free Trial
-            </button>
-
-            <div style="margin-top: 15px; text-align:center;">
-                <a href="{{ route('login') }}">Already have an account?</a>
-            </div>
-
-        </form>
-    </div>
-</div>
-@endsection --}}
-
-
 @extends('layouts.app')
 
 @section('content')
@@ -121,7 +9,7 @@ input:focus {
         <!-- Logo -->
         <div class="text-center mb-4">
             <h3 class="fw-bold">
-                <span style="color:#6f42c1;"> Bloom Monie</span>
+                <span style="color:#6f42c1;"> Bloommonie</span>
             </h3>
         </div>
 
@@ -147,8 +35,19 @@ input:focus {
                 <i class="bi bi-envelope position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                 <input type="email" name="email"
                     class="form-control border-0 border-bottom ps-5 rounded-0"
-                    placeholder="Phone or Email" value="{{ old('email') }}" required>
+                    placeholder="Email" value="{{ old('email') }}" required>
                 @error('email')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <!-- Phone Number -->
+            <div class="mb-4 position-relative">
+                <i class="bi bi-telephone position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                <input type="text" name="phone"
+                    class="form-control border-0 border-bottom ps-5 rounded-0"
+                    placeholder="Phone Number" value="{{ old('phone') }}">
+                @error('phone')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
             </div>
@@ -188,20 +87,23 @@ input:focus {
 
             <!-- Login link -->
             <div class="text-center mt-3">
-                <small>
-                    Already have account?
-                    <a href="{{ route('login') }}" class="fw-bold text-dark">Sign In</a>
-                </small>
+                <div style="font-size:16px; font-weight:800; color:#111827;">
+                    Already have an account?
+                    <a href="{{ route('login') }}" 
+                    style="font-weight:950; color:#1d4ed8; text-decoration:none; margin-left:5px; letter-spacing:0.5px;">
+                        Sign In
+                    </a>
+                </div>
             </div>
 
-            <!-- Divider -->
             <div class="d-flex align-items-center my-4">
+            <!-- Divider -->
                 <hr class="flex-grow-1">
-                <span class="mx-2 small text-muted">Or Sign up with</span>
+                <span class="mx-2 small text-muted"></span>
                 <hr class="flex-grow-1">
             </div>
 
-            <!-- Social -->
+            <!-- Social
             <div class="d-flex justify-content-center gap-3">
                 <button type="button" class="btn btn-light shadow-sm">
                     <i class="bi bi-google"></i>
@@ -212,7 +114,7 @@ input:focus {
                 <button type="button" class="btn btn-light shadow-sm">
                     <i class="bi bi-facebook"></i>
                 </button>
-            </div>
+            </div> -->
 
         </form>
 

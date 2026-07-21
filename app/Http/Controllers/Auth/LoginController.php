@@ -54,14 +54,14 @@ protected function redirectTo()
     /**
      * Override credentials method to include role validation during login.
      */
-    protected function credentials(Request $request)
-    {
-        return [
-            'email' => $request->email,
-            'password' => $request->password,
-            'role' => $request->role, // Ensure role matches during login
-        ];
-    }
+    // protected function credentials(Request $request)
+    // {
+    //     return [
+    //         'email' => $request->email,
+    //         'password' => $request->password,
+    //         'role' => $request->role, // Ensure role matches during login
+    //     ];
+    // }
 
     /**
      * Create a new controller instance.
