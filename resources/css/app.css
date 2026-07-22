@@ -1,5 +1,5 @@
 :root{
-    --text-color:#f10ade;
+    --text-color:#0C1F3F;
 }
 
 
@@ -489,7 +489,7 @@ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 /* Sidebar Container */
 #adminSidebar {
     width: 60px; /* was 220 before */
-    background-color: rgb(112 25 105);
+    background-color: #0C1F3F;
     color: #fff;
     min-height: 100vh;
     padding-top: 20px;
@@ -821,7 +821,7 @@ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 .stat-box h4 {
     font-size: 16px;
     margin-bottom: 10px;
-    color: #f10ade;
+    color: #0C1F3F;
 }
 
 .stat-box p {
