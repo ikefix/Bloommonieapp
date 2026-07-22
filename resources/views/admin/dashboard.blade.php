@@ -97,7 +97,7 @@
                 datasets: [{
                     label: 'Sales Trend',
                     data: {!! json_encode($salesTrendData ?? []) !!},
-                    backgroundColor: 'rgba(241, 10, 222, 1)',
+                    backgroundColor: '#316fb2',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     fill: true
                 }]
