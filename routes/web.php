@@ -34,6 +34,7 @@ use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\ProductionEntryController;
 use App\Http\Controllers\CollectableController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\PlanController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
