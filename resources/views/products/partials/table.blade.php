@@ -23,7 +23,56 @@
                 <td>{{ number_format($product->cost_price, 2) }}</td>
                 <td>{{ $product->stock_quantity }}</td>
                 <td>{{ $product->shop->name ?? 'Not assigned' }}</td>
-                <td>{{ $product->stock_unit ?? 'Not assigned' }}</td>
+                
+                 <td>
+
+    @if($product->stock_unit)
+
+        <div>
+            <strong>
+                {{ $product->stock_unit }}
+            </strong>
+        </div>
+
+        @if($product->unit_size)
+
+            @php
+                $fullUnits = floor(
+                    $product->stock_quantity /
+                    $product->unit_size
+                );
+
+                $pieces =
+                    $product->stock_quantity %
+                    $product->unit_size;
+            @endphp
+
+            <small class="badge bg-light text-dark mt-1">
+
+                {{ $fullUnits }}
+
+                {{ Str::plural(
+                    $product->stock_unit,
+                    $fullUnits
+                ) }}
+
+                @if($pieces > 0)
+                    + {{ $pieces }} Pieces
+                @endif
+
+            </small>
+
+        @endif
+
+    @else
+
+        <span class="text-muted">
+            Not Assigned
+        </span>
+
+    @endif
+
+</td>
                 <td>{{ $product->unit_size ?? 'Not assigned' }}</td>
                 <td class="product-btn">
                     <button type="button" class="btn btn-sm btn-warning edit-btn"
