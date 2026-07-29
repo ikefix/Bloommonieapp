@@ -24,32 +24,6 @@
                 <td>{{ $product->stock_quantity }}</td>
                 <td>{{ $product->shop->name ?? 'Not assigned' }}</td>
                 <td>{{ $product->stock_unit ?? 'Not assigned' }}</td>
-                 <!-- <td>
-
-                    {{ $product->stock_unit ?? 'Not assigned' }}
-
-                    @if($product->stock_unit && $product->unit_size)
-
-                        @php
-                            $remainingUnits = floor(
-                                $product->stock_quantity /
-                                $product->unit_size
-                            );
-                        @endphp
-
-                        <br>
-
-                        <span class="badge bg-info mt-1">
-
-                            {{ number_format($remainingUnits) }}
-                            {{ Str::plural($product->stock_unit, $remainingUnits) }}
-                            Left
-
-                        </span>
-
-                    @endif
-
-                </td> -->
                 <td>{{ $product->unit_size ?? 'Not assigned' }}</td>
                 <td class="product-btn">
                     <button type="button" class="btn btn-sm btn-warning edit-btn"
