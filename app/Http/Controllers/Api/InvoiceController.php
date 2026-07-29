@@ -435,4 +435,78 @@ public function searchCashierCustomerInvoices(Request $request)
         'total_invoices'  => $totalInvoices,
     ]);
 }
+
+// GET /api/cashier/invoices/receivables?search=
+public function receivablesforcash(Request $request)
+{
+    $ownerId = auth()->user()->owner_id;
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 1: GET CUSTOMER IDS (WITH SEARCH)
+    |--------------------------------------------------------------------------
+    */
+
+    $customerIdsQuery = Customer::query()
+        ->whereHas('invoices', function ($q) use ($ownerId) {
+            $q->where('owner_id', $ownerId);
+        });
+
+    if ($request->search) {
+        $search = $request->search;
+
+        $customerIdsQuery->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('phone', 'like', "%{$search}%");
+        });
+    }
+
+    $customerIds = $customerIdsQuery->pluck('id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 2: AGGREGATE INVOICES
+    |--------------------------------------------------------------------------
+    */
+
+    $customers = Invoice::select(
+            'customer_id',
+            DB::raw('SUM(total) as total_invoice'),
+            DB::raw('SUM(amount_paid) as total_paid'),
+            DB::raw('SUM(balance) as total_owing'),
+            DB::raw('MAX(shop_id) as shop_id')
+        )
+        ->with(['customer', 'shop'])
+        ->where('owner_id', $ownerId)
+        ->whereIn('customer_id', $customerIds)
+        ->groupBy('customer_id')
+        ->paginate(10)
+        ->withQueryString();
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 3: GOODS (ALL INVOICES PER CUSTOMER)
+    |--------------------------------------------------------------------------
+    */
+
+    $invoicesByCustomer = Invoice::where('owner_id', $ownerId)
+        ->with('shop')
+        ->get()
+        ->groupBy('customer_id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 4: TOTAL RECEIVABLE
+    |--------------------------------------------------------------------------
+    */
+
+    $totalReceivable = Invoice::where('owner_id', $ownerId)->sum('balance');
+
+    return response()->json([
+        'success'              => true,
+        'customers'            => $customers,
+        'invoices_by_customer' => $invoicesByCustomer,
+        'total_receivable'     => $totalReceivable,
+    ]);
+}
 }
