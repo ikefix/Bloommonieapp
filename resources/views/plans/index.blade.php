@@ -2,14 +2,6 @@
 
 @section('admincontent')
 
-@php
-    use Carbon\Carbon;
-
-    $status = $user->plan_end && Carbon::parse($user->plan_end)->isFuture()
-        ? 'Active'
-        : 'Expired';
-@endphp
-
 <div class="container">
 
     <div class="mb-4">
@@ -33,7 +25,9 @@
             <div class="row">
 
                 <div class="col-md-4 mb-3">
-                    <h6 class="text-muted">Current Plan</h6>
+                    <h6 class="text-muted">
+                        Current Plan
+                    </h6>
 
                     <h3 class="fw-bold text-capitalize">
                         {{ str_replace('_', ' ', $user->plan) }}
@@ -41,24 +35,42 @@
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <h6 class="text-muted">Status</h6>
+                    <h6 class="text-muted">
+                        Status
+                    </h6>
 
-                    @if($status == 'Active')
+                    @if($status === 'Active')
+
                         <span class="badge bg-success p-2">
                             Active
                         </span>
+
                     @else
+
                         <span class="badge bg-danger p-2">
                             Expired
                         </span>
+
                     @endif
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <h6 class="text-muted">Days Remaining</h6>
+                    <h6 class="text-muted">
+                        Days Remaining
+                    </h6>
 
                     <h4 class="fw-bold text-warning">
-                        {{ $daysRemaining > 0 ? $daysRemaining.' Days' : 'Expired' }}
+
+                        @if($daysRemaining > 0)
+
+                            {{ $daysRemaining }} Days
+
+                        @else
+
+                            Expired
+
+                        @endif
+
                     </h4>
                 </div>
 
@@ -75,7 +87,7 @@
 
                     <p>
                         {{ $user->plan_start
-                            ? Carbon::parse($user->plan_start)->format('d M Y')
+                            ? \Carbon\Carbon::parse($user->plan_start)->format('d M Y')
                             : 'N/A'
                         }}
                     </p>
@@ -88,7 +100,7 @@
 
                     <p>
                         {{ $user->plan_end
-                            ? Carbon::parse($user->plan_end)->format('d M Y')
+                            ? \Carbon\Carbon::parse($user->plan_end)->format('d M Y')
                             : 'N/A'
                         }}
                     </p>
@@ -100,8 +112,7 @@
                     </h6>
 
                     <p>
-                        {{ $user->plan_duration ?? 'N/A' }}
-                        Month(s)
+                        {{ $planDuration }}
                     </p>
                 </div>
 
@@ -114,7 +125,6 @@
     <div class="row mb-4">
 
         <div class="col-md-4">
-
             <div class="card shadow-sm text-center p-3">
 
                 <h6 class="text-muted">
@@ -128,11 +138,9 @@
                 </h3>
 
             </div>
-
         </div>
 
         <div class="col-md-4">
-
             <div class="card shadow-sm text-center p-3">
 
                 <h6 class="text-muted">
@@ -146,11 +154,9 @@
                 </h3>
 
             </div>
-
         </div>
 
         <div class="col-md-4">
-
             <div class="card shadow-sm text-center p-3">
 
                 <h6 class="text-muted">
@@ -164,7 +170,6 @@
                 </h3>
 
             </div>
-
         </div>
 
     </div>
@@ -208,7 +213,7 @@
 
     </div>
 
-    {{-- PLAN RECOMMENDATION --}}
+    {{-- RECOMMENDATION --}}
     <div class="card shadow-sm">
 
         <div class="card-body text-center">
@@ -218,11 +223,9 @@
             </h4>
 
             <p class="text-muted">
-
                 Upgrade your BloomMonie subscription to unlock
                 advanced inventory management, production,
                 stock transfers, reporting, and much more.
-
             </p>
 
             <a
