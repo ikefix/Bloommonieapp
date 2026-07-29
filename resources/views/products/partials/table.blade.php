@@ -23,8 +23,8 @@
                 <td>{{ number_format($product->cost_price, 2) }}</td>
                 <td>{{ $product->stock_quantity }}</td>
                 <td>{{ $product->shop->name ?? 'Not assigned' }}</td>
-                <!-- <td>{{ $product->stock_unit ?? 'Not assigned' }}</td> -->
-                 <td>
+                <td>{{ $product->stock_unit ?? 'Not assigned' }}</td>
+                 <!-- <td>
 
                     {{ $product->stock_unit ?? 'Not assigned' }}
 
@@ -49,7 +49,7 @@
 
                     @endif
 
-                </td>
+                </td> -->
                 <td>{{ $product->unit_size ?? 'Not assigned' }}</td>
                 <td class="product-btn">
                     <button type="button" class="btn btn-sm btn-warning edit-btn"
