@@ -66,7 +66,7 @@ Route::get('/subscribe/{plan}/{billing}', [SubscriptionController::class, 'pay']
 
 // PLANS
 
-Route::get('/admin/plan', [PlanController::class, 'index'])->name('plan.index');
+Route::get('/admin/plan', [PlanController::class, 'index'])->name('plans.index');
 
 
 // FOR SUPERADMIN
