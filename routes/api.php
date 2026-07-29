@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\FCMTokenController;
+use App\Http\Controllers\Api\PurchaseItemController;
+use App\Http\Controllers\Api\ExpenseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,15 +87,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/update', [AdminController::class, 'updateProfile']);
     Route::get('/profile', [AdminController::class, 'editProfile']);
 
+
+    
     // STAFF MANAGEMENT
     Route::get('/admin/register-form', [AdminController::class, 'showRegisterForm']);
     Route::post('/admin/store-staff', [AdminController::class, 'storeStaff']);
+
+
 
     // ROLE MANAGEMENT
     Route::get('/admin/users', [RoleController::class, 'index']);
     Route::patch('/admin/users/{id}/role', [RoleController::class, 'updateRole']);
     Route::delete('/admin/users/{id}', [RoleController::class, 'deleteUser']);
     Route::patch('/admin/users/{id}/shop', [RoleController::class, 'updateShop']);
+
+
 
     // INVOICES
     Route::get('/invoices/create',          [InvoiceController::class, 'create']);       // get customers/shops/products
@@ -125,4 +133,45 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Route::post('/fcm-token', [FCMTokenController::class, 'store']);
     Route::post('/fcm-token', [FCMTokenController::class, 'saveFcmToken']);
+
+
+
+    // PURCHASE ITEM ROUTES
+    Route::prefix('cashier')->group(function () {
+        Route::get('home', [PurchaseItemController::class, 'index']);
+        Route::get('sales', [PurchaseItemController::class, 'cashiersales']);
+    });
+
+    Route::get('categories/{categoryId}/products', [PurchaseItemController::class, 'getProductsByCategory']);
+    Route::get('receipts/search', [PurchaseItemController::class, 'searchReceipt']);
+    Route::get('receipts/{id}', [PurchaseItemController::class, 'showReceipt']);
+    Route::post('purchase-items', [PurchaseItemController::class, 'store']);
+    Route::delete('purchase-items/{id}', [PurchaseItemController::class, 'destroy']);
+    Route::get('admin/sales', [PurchaseItemController::class, 'allSales']);
+    Route::get('manager/sales', [PurchaseItemController::class, 'managersales']);
+    });
+
+
+// EXPENSE ROUTES
+// Admin
+Route::prefix('admin')->group(function () {
+    Route::get('expenses', [ExpenseController::class, 'index']);
+    Route::post('expenses', [ExpenseController::class, 'store']);
+    Route::delete('expenses/{id}', [ExpenseController::class, 'destroy']);
 });
+
+// Cashier
+Route::prefix('cashier')->group(function () {
+    Route::get('expenses', [ExpenseController::class, 'indexcash']);
+    Route::post('expenses', [ExpenseController::class, 'storecash']);
+    Route::delete('expenses/{id}', [ExpenseController::class, 'destroycash']);
+});
+
+// Manager
+Route::prefix('manager')->group(function () {
+    Route::get('expenses', [ExpenseController::class, 'indexmanager']);
+    Route::post('expenses', [ExpenseController::class, 'storemanager']);
+    Route::delete('expenses/{id}', [ExpenseController::class, 'destroymanager']);
+});
+
+
