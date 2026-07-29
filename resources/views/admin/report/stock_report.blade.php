@@ -254,6 +254,7 @@
                                 <th>Stock Added</th>
                                 <th>Stock Sold</th>
                                 <th>Remaining</th>
+                                <th>Stock Unit</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -266,6 +267,52 @@
                                     <td>{{ $product->stock_added }}</td>
                                     <td>{{ $product->stock_sold }}</td>
                                     <td>{{ $product->remaining_stock }}</td>
+                                    <td>
+                                        @if($product->stock_unit)
+
+                                            <div>
+                                                <strong>
+                                                    {{ $product->stock_unit }}
+                                                </strong>
+                                                    @if($product->unit_size)
+
+                                                    @php
+                                                        $fullUnits = floor(
+                                                            $product->stock_quantity /
+                                                            $product->unit_size
+                                                        );
+
+                                                        $pieces =
+                                                            $product->stock_quantity %
+                                                            $product->unit_size;
+                                                    @endphp
+
+                                                    <small class="">
+
+                                                        {{ $fullUnits }}
+
+                                                        {{ Str::plural(
+                                                            $product->stock_unit,
+                                                            $fullUnits
+                                                        ) }}
+
+                                                        @if($pieces > 0)
+                                                            + {{ $pieces }} Pieces
+                                                        @endif
+
+                                                    </small>
+
+                                                @endif
+
+                                            @else
+
+                                                <span class="text-muted">
+                                                    Not Assigned
+                                                </span>
+
+                                            @endif
+                                        </div>
+                                    </td>
                                     <td>
                                         @if($product->remaining_stock <= $product->stock_limit)
                                             <span class="badge bg-danger">Low</span>

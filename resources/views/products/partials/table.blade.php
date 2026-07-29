@@ -24,55 +24,55 @@
                 <td>{{ $product->stock_quantity }}</td>
                 <td>{{ $product->shop->name ?? 'Not assigned' }}</td>
                 
-                 <td>
+                <td>
 
-    @if($product->stock_unit)
+                    @if($product->stock_unit)
 
-        <div>
-            <strong>
-                {{ $product->stock_unit }}
-            </strong>
-        </div>
+                        <div>
+                            <strong>
+                                {{ $product->stock_unit }}
+                            </strong>
+                        </div>
 
-        @if($product->unit_size)
+                        @if($product->unit_size)
 
-            @php
-                $fullUnits = floor(
-                    $product->stock_quantity /
-                    $product->unit_size
-                );
+                            @php
+                                $fullUnits = floor(
+                                    $product->stock_quantity /
+                                    $product->unit_size
+                                );
 
-                $pieces =
-                    $product->stock_quantity %
-                    $product->unit_size;
-            @endphp
+                                $pieces =
+                                    $product->stock_quantity %
+                                    $product->unit_size;
+                            @endphp
 
-            <small class="badge bg-light text-dark mt-1">
+                            <small class="badge bg-light text-dark mt-1">
 
-                {{ $fullUnits }}
+                                {{ $fullUnits }}
 
-                {{ Str::plural(
-                    $product->stock_unit,
-                    $fullUnits
-                ) }}
+                                {{ Str::plural(
+                                    $product->stock_unit,
+                                    $fullUnits
+                                ) }}
 
-                @if($pieces > 0)
-                    + {{ $pieces }} Pieces
-                @endif
+                                @if($pieces > 0)
+                                    + {{ $pieces }} Pieces
+                                @endif
 
-            </small>
+                            </small>
 
-        @endif
+                        @endif
 
-    @else
+                    @else
 
-        <span class="text-muted">
-            Not Assigned
-        </span>
+                        <span class="text-muted">
+                            Not Assigned
+                        </span>
 
-    @endif
+                    @endif
 
-</td>
+                </td>
                 <td>{{ $product->unit_size ?? 'Not assigned' }}</td>
                 <td class="product-btn">
                     <button type="button" class="btn btn-sm btn-warning edit-btn"
