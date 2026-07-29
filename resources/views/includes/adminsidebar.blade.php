@@ -146,7 +146,7 @@
                     <span class="sidebar-icon"><i class='bx bx-shield-quarter'></i></span>
                     <span class="sidebar-text">Permissions</span>
                 </a>  
-                <a href="{{ route('plan.index') }}" class="sidebar-link">
+                <a href="{{ route('plans.index') }}" class="sidebar-link">
                     <span class="sidebar-icon"><i class='bx bx-clipboard'></i></span>
                     <span class="sidebar-text">Plans</span>
                 </a>
