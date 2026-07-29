@@ -35,6 +35,9 @@ return [
             'stock_adjustment',
             'expense_tracking',
             'report_download',
+            'production_report',
+            'stock_report',
+            'production_management',
         ],
     ],
 
@@ -53,6 +56,9 @@ return [
             'profit_loss',
             'stock_transfer',
             'barcode_manager',
+            'production_report',
+            'stock_report',
+            'production_management',
         ],
     ],
 

@@ -16,6 +16,12 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
         {{-- Excel Import --}}
         <div class="mb-4 p-3 border rounded bg-light">
             <form action="{{ route('products.import') }}" 

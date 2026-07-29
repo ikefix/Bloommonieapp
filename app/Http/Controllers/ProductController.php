@@ -122,7 +122,7 @@ public function store(Request $request)
 
         return back()->with(
             'error',
-            'Product limit reached for your plan.'
+            auth()->user()->getLimitMessage('products')
         );
     }
 

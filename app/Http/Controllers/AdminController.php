@@ -80,14 +80,48 @@ class AdminController extends Controller
     /**
      * Store new staff details (Admin registers new staff).
      */
+    // public function storeStaff(Request $request)
+    // {
+
+    //         if (!auth()->user()->canCreateMoreUsers()) {
+
+    //         return back()->with(
+    //             'error',
+    //             'Your current plan has reached its user limit. Upgrade your subscription.'
+    //         );
+    //     }
+
+    //     // Validate the input
+    //     $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'email' => 'required|email|unique:users,email',
+    //         'password' => 'required|min:6|confirmed',
+    //         'role' => 'required|in:cashier,manager',
+    //         'shop_id' => 'required_unless:role,admin|exists:shops,id',
+    //     ]);
+
+    //     $ownerId = auth()->user()->getOwnerId();
+
+    //     $user = User::create([
+    //         'name' => $request->name,
+    //         'email' => $request->email,
+    //         'password' => bcrypt($request->password),
+    //         'email_verified_at' => now(),
+    //         'role' => $request->role,
+    //         'shop_id' => $request->shop_id,
+    //         'owner_id' => $ownerId,
+    //     ]);
+    
+    //     return redirect()->route('admin.register')->with('success', 'Staff registered successfully.');
+    // }
+
     public function storeStaff(Request $request)
     {
-
-            if (!auth()->user()->canCreateMoreUsers()) {
+        if (!auth()->user()->canCreateMoreUsers()) {
 
             return back()->with(
                 'error',
-                'Your current plan has reached its user limit. Upgrade your subscription.'
+                auth()->user()->getLimitMessage('users')
             );
         }
 
@@ -111,8 +145,10 @@ class AdminController extends Controller
             'shop_id' => $request->shop_id,
             'owner_id' => $ownerId,
         ]);
-    
-        return redirect()->route('admin.register')->with('success', 'Staff registered successfully.');
+
+        return redirect()
+            ->route('admin.register')
+            ->with('success', 'Staff registered successfully.');
     }
     
 

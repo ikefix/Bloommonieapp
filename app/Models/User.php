@@ -168,5 +168,31 @@ public function canCreateMoreProducts()
 
     return $productCount < $limits['products'];
 }
+
+public function getLimitMessage($type, $feature = null)
+{
+    $owner = $this->owner_id
+        ? User::find($this->owner_id)
+        : $this;
+
+    $limits = $owner->getPlanLimits();
+
+    switch ($type) {
+        case 'users':
+            return "Your {$owner->plan} plan supports only {$limits['users']} user account(s). Please upgrade your plan.";
+
+        case 'stores':
+            return "Your {$owner->plan} plan supports only {$limits['stores']} shop(s). Please upgrade your plan.";
+
+        case 'products':
+            return "Your {$owner->plan} plan supports only {$limits['products']} product(s). Please upgrade your plan.";
+
+        case 'feature':
+            return "{$feature} is not available on your {$owner->plan} plan. Please upgrade to unlock this feature.";
+
+        default:
+            return "Your current plan does not support this action.";
+    }
+}
 }
 

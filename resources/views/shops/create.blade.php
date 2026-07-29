@@ -8,6 +8,12 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="shop-flex-wrapper">
             <!-- Form for creating or editing the shop -->
             <div class="shop-form-section">

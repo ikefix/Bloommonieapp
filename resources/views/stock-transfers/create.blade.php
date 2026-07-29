@@ -5,7 +5,12 @@
 @php
     $user = auth()->user();
 
-    $locked = ! $user->hasFeature('stock_transfer');
+    $locked = !$user->hasFeature('stock_transfer');
+
+    $message = $user->getLimitMessage(
+        'feature',
+        'Stock Transfer'
+    );
 @endphp
 
 <style>
