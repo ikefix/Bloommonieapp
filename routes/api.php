@@ -175,3 +175,7 @@ Route::prefix('manager')->group(function () {
 });
 
 
+Route::prefix('admin')->group(function () {
+    Route::get('collectables', [CollectableController::class, 'index']);
+    Route::get('collectables/download', [CollectableController::class, 'downloadPdf']);
+});
