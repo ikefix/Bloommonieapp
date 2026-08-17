@@ -17,6 +17,10 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\FCMTokenController;
 use App\Http\Controllers\Api\PurchaseItemController;
 use App\Http\Controllers\Api\ExpenseController;
+use App\Http\Controllers\Api\ProfitReportController;
+use App\Http\Controllers\Api\ProductionReportController;
+use App\Http\Controllers\Api\SalesReportController;
+use App\Http\Controllers\Api\StockReportController;
 
 /*
 |--------------------------------------------------------------------------
