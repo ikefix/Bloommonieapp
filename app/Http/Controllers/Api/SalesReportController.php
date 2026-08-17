@@ -13,21 +13,23 @@ use App\Models\Shop;
 class SalesReportController extends Controller
 {
     // GET /api/admin/reports/sales?start_date=&end_date=&shop_id=
-    // NOTE: filters by auth()->id() (unchanged from original) — only correct
-    // if the logged-in user IS the owner. A cashier/manager calling this
-    // would filter by their own user id, not the actual owner_id on their
-    // sales. Flagging as-is; confirm before exposing this to non-admin roles.
+    // FIXED: was filtering by auth()->id() directly, which only matches
+    // rows where the logged-in user's own ID equals owner_id — same pattern
+    // bug flagged earlier. Now uses the owner_id ?? id fallback used
+    // elsewhere in the app (see CustomerController::searchSuggestions).
     public function index(Request $request)
     {
-        $shops = Shop::where('owner_id', auth()->id())
+        $ownerId = auth()->user()->owner_id ?? auth()->id();
+
+        $shops = Shop::where('owner_id', $ownerId)
             ->orderBy('name')
             ->get();
 
         $baseQuery = PurchaseItem::query()
-            ->where('purchase_items.owner_id', auth()->id());
+            ->where('purchase_items.owner_id', $ownerId);
 
         $chartQuery = PurchaseItem::query()
-            ->where('purchase_items.owner_id', auth()->id());
+            ->where('purchase_items.owner_id', $ownerId);
 
         /**
          * =========================
@@ -124,9 +126,11 @@ class SalesReportController extends Controller
     }
 
     // GET /api/admin/reports/sales/pdf?start_date=&end_date=&shop_id=
-    // Unchanged — still returns a binary PDF file.
+    // Unchanged behavior except the same owner_id fallback fix as index().
     public function downloadPdf(Request $request)
     {
+        $ownerId = auth()->user()->owner_id ?? auth()->id();
+
         $startDate = $request->start_date;
         $endDate = $request->end_date;
         $shopId = $request->shop_id;
@@ -134,7 +138,7 @@ class SalesReportController extends Controller
         $query = DB::table('purchase_items')
             ->join('products', 'purchase_items.product_id', '=', 'products.id')
             ->join('shops', 'purchase_items.shop_id', '=', 'shops.id')
-            ->where('purchase_items.owner_id', auth()->id());
+            ->where('purchase_items.owner_id', $ownerId);
 
         if ($startDate && $endDate) {
             $query->whereBetween('purchase_items.created_at', [
@@ -164,7 +168,7 @@ class SalesReportController extends Controller
             ->count();
 
         $shop = $shopId
-            ? Shop::where('owner_id', auth()->id())->find($shopId)
+            ? Shop::where('owner_id', $ownerId)->find($shopId)
             : null;
 
         $pdf = Pdf::loadView(
