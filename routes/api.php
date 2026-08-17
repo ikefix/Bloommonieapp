@@ -179,3 +179,20 @@ Route::prefix('admin')->group(function () {
     Route::get('collectables', [CollectableController::class, 'index']);
     Route::get('collectables/download', [CollectableController::class, 'downloadPdf']);
 });
+
+
+// ALL REPORT ROUTES
+
+Route::prefix('admin')->group(function () {
+    Route::get('reports/profit-loss', [ProfitReportController::class, 'profitLoss']);
+    Route::get('reports/profit-loss/goods-pdf', [ProfitReportController::class, 'downloadProfitGoodsPdf']);
+
+    Route::get('reports/production', [ProductionReportController::class, 'productionReport']);
+    Route::get('reports/production/pdf', [ProductionReportController::class, 'productionReportPdf']);
+
+    Route::get('reports/sales', [SalesReportController::class, 'index']);
+    Route::get('reports/sales/pdf', [SalesReportController::class, 'downloadPdf']);
+
+    Route::get('reports/stock', [StockReportController::class, 'index']);
+    Route::get('reports/stock/pdf', [StockReportController::class, 'downloadPdf']);
+});
