@@ -21,7 +21,7 @@ use App\Http\Controllers\Api\ProfitReportController;
 use App\Http\Controllers\Api\ProductionReportController;
 use App\Http\Controllers\Api\SalesReportController;
 use App\Http\Controllers\Api\StockReportController;
-use App\Http\Controllers\WhatsAppWebhookController;
+use App\Http\Controllers\Api\WhatsAppWebhookController;
 
 /*
 |--------------------------------------------------------------------------
