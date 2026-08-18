@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\ProfitReportController;
 use App\Http\Controllers\Api\ProductionReportController;
 use App\Http\Controllers\Api\SalesReportController;
 use App\Http\Controllers\Api\StockReportController;
+use App\Http\Controllers\WhatsAppWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -200,3 +201,8 @@ Route::prefix('admin')->group(function () {
     Route::get('reports/stock', [StockReportController::class, 'index']);
     Route::get('reports/stock/pdf', [StockReportController::class, 'downloadPdf']);
 });
+
+
+
+Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify']);
+Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive']);
