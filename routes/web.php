@@ -35,6 +35,8 @@ use App\Http\Controllers\ProductionEntryController;
 use App\Http\Controllers\CollectableController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\WhatsAppWebhookController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -620,3 +622,8 @@ Route::get('/admin/report/profit-loss/download',[ProfitReportController::class, 
 Route::get('/complaints/create', [ComplaintController::class, 'create'])->name('complaints.create');
 
 Route::post('/complaints', [ComplaintController::class, 'store'])->name('complaints.store');
+
+
+
+Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify']);
+Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive']);
