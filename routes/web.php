@@ -620,3 +620,5 @@ Route::get('/admin/report/profit-loss/download',[ProfitReportController::class, 
 Route::get('/complaints/create', [ComplaintController::class, 'create'])->name('complaints.create');
 
 Route::post('/complaints', [ComplaintController::class, 'store'])->name('complaints.store');
+
+
