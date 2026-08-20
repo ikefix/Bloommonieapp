@@ -13,10 +13,13 @@ use App\Models\Shop;
 class SalesReportController extends Controller
 {
     // GET /api/admin/reports/sales?start_date=&end_date=&shop_id=
-    // FIXED: was filtering by auth()->id() directly, which only matches
-    // rows where the logged-in user's own ID equals owner_id — same pattern
-    // bug flagged earlier. Now uses the owner_id ?? id fallback used
-    // elsewhere in the app (see CustomerController::searchSuggestions).
+    // NO CODE CHANGE HERE — this controller's owner scoping is already
+    // correct (uses the owner_id ?? id fallback). If it's still returning
+    // 0.00 / N/A while P&L shows real revenue for the same period, the
+    // query logic isn't the problem — the data is: purchase_items.owner_id
+    // is likely NULL on the rows being created for your account, so
+    // ->where('purchase_items.owner_id', $ownerId) matches nothing.
+    // Need the PurchaseItem creation code to confirm/fix that.
     public function index(Request $request)
     {
         $ownerId = auth()->user()->owner_id ?? auth()->id();
@@ -126,7 +129,7 @@ class SalesReportController extends Controller
     }
 
     // GET /api/admin/reports/sales/pdf?start_date=&end_date=&shop_id=
-    // Unchanged behavior except the same owner_id fallback fix as index().
+    // NO CODE CHANGE HERE either — same owner_id fallback already in place.
     public function downloadPdf(Request $request)
     {
         $ownerId = auth()->user()->owner_id ?? auth()->id();
