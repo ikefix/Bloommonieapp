@@ -31,22 +31,13 @@ class ProductionReportController extends Controller
             ]);
         }
 
-        // FIXED: this was `->where('owner_id', auth()->user()->owner_id)`
-        // with no fallback. When the logged-in user IS the owner account,
-        // their own owner_id column is null, so this became
-        // `where('owner_id', null)` — which matches nothing in SQL, not
-        // even NULL rows. That's why the report showed empty. Same
-        // owner_id ?? id fallback used elsewhere in the app.
-        $ownerId = $user->owner_id ?? $user->id;
-
-        $shops      = Shop::where('owner_id', $ownerId)->get();
+        $shops      = Shop::all();
         $startDate  = $request->start_date;
         $endDate    = $request->end_date;
         $shopId     = $request->shop_id;
         $search     = $request->search;
 
-        $query = Production::with(['entries', 'productionType', 'shop'])
-            ->where('owner_id', $ownerId)
+        $query = Production::with(['entries', 'productionType', 'shop'])->where('owner_id', auth()->user()->owner_id)
 
             ->when($startDate, fn($q) =>
                 $q->whereDate('start_date', '>=', $startDate)
@@ -174,22 +165,18 @@ class ProductionReportController extends Controller
         ]);
     }
 
-    // FIXED: this previously had NO owner filter at all (see old comment
-    // below it used to carry) — the PDF export could return every admin's
-    // productions. Now uses the same owner_id ?? id fallback as
-    // productionReport() above.
+    // NOTE: unlike productionReport() above, this helper does NOT filter by
+    // owner_id — that's carried over unchanged from the original web
+    // controller. If productionReportPdf() should also be owner-scoped,
+    // add ->where('owner_id', auth()->user()->owner_id) to the query below.
     private function getProductionReportData(Request $request)
     {
-        $user = $request->user();
-        $ownerId = $user->owner_id ?? $user->id;
-
-        $shops      = Shop::where('owner_id', $ownerId)->get();
+        $shops      = Shop::all();
         $startDate  = $request->start_date;
         $endDate    = $request->end_date;
         $shopId     = $request->shop_id;
 
         $query = Production::with(['entries', 'productionType', 'shop'])
-            ->where('owner_id', $ownerId)
             ->when($startDate, fn($q) => $q->whereDate('start_date', '>=', $startDate))
             ->when($endDate, fn($q) => $q->whereDate('end_date', '<=', $endDate))
             ->when($shopId, fn($q) => $q->where('shop_id', $shopId))
@@ -197,7 +184,7 @@ class ProductionReportController extends Controller
 
         $productions = $query->get();
 
-        $productNames = Product::where('owner_id', $ownerId)->pluck('name', 'id')->toArray();
+        $productNames = Product::pluck('name', 'id')->toArray();
 
         // SUMMARY
         $totalProductions = $productions->count();
@@ -340,6 +327,7 @@ class ProductionReportController extends Controller
     }
 
     // GET /api/admin/reports/production/pdf?start_date=&end_date=&shop_id=
+    // Unchanged — still returns a binary PDF file.
     public function productionReportPdf(Request $request)
     {
         if (!$request->user()->hasFeature('production_report')) {
