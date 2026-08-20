@@ -11,61 +11,34 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class StockReportController extends Controller
 {
+    /**
+     * GET /api/admin/reports/stock
+     *
+     * Query params:
+     * shop_id=
+     * search=
+     */
     public function index(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | OWNER
-        |--------------------------------------------------------------------------
-        */
+        // Get all shops for filter
+        $shops = Shop::orderBy('name')->get();
 
-        $ownerId = auth()->user()->owner_id ?? auth()->id();
+        /**
+         * =========================
+         * TABLE QUERY
+         * =========================
+         */
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | OWNER SHOPS ONLY
-        |--------------------------------------------------------------------------
-        */
-
-        $shops = Shop::where('owner_id', $ownerId)
-            ->orderBy('name')
-            ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRODUCTS
-        |--------------------------------------------------------------------------
-        */
-
-        $tableQuery = Product::with('shop')
-            ->where('owner_id', $ownerId);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SHOP FILTER
-        |--------------------------------------------------------------------------
-        */
+        $tableQuery = Product::with('shop');
 
         if ($request->filled('shop_id')) {
-
             $tableQuery->where(
                 'shop_id',
                 $request->shop_id
             );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | SEARCH FILTER
-        |--------------------------------------------------------------------------
-        */
-
         if ($request->filled('search')) {
-
             $tableQuery->where(
                 'name',
                 'like',
@@ -73,12 +46,11 @@ class StockReportController extends Controller
             );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRODUCTS
-        |--------------------------------------------------------------------------
-        */
+        /**
+         * =========================
+         * PRODUCTS
+         * =========================
+         */
 
         $products = $tableQuery
             ->select(
@@ -110,21 +82,17 @@ class StockReportController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        /**
+         * =========================
+         * STATS
+         * =========================
+         */
 
-        /*
-        |--------------------------------------------------------------------------
-        | STATS — OWNER ONLY
-        |--------------------------------------------------------------------------
-        */
-
-        $statsQuery = Product::where(
-            'owner_id',
-            $ownerId
-        );
+        $statsQuery = Product::query();
 
         $totalProducts = $statsQuery->count();
 
-        $lowStockCount = (clone $statsQuery)
+        $lowStockCount = $statsQuery
             ->whereColumn(
                 'stock_quantity',
                 '<=',
@@ -132,12 +100,11 @@ class StockReportController extends Controller
             )
             ->count();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | STOCK CHART
-        |--------------------------------------------------------------------------
-        */
+        /**
+         * =========================
+         * STOCK CHART
+         * =========================
+         */
 
         $stockChart = [
             'labels' => [
@@ -151,15 +118,14 @@ class StockReportController extends Controller
                     $totalProducts - $lowStockCount,
                     0
                 )
-            ]
+            ],
         ];
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | API RESPONSE
-        |--------------------------------------------------------------------------
-        */
+        /**
+         * =========================
+         * API RESPONSE
+         * =========================
+         */
 
         return response()->json([
             'status' => true,
@@ -174,55 +140,32 @@ class StockReportController extends Controller
                 'low_stock_count' => $lowStockCount,
 
                 'stock_chart' => $stockChart,
-            ]
+            ],
         ]);
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | PDF
-    |--------------------------------------------------------------------------
-    */
-
+    /**
+     * GET /api/admin/reports/stock/pdf
+     */
     public function downloadPdf(Request $request)
     {
-        $ownerId = auth()->user()->owner_id ?? auth()->id();
+        /**
+         * =========================
+         * BASE QUERY
+         * =========================
+         */
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | OWNER PRODUCTS ONLY
-        |--------------------------------------------------------------------------
-        */
-
-        $query = Product::with('shop')
-            ->where('owner_id', $ownerId);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SHOP FILTER
-        |--------------------------------------------------------------------------
-        */
+        $query = Product::with('shop');
 
         if ($request->filled('shop_id')) {
-
             $query->where(
                 'shop_id',
                 $request->shop_id
             );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | SEARCH FILTER
-        |--------------------------------------------------------------------------
-        */
-
         if ($request->filled('search')) {
-
             $query->where(
                 'name',
                 'like',
@@ -230,12 +173,14 @@ class StockReportController extends Controller
             );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRODUCTS
-        |--------------------------------------------------------------------------
-        */
+        /**
+         * =========================
+         * PRODUCTS
+         * =========================
+         *
+         * Same select as index().
+         * NO pagination for PDF.
+         */
 
         $products = $query
             ->select(
@@ -266,12 +211,11 @@ class StockReportController extends Controller
             ->orderBy('products.name')
             ->get();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | PDF
-        |--------------------------------------------------------------------------
-        */
+        /**
+         * =========================
+         * PDF
+         * =========================
+         */
 
         $pdf = Pdf::loadView(
             'admin.report.stock_pdf',
