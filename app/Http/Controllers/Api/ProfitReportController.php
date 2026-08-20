@@ -16,6 +16,14 @@ class ProfitReportController extends Controller
     // GET /api/admin/reports/profit-loss?start_date=&end_date=&shop_id=
     public function profitLoss(Request $request)
     {
+        // FIXED: this controller had NO owner scoping at all — every query
+        // below pulled PurchaseItem/Expense/Shop rows across ALL admins,
+        // filtered only by shop_id when one was passed. That's why "All
+        // Shops" leaked other admins' data while picking your own shop
+        // "accidentally" narrowed it back down. Same owner_id ?? id
+        // fallback used in SalesReportController.
+        $ownerId = auth()->user()->owner_id ?? auth()->id();
+
         $shopId = $request->shop_id;
 
         /* ---------------- FILTER DATES ---------------- */
@@ -28,7 +36,8 @@ class ProfitReportController extends Controller
             : now()->endOfDay();
 
         /* ---------------- SALES ---------------- */
-        $sales = PurchaseItem::whereBetween('created_at', [$startDate, $endDate])
+        $sales = PurchaseItem::where('owner_id', $ownerId)
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->when($shopId, fn($q) => $q->where('shop_id', $shopId))
             ->with('product')
             ->get();
@@ -37,7 +46,8 @@ class ProfitReportController extends Controller
         if ($request->start_date && $request->end_date) {
             $totalRevenue = $sales->sum(fn($i) => $i->total_price - ($i->discount_value ?? 0));
         } else {
-            $totalRevenue = PurchaseItem::whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])
+            $totalRevenue = PurchaseItem::where('owner_id', $ownerId)
+                ->whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])
                 ->when($shopId, fn($q) => $q->where('shop_id', $shopId))
                 ->get()
                 ->sum(fn($i) => $i->total_price - ($i->discount_value ?? 0));
@@ -49,7 +59,8 @@ class ProfitReportController extends Controller
         $grossProfit = $totalRevenue - $totalCost;
 
         /* ---------------- EXPENSES ---------------- */
-        $expensesQuery = Expense::whereBetween('date', [$startDate, $endDate])
+        $expensesQuery = Expense::where('owner_id', $ownerId)
+            ->whereBetween('date', [$startDate, $endDate])
             ->when($shopId, fn($q) => $q->where('shop_id', $shopId));
 
         $totalExpenses = $expensesQuery->sum('amount');
@@ -82,7 +93,8 @@ class ProfitReportController extends Controller
 
         // Group sales and expenses by date
         $rawSales = $sales->groupBy(fn($item) => $item->created_at->format('Y-m-d'));
-        $rawExpenses = Expense::whereBetween('date', [$chartStart, $chartEnd])
+        $rawExpenses = Expense::where('owner_id', $ownerId)
+            ->whereBetween('date', [$chartStart, $chartEnd])
             ->when($shopId, fn($q) => $q->where('shop_id', $shopId))
             ->get()
             ->groupBy(fn($item) => Carbon::parse($item->date)->format('Y-m-d'));
@@ -109,7 +121,9 @@ class ProfitReportController extends Controller
         $worstDay = $profitByDay->sortBy('profit')->first();
 
         /* ---------------- SHOPS ---------------- */
-        $shops = Shop::all();
+        // FIXED: was Shop::all() — leaked every admin's shops into the
+        // filter dropdown, not just the logged-in admin's own shops.
+        $shops = Shop::where('owner_id', $ownerId)->get();
 
         return response()->json([
             'status' => true,
@@ -131,10 +145,13 @@ class ProfitReportController extends Controller
     }
 
     // GET /api/admin/reports/profit-loss/goods-pdf?start_date=&end_date=&shop_id=
-    // Unchanged — still returns a binary PDF file.
     public function downloadProfitGoodsPdf(Request $request)
     {
+        // FIXED: same missing owner scoping as profitLoss() above.
+        $ownerId = auth()->user()->owner_id ?? auth()->id();
+
         $sales = PurchaseItem::with('product')
+            ->where('owner_id', $ownerId)
             ->when($request->start_date, fn ($q) =>
                 $q->whereDate('created_at', '>=', $request->start_date)
             )

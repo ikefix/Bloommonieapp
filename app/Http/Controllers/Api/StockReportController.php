@@ -28,9 +28,20 @@ class StockReportController extends Controller
             ]);
         }
 
-        $shops = Shop::orderBy('name')->get();
+        // FIXED: no owner scoping anywhere in this controller before — both
+        // the shop dropdown and the product table pulled EVERY admin's
+        // data, filtered only by shop_id/search if supplied.
+        //
+        // NOTE: this assumes `products` has its own `owner_id` column, the
+        // same way `purchase_items` and `expenses` do elsewhere in the app.
+        // If it doesn't, tell me and I'll scope through the shop relation
+        // instead (whereHas('shop', fn($q) => $q->where('owner_id', $ownerId))).
+        $ownerId = $user->owner_id ?? $user->id;
 
-        $tableQuery = Product::with('shop');
+        $shops = Shop::where('owner_id', $ownerId)->orderBy('name')->get();
+
+        $tableQuery = Product::with('shop')
+            ->where('owner_id', $ownerId);
 
         if ($request->filled('shop_id')) {
             $tableQuery->where('shop_id', $request->shop_id);
@@ -58,9 +69,22 @@ class StockReportController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $statsQuery = Product::query();
-        $totalProducts = $statsQuery->count();
-        $lowStockCount = $statsQuery->whereColumn('stock_quantity', '<=', 'stock_limit')->count();
+        // FIXED: stats were computed off Product::query() with no owner
+        // filter — totals/low-stock counts didn't match the (also broken)
+        // table above. Scoped to the same owner + same shop/search filters
+        // so the summary cards agree with the table.
+        $statsQuery = Product::query()->where('owner_id', $ownerId);
+
+        if ($request->filled('shop_id')) {
+            $statsQuery->where('shop_id', $request->shop_id);
+        }
+
+        if ($request->filled('search')) {
+            $statsQuery->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $totalProducts = (clone $statsQuery)->count();
+        $lowStockCount = (clone $statsQuery)->whereColumn('stock_quantity', '<=', 'stock_limit')->count();
 
         $stockChart = [
             'labels' => ['Low Stock', 'Normal Stock'],
@@ -81,14 +105,19 @@ class StockReportController extends Controller
     }
 
     // GET /api/admin/reports/stock/pdf?shop_id=&search=
-    // Unchanged — still returns a binary PDF file.
     public function downloadPdf(Request $request)
     {
-        if (!$request->user()->hasFeature('stock_report')) {
+        $user = $request->user();
+
+        if (!$user->hasFeature('stock_report')) {
             abort(403, 'This feature is not included in your current plan.');
         }
 
-        $query = Product::with('shop');
+        // FIXED: same missing owner scoping as index() above.
+        $ownerId = $user->owner_id ?? $user->id;
+
+        $query = Product::with('shop')
+            ->where('owner_id', $ownerId);
 
         if ($request->filled('shop_id')) {
             $query->where('shop_id', $request->shop_id);
