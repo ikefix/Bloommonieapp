@@ -15,14 +15,13 @@ class SalesReportController extends Controller
     /**
      * GET /api/admin/reports/sales?start_date=&end_date=&shop_id=
      *
-     * FIXED: was filtering by auth()->id() directly. That only matches rows
-     * where the logged-in user's own ID equals owner_id — correct ONLY for
-     * a top-level owner account whose sub-users (cashiers/managers) have
-     * their owner_id set back to this admin's id. For any account where
-     * auth()->id() doesn't literally equal the stored owner_id, every query
-     * here returns zero rows. Now uses owner_id ?? id, the same fallback
-     * pattern already used elsewhere in this app (see
-     * CustomerController::searchSuggestions).
+     * FIXED: every owner filter here used auth()->id() directly. That only
+     * matches rows when the OWNER account itself is logged in. If a staff /
+     * sub-user is logged in, auth()->id() is their own user id, not the
+     * owner_id stored on purchase_items — so every query below matched
+     * nothing and the report came back empty. Same fix as elsewhere in the
+     * app: resolve the actual owner id once, with a fallback for owner
+     * accounts whose own owner_id column is null.
      */
     public function index(Request $request)
     {
@@ -198,6 +197,8 @@ class SalesReportController extends Controller
 
     /**
      * GET /api/admin/reports/sales/pdf?start_date=&end_date=&shop_id=
+     *
+     * FIXED: same auth()->id() vs owner_id bug as index() above.
      */
     public function downloadPdf(Request $request)
     {
