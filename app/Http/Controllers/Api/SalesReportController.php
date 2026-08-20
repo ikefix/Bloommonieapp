@@ -14,21 +14,32 @@ class SalesReportController extends Controller
 {
     /**
      * GET /api/admin/reports/sales?start_date=&end_date=&shop_id=
+     *
+     * FIXED: was filtering by auth()->id() directly. That only matches rows
+     * where the logged-in user's own ID equals owner_id — correct ONLY for
+     * a top-level owner account whose sub-users (cashiers/managers) have
+     * their owner_id set back to this admin's id. For any account where
+     * auth()->id() doesn't literally equal the stored owner_id, every query
+     * here returns zero rows. Now uses owner_id ?? id, the same fallback
+     * pattern already used elsewhere in this app (see
+     * CustomerController::searchSuggestions).
      */
     public function index(Request $request)
     {
+        $ownerId = auth()->user()->owner_id ?? auth()->id();
+
         // 🔒 ONLY OWNER SHOPS
-        $shops = Shop::where('owner_id', auth()->id())
+        $shops = Shop::where('owner_id', $ownerId)
             ->orderBy('name')
             ->get();
 
         // 🔒 OWNER FILTER
         $baseQuery = PurchaseItem::query()
-            ->where('purchase_items.owner_id', auth()->id());
+            ->where('purchase_items.owner_id', $ownerId);
 
         // 🔒 OWNER FILTER
         $chartQuery = PurchaseItem::query()
-            ->where('purchase_items.owner_id', auth()->id());
+            ->where('purchase_items.owner_id', $ownerId);
 
         /**
          * =========================
@@ -190,6 +201,8 @@ class SalesReportController extends Controller
      */
     public function downloadPdf(Request $request)
     {
+        $ownerId = auth()->user()->owner_id ?? auth()->id();
+
         $startDate = $request->start_date;
 
         $endDate = $request->end_date;
@@ -221,7 +234,7 @@ class SalesReportController extends Controller
             // 🔒 OWNER FILTER
             ->where(
                 'purchase_items.owner_id',
-                auth()->id()
+                $ownerId
             );
 
         /**
@@ -303,7 +316,7 @@ class SalesReportController extends Controller
          */
 
         $shop = $shopId
-            ? Shop::where('owner_id', auth()->id())
+            ? Shop::where('owner_id', $ownerId)
                 ->find($shopId)
             : null;
 
