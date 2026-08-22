@@ -23,6 +23,9 @@ use App\Http\Controllers\Api\SalesReportController;
 use App\Http\Controllers\Api\StockReportController;
 use App\Http\Controllers\Api\CollectableController;
 use App\Http\Controllers\Api\WhatsAppWebhookController;
+use App\Http\Controllers\Api\ProductionController;
+use App\Http\Controllers\Api\ProductionEntryController;
+use App\Http\Controllers\Api\ProductionTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -189,6 +192,29 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('reports/stock', [StockReportController::class, 'index']);
         Route::get('reports/stock/pdf', [StockReportController::class, 'downloadPdf']);
+    });
+
+    Route::prefix('admin')->group(function () {
+ 
+        // Production batches
+        Route::get('production', [ProductionController::class, 'index']);
+        Route::get('production/create', [ProductionController::class, 'create']);
+        Route::post('production', [ProductionController::class, 'store']);
+        Route::patch('production/{production}/status', [ProductionController::class, 'updateStatus']);
+    
+        // Production entries (input/output/loss per batch)
+        Route::get('production-entries', [ProductionEntryController::class, 'index']);
+        Route::get('production-entries/{production}', [ProductionEntryController::class, 'show']);
+        Route::get('production-entries/{production}/fill', [ProductionEntryController::class, 'fill']);
+        Route::get('production-entries/{production}/edit', [ProductionEntryController::class, 'edit']);
+        Route::post('production-entries/{productionId}', [ProductionEntryController::class, 'store']);
+        Route::put('production-entries/{productionId}', [ProductionEntryController::class, 'update']);
+        Route::delete('production-entries/{id}', [ProductionEntryController::class, 'destroy']);
+    
+        // Production types
+        Route::get('production-types', [ProductionTypeController::class, 'index']);
+        Route::post('production-types', [ProductionTypeController::class, 'store']);
+        Route::delete('production-types/{id}', [ProductionTypeController::class, 'destroy']);
     });
 
 });
