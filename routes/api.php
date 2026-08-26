@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\WhatsAppWebhookController;
 use App\Http\Controllers\Api\ProductionController;
 use App\Http\Controllers\Api\ProductionEntryController;
 use App\Http\Controllers\Api\ProductionTypeController;
+use App\Http\Controllers\Api\OfflineSalesSyncController;
 
 /*
 |--------------------------------------------------------------------------
@@ -217,6 +218,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('production-types/{id}', [ProductionTypeController::class, 'destroy']);
     });
 
+// ...
+    Route::post('sales/sync', [OfflineSalesSyncController::class, 'sync']);
 });
 
 

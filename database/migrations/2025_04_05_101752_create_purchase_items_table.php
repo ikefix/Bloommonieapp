@@ -14,45 +14,56 @@ return new class extends Migration
     public function up()
     {
        Schema::create('purchase_items', function (Blueprint $table) {
-    $table->id();
+            $table->id();
 
-    // 🔐 SaaS OWNERSHIP (VERY IMPORTANT)
-    $table->unsignedBigInteger('owner_id');
+            // 🔐 SaaS OWNERSHIP (VERY IMPORTANT)
+            $table->unsignedBigInteger('owner_id');
 
-    $table->string('transaction_id')->nullable();
+            $table->string('transaction_id')->nullable();
 
-    // 🧍 Customer info
-    $table->string('customer_name')->nullable();
-    $table->string('customer_phone', 20)->nullable();
+                // 📴 OFFLINE SYNC
+            // Device-generated UUID for the whole offline basket. Used as the
+            // idempotency key when replaying offline sales through the sync
+            // endpoint — not unique at the column level since every item in one
+            // offline basket shares the same client_sale_id.
+            $table->string('client_sale_id')->nullable()->index();
+        
+            // True when this row was created via the offline sync endpoint
+            // rather than the normal online store() flow.
+            $table->boolean('synced_offline')->default(false);
 
-    $table->unsignedBigInteger('product_id');
-    $table->unsignedBigInteger('category_id')->nullable();
-    $table->unsignedBigInteger('shop_id')->nullable();
+            // 🧍 Customer info
+            $table->string('customer_name')->nullable();
+            $table->string('customer_phone', 20)->nullable();
 
-    $table->integer('quantity');
-    $table->decimal('total_price', 10, 2);
+            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->unsignedBigInteger('shop_id')->nullable();
 
-    $table->unsignedBigInteger('cashier_id')->nullable();
+            $table->integer('quantity');
+            $table->decimal('total_price', 10, 2);
 
-    // 🆕 Discount
-    $table->enum('discount_type', ['none', 'percentage', 'flat'])->default('none');
-    $table->decimal('discount_value', 10, 2)->default(0);
-    $table->decimal('discount', 10, 2)->default(0);
+            $table->unsignedBigInteger('cashier_id')->nullable();
 
-    $table->enum('payment_method', ['cash', 'card', 'transfer'])->default('cash');
+            // 🆕 Discount
+            $table->enum('discount_type', ['none', 'percentage', 'flat'])->default('none');
+            $table->decimal('discount_value', 10, 2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
 
-    // ⭐ SALE TYPE
-    $table->enum('sale_type', ['invoice', 'cashier'])->default('cashier');
+            $table->enum('payment_method', ['cash', 'card', 'transfer'])->default('cash');
 
-    $table->timestamps();
+            // ⭐ SALE TYPE
+            $table->enum('sale_type', ['invoice', 'cashier'])->default('cashier');
 
-    // 🔗 Foreign keys
-    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->timestamps();
 
-    $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
+            // 🔗 Foreign keys
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
 
-    $table->foreign('shop_id')->references('id')->on('shops')->onDelete('set null');
-});
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
+
+            $table->foreign('shop_id')->references('id')->on('shops')->onDelete('set null');
+    });
 
     }
 
