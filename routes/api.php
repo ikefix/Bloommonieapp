@@ -219,7 +219,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 // ...
-    Route::post('sales/sync', [OfflineSalesSyncController::class, 'sync']);
+    Route::prefix('admin')->group(function () {
+        Route::post('sales/sync', [OfflineSalesSyncController::class, 'sync']);
+    });
 });
 
 
