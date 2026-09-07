@@ -94,10 +94,10 @@
                     <td>
                         @if(!empty($sale->discount_value) && $sale->discount_value > 0)
                             <span style="text-decoration: line-through; color: red;">
-                                ₦{{ number_format($sale->total_price, 2) }}
+                                ₦{{ number_format($sale->total_price + $sale->discount, 2) }}
                             </span><br>
                             <span style="color: #28a745; font-weight: bold;">
-                                ₦{{ number_format($sale->total_price - $sale->discount, 2) }}
+                                ₦{{ number_format($sale->total_price, 2) }}
                             </span>
                         @else
                             <span style="color: #000;">
