@@ -49,16 +49,10 @@
     </div>
 
 @php
-    // Calculate total directly in the view (safe for small datasets)
     $grandTotal = 0;
+
     foreach ($sales as $sale) {
-        $priceAfterDiscount = $sale->total_price;
-
-        if (!empty($sale->discount_value) && $sale->discount_value > 0) {
-            $priceAfterDiscount = $sale->total_price - $sale->discount;
-        }
-
-        $grandTotal += $priceAfterDiscount;
+        $grandTotal += $sale->total_price;
     }
 @endphp
 
