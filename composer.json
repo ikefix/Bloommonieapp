@@ -12,6 +12,7 @@
         "barryvdh/laravel-dompdf": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
         "kreait/laravel-firebase": "5.10",
+        "laravel-notification-channels/fcm": "^4.5",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "*",
         "laravel/tinker": "^2.7",

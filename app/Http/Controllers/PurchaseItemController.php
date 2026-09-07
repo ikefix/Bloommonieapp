@@ -130,8 +130,22 @@ public function store(Request $request)
             //     $admins = User::whereIn('role', ['admin', 'manager'])->get();
             //     Notification::send($admins, new LowStockAlert($product));
             // }
+            // if ($product->stock_quantity <= $product->stock_limit) {
+            //     Notification::send(auth()->user(), new LowStockAlert($product));
+            // }
+
             if ($product->stock_quantity <= $product->stock_limit) {
-                Notification::send(auth()->user(), new LowStockAlert($product));
+                try {
+                    Notification::send(
+                        auth()->user(),
+                        new LowStockAlert($product)
+                    );
+                } catch (\Exception $notificationException) {
+                    \Log::error('Low stock notification failed', [
+                        'product_id' => $product->id,
+                        'error' => $notificationException->getMessage(),
+                    ]);
+                }
             }
         }
 
