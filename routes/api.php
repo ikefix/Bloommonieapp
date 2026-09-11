@@ -91,7 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // SALES
     Route::get('/admin/sales-page', [AdminController::class, 'salesPage']);
     Route::get('/admin/filter-sales', [AdminController::class, 'filterSales']);
-    Route::delete('/admin/sales/{id}', [AdminController::class, 'deleteSale']);
+    Route::delete('/admin/sales/{id}', [PurchaseItemController::class, 'deleteSale']);
 
     // PROFILE
     Route::put('/profile/update', [AdminController::class, 'updateProfile']);
