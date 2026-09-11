@@ -425,4 +425,24 @@ class AdminController extends Controller
             ],
         ]);
     }
+
+    
+public function deleteSale($id)
+{
+    // Find the sale record
+    $sale = PurchaseItem::with('product')->findOrFail($id);
+
+    // ✅ Restore product stock
+    if ($sale->product) {
+        $sale->product->increment('stock_quantity', $sale->quantity);
+    }
+
+    // ✅ Delete the sale
+    $sale->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Sale deleted and product stock restored successfully.',
+    ]);
+}
 }
