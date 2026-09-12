@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'product.key' => \App\Http\Middleware\VerifyProductKey::class,
         'subscription' => \App\Http\Middleware\CheckSubscription::class,
         'activated' => \App\Http\Middleware\CheckSubscription::class,
+        'restricted' => \App\Http\Middleware\CheckRestricted::class,
     ];
 }

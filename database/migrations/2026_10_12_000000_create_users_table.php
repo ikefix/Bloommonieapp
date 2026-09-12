@@ -29,6 +29,7 @@ return new class extends Migration
             // 👤 roles
             $table->enum('role', ['superadmin', 'admin', 'manager', 'cashier'])
                   ->default('cashier');
+            $table->boolean('is_restricted')->default(false);
 
 
             // 🧾 subscription fields (for admin SaaS)

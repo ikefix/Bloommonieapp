@@ -24,22 +24,23 @@ protected function redirectTo()
         return '/login';
     }
 
-    // SUPERADMIN bypass
     if ($user->role === 'superadmin') {
         return '/superadmin-dashboard';
     }
 
-    // 🔥 Resolve OWNER (this is the missing piece)
     $owner = $user->owner_id
         ? \App\Models\User::find($user->owner_id)
         : $user;
 
-    // ❌ NOT ACTIVATED (CHECK OWNER, NOT USER)
     if (!$owner->is_activated) {
         return '/show-product-key';
     }
 
-    // ✅ ACTIVATED → go by role
+    // 🔥 SUBSCRIPTION CHECK
+    if ($owner->plan_end && now()->greaterThan($owner->plan_end)) {
+        return '/subscription-expired';
+    }
+
     if ($user->role === 'admin') {
         return '/admin-dashboard';
     }
@@ -48,9 +49,8 @@ protected function redirectTo()
         return '/manager-dashboard';
     }
 
-    return '/home'; // cashier
+    return '/home';
 }
-
     /**
      * Override credentials method to include role validation during login.
      */

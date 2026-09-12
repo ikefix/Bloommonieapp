@@ -43,6 +43,18 @@
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
+                            <form method="POST" action="{{ route('users.toggle-restrict', $user->id) }}">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit"
+                                    class="btn btn-sm {{ $user->is_restricted ? 'btn-success' : 'btn-danger' }}">
+                                    {{ $user->is_restricted ? 'Unrestrict' : 'Restrict' }}
+                                </button>
+                            </form>
+
+                            @if($user->is_restricted)
+                                <span class="badge bg-danger">Restricted</span>
+                            @endif
                         </td>
                         <td>
                             <select name="shop_id" id="shop_id" class="form-control" required>

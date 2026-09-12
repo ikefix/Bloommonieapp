@@ -409,6 +409,26 @@ public function dashboard()
     ));
 }
 
+public function toggleRestrict($id)
+{
+    $user = User::findOrFail($id);
+
+    // Prevent an admin from restricting themselves or a superadmin
+    if ($user->role === 'superadmin') {
+        return back()->with('error', 'Cannot restrict a superadmin account.');
+    }
+
+    $user->is_restricted = !$user->is_restricted;
+    $user->save();
+
+    if ($user->is_restricted) {
+        $user->tokens()->delete(); // force logout everywhere immediately
+    }
+
+    return back()->with('success', $user->is_restricted
+        ? "{$user->name} has been restricted."
+        : "{$user->name} has been unrestricted.");
+}
 
 
 

@@ -86,7 +86,7 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
         ->name('superadmin.subscriptions');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'subscription', 'restricted'])->group(function () {
     Route::get('/admin/units', [UnitController::class, 'index'])->name('admin.units.index');
     Route::post('/admin/units', [UnitController::class, 'store'])->name('admin.units.store');
     Route::delete('/admin/units/{id}', [UnitController::class, 'destroy'])->name('admin.units.destroy');
@@ -105,7 +105,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'activated', 'subscription',])->group(function () {
+Route::middleware(['auth', 'activated', 'subscription', 'restricted'])->group(function () {
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -115,7 +115,7 @@ Route::middleware(['auth', 'activated', 'subscription',])->group(function () {
 
 });
 
-Route::middleware(['auth', 'activated', 'subscription', 'verified'])->group(function () {
+Route::middleware(['auth', 'activated', 'subscription', 'restricted', 'verified'])->group(function () {
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -172,7 +172,7 @@ Route::get('/', function () {
 Auth::routes(['verify' => true]);
 
 
-Route::get('/admin', [AdminController::class, 'index'])->middleware('role:admin');
+Route::get('/admin', [AdminController::class, 'index'])->middleware(['role:admin', 'subscription', 'restricted']);
 
 Route::middleware(['auth'])->group(function () {
     // Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
@@ -216,12 +216,12 @@ Route::post('/products', [ProductController::class, 'store'])->name('products.st
 
 
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin', 'subscription', 'restricted'])->group(function () {
     Route::get('/admin/manage-roles', [RoleController::class, 'index'])->name('admin.manage_roles');
     Route::patch('/admin/update-role/{id}', [RoleController::class, 'updateRole'])->name('admin.updateRole');
 });
 
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'admin', 'subscription', 'restricted'])->group(function () {
     Route::get('/admin/register', [AdminController::class, 'showRegisterForm'])->name('admin.register');
 });
 
@@ -251,14 +251,20 @@ Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name
 
 
 // PRODUCT CREATE
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'subscription', 'restricted'])->group(function () {
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create')->middleware('admin');
     // Route::post('/products', [ProductController::class, 'store'])->name('products.store')->middleware('admin');
 });
 
+// RESTRICT
+Route::middleware(['auth', 'admin', 'subscription', 'restricted'])->group(function () {
+    Route::patch('/admin/users/{id}/toggle-restrict', [AdminController::class, 'toggleRestrict'])
+        ->name('users.toggle-restrict');
+});
+
 
 // CATEGORY CREATE
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'subscription', 'restricted'])->group(function () {
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
@@ -271,7 +277,7 @@ Route::get('/products/by-category/{categoryId}', [App\Http\Controllers\ProductCo
 // Search
 Route::get('/products/search-suggestions', [ProductController::class, 'searchSuggestions']);
 // FOR ADMIN AND MANAGER
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'subscription', 'restricted'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('user.notifications');
 });
 
@@ -304,7 +310,7 @@ Route::get('/api/product-stock/{id}', function ($id) {
 
 // PERMISSION ACCESS
 
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'admin', 'subscription', 'restricted'])->group(function () {
     Route::get('/admin/manager-permissions', [ProductPermissionController::class, 'show'])->name('admin.manager-permissions');
     Route::post('/admin/grant-product-access', [ProductPermissionController::class, 'grantAccess'])->name('admin.give-product-access');
     Route::post('/admin/revoke-product-access', [ProductPermissionController::class, 'revokeAccess'])->name('admin.revoke-product-access');
@@ -314,7 +320,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
 // MULTIPLE SHOPS ROUTES
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'subscription', 'restricted'])->group(function () {
     Route::get('/shops/create', [ShopController::class, 'index'])->name('shops.create');
     // Route::get('/shops/create', [ShopController::class, 'create'])->name('shops.create');
     Route::post('/shops', [ShopController::class, 'store'])->name('shops.store');
@@ -365,14 +371,14 @@ Route::post('/Managerexpenses', [ExpenseController::class, 'storemanager'])->nam
 Route::delete('/Managerexpenses/{id}', [ExpenseController::class, 'destroymanager'])->name('managerexpense.destroy');
 
 // Admin
-Route::prefix('admin')->middleware(['auth','role:admin'])->group(function(){
+Route::prefix('admin')->middleware(['auth','role:admin', 'subscription', 'restricted'])->group(function(){
     Route::get('/customers', [CustomerController::class,'index'])->name('admin.customers.index');
     Route::post('/customers', [CustomerController::class,'store'])->name('admin.customers.store');
     Route::delete('/customers/{customer}', [CustomerController::class,'destroy'])->name('admin.customers.destroy');
 });
 
 // Manager
-Route::prefix('manager')->middleware(['auth','role:manager'])->group(function(){
+Route::prefix('manager')->middleware(['auth','role:manager', 'subscription', 'restricted'])->group(function(){
     Route::get('/customers', [CustomerController::class,'index'])->name('manager.customers.index');
     Route::post('/customers', [CustomerController::class,'store'])->name('manager.customers.store');
     Route::delete('/customers/{customer}', [CustomerController::class,'destroy'])->name('manager.customers.destroy');
@@ -468,7 +474,7 @@ Route::post('production-entries/{productionId}/update', [ProductionEntryControll
 
 Route::get('/production-entries/{production}/edit',[ProductionEntryController::class, 'edit'])->name('admin.production_entries.edit');
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function() {
+Route::middleware(['auth', 'role:admin', 'subscription', 'restricted'])->prefix('admin')->group(function() {
     Route::get('/invoices/owing', [InvoiceController::class, 'owing'])->name('admin.invoices.owing');
     Route::get('/invoices/{invoice}/edit-payment', [InvoiceController::class, 'editPayment'])->name('admin.invoices.edit-payment');
     Route::post('/invoices/{invoice}/update-payment', [InvoiceController::class, 'updatePayment'])->name('admin.invoices.update-payment');
@@ -479,7 +485,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function() {
 });
 
 // manager routes
-Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function() {
+Route::middleware(['auth', 'role:manager', 'subscription', 'restricted'])->prefix('manager')->group(function() {
     Route::get('/invoices/owing', [InvoiceController::class, 'owing'])->name('manager.invoices.owing');
     Route::get('/invoices/{invoice}/edit-payment', [InvoiceController::class, 'editPayment'])->name('manager.invoices.edit-payment');
     Route::post('/invoices/{invoice}/update-payment', [InvoiceController::class, 'updatePayment'])->name('manager.invoices.update-payment');
@@ -495,17 +501,17 @@ Route::get('reports/production/pdf', [ProductionReportController::class, 'produc
 
 
 
-Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function(){
+Route::prefix('admin')->middleware(['auth', 'role:admin', 'subscription', 'restricted'])->group(function(){
     Route::get('invoices/create', [InvoiceController::class, 'create'])->name('admin.invoices.create');
     Route::post('invoices', [InvoiceController::class, 'store'])->name('admin.invoices.store');
 });
 
-Route::prefix('manager')->middleware(['auth', 'role:manager'])->group(function(){
+Route::prefix('manager')->middleware(['auth', 'role:manager', 'subscription', 'restricted'])->group(function(){
     Route::get('invoices/create', [InvoiceController::class, 'create'])->name('manager.invoices.create');
     Route::post('invoices', [InvoiceController::class, 'store'])->name('manager.invoices.store');
 });
 
-Route::prefix('cashier')->middleware(['auth', 'role:cashier'])->group(function(){
+Route::prefix('cashier')->middleware(['auth', 'role:cashier', 'subscription', 'restricted'])->group(function(){
     
     Route::get('/invoices/owing', [InvoiceController::class, 'owing'])->name('cashier.invoices.owing');
     Route::get('invoices/create', [InvoiceController::class, 'create'])->name('cashier.invoices.create');
@@ -559,13 +565,13 @@ Route::post('/products/import', [ProductController::class, 'import'])
 
 
 // Admin
-Route::prefix('admin')->middleware(['auth','role:admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth','role:admin', 'subscription', 'restricted'])->group(function () {
     Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('admin.invoices.create');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('admin.invoices.store');
 });
 
 // Manager
-Route::prefix('manager')->middleware(['auth','role:manager'])->group(function () {
+Route::prefix('manager')->middleware(['auth','role:manager', 'subscription', 'restricted'])->group(function () {
     Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('manager.invoices.create');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('manager.invoices.store');
 });
@@ -579,7 +585,7 @@ Route::get('/cashier/receivables', [InvoiceController::class, 'receivablesforcas
 
 // SALES REPORT
 Route::prefix('admin')
-    ->middleware(['auth', 'admin'])
+    ->middleware(['auth', 'admin', 'subscription', 'restricted'])
     ->group(function () {
 
         Route::get('/report/sales-report', 
@@ -620,5 +626,3 @@ Route::get('/admin/report/profit-loss/download',[ProfitReportController::class, 
 Route::get('/complaints/create', [ComplaintController::class, 'create'])->name('complaints.create');
 
 Route::post('/complaints', [ComplaintController::class, 'store'])->name('complaints.store');
-
-

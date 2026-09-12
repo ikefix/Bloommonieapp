@@ -45,7 +45,7 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/google-login', [GoogleLoginController::class, 'googleLogin']);
 Route::post('/login', [LoginController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(function () {
 
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -106,6 +106,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/admin/users/{id}/role', [RoleController::class, 'updateRole']);
     Route::delete('/admin/users/{id}', [RoleController::class, 'deleteUser']);
     Route::patch('/admin/users/{id}/shop', [RoleController::class, 'updateShop']);
+    Route::patch('/admin/users/{id}/toggle-restrict', [RoleController::class, 'toggleRestrict']);
 
     // INVOICES
     Route::get('/invoices/create',          [InvoiceController::class, 'create']);       // get customers/shops/products

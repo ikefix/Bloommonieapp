@@ -112,4 +112,31 @@ class RoleController extends Controller
             'user' => $user,
         ]);
     }
+
+    public function toggleRestrict($id)
+{
+    $user = User::findOrFail($id);
+
+    if ($user->role === 'superadmin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Cannot restrict a superadmin account.'
+        ], 403);
+    }
+
+    $user->is_restricted = !$user->is_restricted;
+    $user->save();
+
+    if ($user->is_restricted) {
+        $user->tokens()->delete();
+    }
+
+    return response()->json([
+        'success' => true,
+        'is_restricted' => $user->is_restricted,
+        'message' => $user->is_restricted
+            ? "{$user->name} has been restricted."
+            : "{$user->name} has been unrestricted."
+    ]);
+}
 }
