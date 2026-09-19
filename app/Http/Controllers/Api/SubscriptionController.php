@@ -46,20 +46,31 @@ class SubscriptionController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | POST /api/subscription/initialize   { plan, billing }
+    | POST /api/subscription/initialize   { email, plan, billing }   (public, throttled)
     |--------------------------------------------------------------------------
     */
     public function initialize(Request $request)
     {
         $data = $request->validate([
+            'email'   => 'required|email',
             'plan'    => 'required|in:basic,lite,business',
             'billing' => 'required|in:monthly,yearly',
         ]);
 
-        $user = $request->user();
+        // No login needed: an expired account often has no valid session.
+        // The subscription lives on the admin's row (managers and cashiers
+        // have no plan of their own), so only an admin's email is accepted.
+        // Same message for "no such email" and "not an admin" so this can't
+        // be used to find out which emails are registered.
+        $user = User::where('email', trim($data['email']))
+            ->where('role', 'admin')
+            ->first();
 
-        if ($denied = $this->denyUnlessOwner($user)) {
-            return $denied;
+        if (!$user) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'No account owner found with that email. Only the account owner (admin) can renew.',
+            ], 404);
         }
 
         $plan      = $data['plan'];
@@ -115,14 +126,15 @@ class SubscriptionController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | GET /api/subscription/verify/{reference}
+    | GET /api/subscription/verify/{reference}   (public, throttled)
     |--------------------------------------------------------------------------
     */
     public function verify(Request $request, string $reference)
     {
-        $tx = SubscriptionTransaction::where('reference', $reference)
-            ->where('user_id', $request->user()->id)
-            ->first();
+        // The reference is a random 16-character code created by initialize(),
+        // and verifying only ever confirms a real Paystack payment, so no login
+        // is needed here.
+        $tx = SubscriptionTransaction::where('reference', $reference)->first();
 
         if (!$tx) {
             return response()->json([
@@ -133,7 +145,7 @@ class SubscriptionController extends Controller
 
         [$ok, $message] = $this->verifyAndActivate($tx);
 
-        $user = $request->user()->fresh();
+        $user = User::find($tx->user_id);
 
         return response()->json([
             'status'  => $ok,
@@ -169,26 +181,6 @@ class SubscriptionController extends Controller
         }
 
         return response()->json(['status' => true]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | The subscription lives on the admin's row (managers and cashiers point to
-    | the admin through owner_id and have no plan of their own). If a cashier
-    | paid, the plan would be written to the cashier's row and the shop would
-    | still read as expired, so only admins may pay.
-    |--------------------------------------------------------------------------
-    */
-    private function denyUnlessOwner(User $user)
-    {
-        if ($user->role === 'admin') {
-            return null;
-        }
-
-        return response()->json([
-            'status'  => false,
-            'message' => 'Only the account owner can renew the subscription. Please ask your admin to renew.',
-        ], 403);
     }
 
     /*
