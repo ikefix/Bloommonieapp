@@ -51,10 +51,9 @@ Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(functio
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-
-    Route::post('/subscription/pay', [SubscriptionController::class, 'pay']);
-
-    Route::get('/subscription/status', [SubscriptionController::class, 'status']);
+    Route::get('/subscription/plans', [SubscriptionController::class, 'plans']);
+    Route::post('/subscription/initialize', [SubscriptionController::class, 'initialize']);
+    Route::get('/subscription/verify/{reference}', [SubscriptionController::class, 'verify']);
 
 
     Route::post('/logout', [LoginController::class, 'logout']);
@@ -235,3 +234,6 @@ Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(functio
 
 Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify']);
 Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive']);
+
+
+Route::post('/paystack/webhook', [SubscriptionController::class, 'webhook']);
