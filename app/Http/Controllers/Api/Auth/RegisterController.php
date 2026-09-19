@@ -39,10 +39,10 @@ class RegisterController extends Controller
             'role' => 'admin',
 
             // BUSINESS PLAN (1 YEAR)
-            'plan' => 'business',
-            'plan_duration' => '1_year',
+            'plan' => 'free_trial',
+            'plan_duration' => '3_days',
             'plan_start' => $now,
-            'plan_end' => $now->copy()->addYear(),
+            'plan_end' => $now->copy()->addDays(3),
 
             'is_activated' => true,
             'activated_at' => $now,
