@@ -49,13 +49,14 @@ Route::post('/login', [LoginController::class, 'login']);
 
     Route::get('/subscription/plans', [SubscriptionController::class, 'plans']);
 
+    Route::post('/subscription/initialize', [SubscriptionController::class, 'initialize']);
+    Route::get('/subscription/verify/{reference}', [SubscriptionController::class, 'verify']);
+
 Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(function () {
 
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::post('/subscription/initialize', [SubscriptionController::class, 'initialize']);
-    Route::get('/subscription/verify/{reference}', [SubscriptionController::class, 'verify']);
 
 
     Route::post('/logout', [LoginController::class, 'logout']);
