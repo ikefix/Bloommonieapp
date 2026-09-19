@@ -46,12 +46,14 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/google-login', [GoogleLoginController::class, 'googleLogin']);
 Route::post('/login', [LoginController::class, 'login']);
 
+
+    Route::get('/subscription/plans', [SubscriptionController::class, 'plans']);
+
 Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(function () {
 
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::get('/subscription/plans', [SubscriptionController::class, 'plans']);
     Route::post('/subscription/initialize', [SubscriptionController::class, 'initialize']);
     Route::get('/subscription/verify/{reference}', [SubscriptionController::class, 'verify']);
 

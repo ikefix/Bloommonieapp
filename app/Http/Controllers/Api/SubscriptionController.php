@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\SubscriptionTransaction;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -25,17 +24,13 @@ class SubscriptionController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | GET /api/subscription/plans
+    | GET /api/subscription/plans   (public, no login needed)
     |--------------------------------------------------------------------------
     */
-    public function plans(Request $request)
+    public function plans()
     {
-        $user = $request->user();
-
-        if ($denied = $this->denyUnlessOwner($user)) {
-            return $denied;
-        }
-
+        // Public on purpose: prices aren't secret, and an expired user may
+        // not have a valid login to show them with.
         $plans = collect(self::PRICES)->map(fn ($price, $id) => [
             'id'            => $id,
             'name'          => ucfirst($id),
@@ -45,16 +40,7 @@ class SubscriptionController extends Controller
 
         return response()->json([
             'status' => true,
-            'data'   => [
-                'plans'   => $plans,
-                'current' => [
-                    'plan'     => $user->plan,
-                    'plan_end' => $user->plan_end,
-                    // plan_end is a DATE column, so the plan runs through the END of that day
-                    'active'   => $user->plan_end
-                        && Carbon::parse($user->plan_end)->endOfDay()->isFuture(),
-                ],
-            ],
+            'data'   => ['plans' => $plans],
         ]);
     }
 
