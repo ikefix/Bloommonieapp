@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\ProductionController;
 use App\Http\Controllers\Api\ProductionEntryController;
 use App\Http\Controllers\Api\ProductionTypeController;
 use App\Http\Controllers\Api\OfflineSalesSyncController;
+use App\Http\Controllers\Api\SubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,11 @@ Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(functio
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    Route::post('/subscription/pay', [SubscriptionController::class, 'pay']);
+
+    Route::get('/subscription/status', [SubscriptionController::class, 'status']);
+
 
     Route::post('/logout', [LoginController::class, 'logout']);
 
