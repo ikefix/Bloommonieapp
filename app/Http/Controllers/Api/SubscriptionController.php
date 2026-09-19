@@ -101,6 +101,10 @@ class SubscriptionController extends Controller
             return response()->json([
                 'status'  => false,
                 'message' => 'Unable to initialize payment. Please try again.',
+                // Paystack's own reason, only while APP_DEBUG=true (e.g. "Invalid key")
+                'detail'  => config('app.debug')
+                    ? ($response->json('message') ?? $response->body())
+                    : null,
             ], 502);
         }
 
