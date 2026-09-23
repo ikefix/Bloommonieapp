@@ -53,6 +53,10 @@ class LoginController extends Controller
         ], 403);
     }
 
+    $daysLeft = $owner->plan_end
+        ? now()->diffInDays($owner->plan_end, false)
+        : 0;
+
     $token = $user->createToken('mobile_login_token')->plainTextToken;
 
     return response()->json([
@@ -61,7 +65,11 @@ class LoginController extends Controller
         'token' => $token,
         'user' => $user,
         'role' => $user->role,
-        'owner_id' => $user->owner_id
+        'owner_id' => $user->owner_id,
+        'plan' => $owner->plan,
+        'is_free_trial' => $owner->plan === 'free_trial',
+        'trial_days_left' => $daysLeft,
+        'email_verified' => $user->email_verified_at !== null
     ]);
 }
 

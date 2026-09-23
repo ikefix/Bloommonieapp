@@ -18,6 +18,7 @@ class RegisterController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:8',
         ]);
 
@@ -34,6 +35,7 @@ class RegisterController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
 
             'role' => 'admin',
@@ -51,6 +53,9 @@ class RegisterController extends Controller
         $user->owner_id = $user->id;
         $user->save();
 
+        // 📧 SEND EMAIL VERIFICATION
+        $user->sendEmailVerificationNotification();
+
         // 🔥 CREATE TOKEN FOR FLUTTER
         $token = $user->createToken('mobile_app_token')->plainTextToken;
 
@@ -58,7 +63,27 @@ class RegisterController extends Controller
             'status' => true,
             'message' => 'Account created successfully',
             'token' => $token,
-            'user' => $user
+            'user' => $user,
+            'email_verified' => false,
         ], 201);
+    }
+
+    public function resendVerification(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Email already verified.'
+            ]);
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Verification email sent.'
+        ]);
     }
 }

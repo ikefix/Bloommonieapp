@@ -35,18 +35,29 @@ class GoogleLoginController extends Controller
                 'role' => 'admin',
 
                 // BUSINESS PLAN (1 YEAR)
-                'plan' => 'business',
-                'plan_duration' => '1_year',
+                'plan' => 'free_trial',
+                'plan_duration' => '3_days',
                 'plan_start' => $now,
-                'plan_end' => $now->copy()->addYear(),
+                'plan_end' => $now->copy()->addDays(3),
 
                 'is_activated' => true,
                 'activated_at' => $now,
+
+                // Google already verifies the email on their end
+                'email_verified_at' => $now,
             ]);
 
             $user->owner_id = $user->id;
             $user->save();
         }
+
+        $owner = $user->owner_id
+            ? User::find($user->owner_id)
+            : $user;
+
+        $daysLeft = $owner->plan_end
+            ? now()->diffInDays($owner->plan_end, false)
+            : 0;
 
         // CREATE TOKEN (LOGIN)
         $token = $user->createToken('google_login_token')->plainTextToken;
@@ -55,7 +66,13 @@ class GoogleLoginController extends Controller
             'status' => true,
             'message' => 'Google login successful',
             'token' => $token,
-            'user' => $user
+            'user' => $user,
+            'role' => $user->role,
+            'owner_id' => $user->owner_id,
+            'plan' => $owner->plan,
+            'is_free_trial' => $owner->plan === 'free_trial',
+            'trial_days_left' => $daysLeft,
+            'email_verified' => $user->email_verified_at !== null,
         ]);
     }
 }

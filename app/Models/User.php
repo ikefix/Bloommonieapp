@@ -42,7 +42,35 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'plan_start' => 'date',
+        'plan_end' => 'date',
     ];
+
+    public function isAccountOwner()
+{
+    return is_null($this->owner_id);
+}
+
+public function getOwnerRecord()
+{
+    return $this->isAccountOwner() ? $this : self::find($this->owner_id);
+}
+
+public function isOnFreeTrial()
+{
+    return $this->getOwnerRecord()?->plan === 'free_trial';
+}
+
+public function trialDaysLeft()
+{
+    $owner = $this->getOwnerRecord();
+
+    if (!$owner || !$owner->plan_end) {
+        return 0;
+    }
+
+    return \Carbon\Carbon::now()->diffInDays($owner->plan_end, false);
+}
 
     /**
      * Define the relationship between the user and the store.
@@ -51,6 +79,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Shop::class);
     }
+
+//     public function isOnFreeTrial()
+// {
+//     $owner = $this->isAccountOwner() ? $this : \App\Models\User::find($this->owner_id);
+//     return $owner?->plan === 'free_trial';
+// }
     
 
     public function productions()

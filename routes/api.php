@@ -28,6 +28,8 @@ use App\Http\Controllers\Api\ProductionEntryController;
 use App\Http\Controllers\Api\ProductionTypeController;
 use App\Http\Controllers\Api\OfflineSalesSyncController;
 use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\StockTransferController;
+use App\Http\Controllers\Api\ProductPermissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,12 +53,67 @@ Route::post('/login', [LoginController::class, 'login']);
 
     Route::post('/subscription/initialize', [SubscriptionController::class, 'initialize']);
     Route::get('/subscription/verify/{reference}', [SubscriptionController::class, 'verify']);
+    
+    Route::post('/email/resend', [RegisterController::class, 'resendVerification']);
 
 Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(function () {
 
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    Route::post('/stock-transfers', [
+        StockTransferController::class,
+        'store'
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Transfer Data
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/stock-transfers/shops', [
+        StockTransferController::class,
+        'shops'
+    ]);
+
+    Route::get('/stock-transfers/products', [
+        StockTransferController::class,
+        'products'
+    ]);
+
+    Route::get('/stock-transfers/categories', [
+        StockTransferController::class,
+        'categories'
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Products by Shop
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/shops/{shopId}/products', [
+        StockTransferController::class,
+        'getProductsByShop'
+    ]);
+
+        Route::get('/product-permissions', [
+        ProductPermissionController::class,
+        'index'
+    ]);
+
+    Route::post('/product-permissions/grant', [
+        ProductPermissionController::class,
+        'grantAccess'
+    ]);
+
+    Route::post('/product-permissions/revoke', [
+        ProductPermissionController::class,
+        'revokeAccess'
+    ]);
+
 
 
     Route::post('/logout', [LoginController::class, 'logout']);
