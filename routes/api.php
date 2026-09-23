@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\OfflineSalesSyncController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\StockTransferController;
 use App\Http\Controllers\Api\ProductPermissionController;
+use App\Http\Controllers\Api\Auth\EmailVerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,20 @@ Route::post('/login', [LoginController::class, 'login']);
     Route::get('/subscription/verify/{reference}', [SubscriptionController::class, 'verify']);
     
     Route::post('/email/resend', [RegisterController::class, 'resendVerification']);
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post('/email/verify-otp', [
+        EmailVerificationController::class,
+        'verifyOtp'
+    ]);
+
+    Route::post('/email/resend-otp', [
+        EmailVerificationController::class,
+        'resendOtp'
+    ]);
+
+});
 
 Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(function () {
 

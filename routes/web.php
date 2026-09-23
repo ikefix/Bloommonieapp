@@ -35,6 +35,7 @@ use App\Http\Controllers\ProductionEntryController;
 use App\Http\Controllers\CollectableController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -61,6 +62,25 @@ Route::get('/subscribe/{plan}/{billing}', [SubscriptionController::class, 'pay']
 
     Route::get('/payment/callback', [SubscriptionController::class, 'callback'])
         ->name('payment.callback');
+
+});
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('/email/verify', [
+        EmailVerificationController::class,
+        'show'
+    ])->name('verification.notice');
+
+    Route::post('/email/verify-otp', [
+        EmailVerificationController::class,
+        'verifyOtp'
+    ])->name('verification.otp');
+
+    Route::post('/email/resend-otp', [
+        EmailVerificationController::class,
+        'resendOtp'
+    ])->name('verification.otp.resend');
 
 });
 

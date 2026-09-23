@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\EmailVerificationOtpMail;
+use App\Models\EmailVerificationOtp;
 use App\Models\User;
 
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -10,9 +12,9 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Http\Request;
-use Illuminate\Auth\Events\Registered;
 
 use Carbon\Carbon;
 
@@ -63,7 +65,7 @@ class RegisterController extends Controller
                 'unique:users'
             ],
 
-             'phone' => [
+            'phone' => [
                 'nullable',
                 'string',
                 'max:20',
@@ -87,16 +89,33 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
 
-        // 🔥 Create User
+        // Create User
         $user = $this->create($request->all());
 
-        // 🔥 Send Verification Email
-        event(new Registered($user));
+        // =====================================================
+        // 📧 CREATE EMAIL VERIFICATION OTP
+        // =====================================================
 
-        // 🔥 Login User
+        // Generate 6-digit OTP
+        $otp = (string) random_int(100000, 999999);
+
+        // Store hashed OTP
+        EmailVerificationOtp::create([
+            'user_id' => $user->id,
+            'otp_hash' => Hash::make($otp),
+            'expires_at' => Carbon::now()->addMinutes(10),
+            'attempts' => 0,
+        ]);
+
+        // Send OTP email
+        Mail::to($user->email)->send(
+            new EmailVerificationOtpMail($user, $otp)
+        );
+
+        // Login user using normal web session
         Auth::login($user);
 
-        // 🔥 Redirect to verification notice
+        // Redirect to OTP verification page
         return redirect('/email/verify');
     }
 
@@ -112,14 +131,15 @@ class RegisterController extends Controller
             'name' => $data['name'],
 
             'email' => $data['email'],
-            'phone' => $data['phone'], // 
+
+            'phone' => $data['phone'] ?? null,
 
             'password' => Hash::make($data['password']),
 
-            // 🔥 Default Role
+            // Default Role
             'role' => 'admin',
 
-            // 🔥 Free Trial
+            // Free Trial
             'plan' => 'free_trial',
 
             'plan_duration' => '3_days',
@@ -134,10 +154,11 @@ class RegisterController extends Controller
 
         ]);
 
-        // 🔥 Owner owns himself
+        // Owner owns himself
         $user->owner_id = $user->id;
         $user->save();
 
         return $user;
     }
 }
+

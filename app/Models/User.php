@@ -9,6 +9,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\EmailVerificationOtp;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -70,6 +71,11 @@ public function trialDaysLeft()
     }
 
     return \Carbon\Carbon::now()->diffInDays($owner->plan_end, false);
+}
+
+public function emailVerificationOtps()
+{
+    return $this->hasMany(EmailVerificationOtp::class);
 }
 
     /**
