@@ -129,7 +129,7 @@ Route::middleware(['auth', 'activated', 'subscription', 'restricted'])->group(fu
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-        Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
+        // Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
 
         Route::get('/manager-dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard')->middleware('role:manager');
 
@@ -139,7 +139,7 @@ Route::middleware(['auth', 'activated', 'subscription', 'restricted', 'verified'
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-        Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
+        // Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
 });
 
 
@@ -195,7 +195,8 @@ Auth::routes(['verify' => true]);
 Route::get('/admin', [AdminController::class, 'index'])->middleware(['role:admin', 'subscription', 'restricted']);
 
 Route::middleware(['auth'])->group(function () {
-    // Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
+
+        Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('role:admin');
     // Route::get('/manager-dashboard', [ManagerController::class, 'index'])->name('manager.dashboard')->middleware('role:manager');
 });
 
