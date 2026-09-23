@@ -36,6 +36,7 @@ use App\Http\Controllers\CollectableController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes

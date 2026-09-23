@@ -83,6 +83,38 @@
             word-break: break-word;
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Messages
+        |--------------------------------------------------------------------------
+        */
+
+        .message {
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.error {
+            background: #fff1f1;
+            color: #b42318;
+            border: 1px solid #fecdca;
+        }
+
+        .message.success {
+            background: #ecfdf3;
+            color: #027a48;
+            border: 1px solid #abefc6;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | OTP Input
+        |--------------------------------------------------------------------------
+        */
+
         .otp-input {
             width: 100%;
             height: 58px;
@@ -95,6 +127,7 @@
             color: #0C1F3F;
             outline: none;
             padding-left: 10px;
+            transition: 0.2s ease;
         }
 
         .otp-input:focus {
@@ -106,6 +139,12 @@
             color: #c5cbd5;
             letter-spacing: 8px;
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Buttons
+        |--------------------------------------------------------------------------
+        */
 
         .verify-button {
             width: 100%;
@@ -123,34 +162,6 @@
 
         .verify-button:hover {
             background: #244b8c;
-        }
-
-        .verify-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .message {
-            padding: 12px 14px;
-            border-radius: 8px;
-            margin-bottom: 18px;
-            font-size: 14px;
-            line-height: 1.5;
-            display: none;
-        }
-
-        .message.error {
-            display: block;
-            background: #fff1f1;
-            color: #b42318;
-            border: 1px solid #fecdca;
-        }
-
-        .message.success {
-            display: block;
-            background: #ecfdf3;
-            color: #027a48;
-            border: 1px solid #abefc6;
         }
 
         .resend-section {
@@ -188,7 +199,14 @@
             font-size: 13px;
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Mobile
+        |--------------------------------------------------------------------------
+        */
+
         @media (max-width: 480px) {
+
             .card {
                 padding: 32px 22px;
             }
@@ -209,29 +227,78 @@
 
 <div class="verification-container">
 
+    <!-- Logo -->
     <div class="logo">
-        <div class="logo-text">Bloommonie</div>
+        <div class="logo-text">
+            Bloommonie
+        </div>
     </div>
 
+
+    <!-- Verification Card -->
     <div class="card">
 
+        <!-- Email Icon -->
         <div class="icon">
             ✉️
         </div>
 
-        <h1>Verify your email</h1>
 
+        <!-- Heading -->
+        <h1>
+            Verify your email
+        </h1>
+
+
+        <!-- Description -->
         <p class="description">
             We've sent a 6-digit verification code to:
         </p>
 
+
+        <!-- User Email -->
         <div class="email">
             {{ auth()->user()->email }}
         </div>
 
-        <div id="message" class="message"></div>
 
-        <form id="verificationForm">
+        <!-- Laravel Error Message -->
+        @if ($errors->has('otp'))
+
+            <div class="message error">
+                {{ $errors->first('otp') }}
+            </div>
+
+        @endif
+
+
+        <!-- Success Message -->
+        @if (session('success'))
+
+            <div class="message success">
+                {{ session('success') }}
+            </div>
+
+        @endif
+
+
+        <!-- General Error Message -->
+        @if (session('error'))
+
+            <div class="message error">
+                {{ session('error') }}
+            </div>
+
+        @endif
+
+
+        <!-- OTP Verification Form -->
+        <form
+            method="POST"
+            action="{{ route('verification.otp') }}"
+            id="verificationForm"
+        >
+
             @csrf
 
             <input
@@ -244,34 +311,57 @@
                 autocomplete="one-time-code"
                 placeholder="••••••"
                 required
+                autofocus
             >
 
             <button
                 type="submit"
-                id="verifyButton"
                 class="verify-button"
+                id="verifyButton"
             >
                 Verify Email
             </button>
+
         </form>
 
+
+        <!-- Resend Section -->
         <div class="resend-section">
+
             Didn't receive the code?
 
-            <button
-                type="button"
-                id="resendButton"
-                class="resend-button"
-                disabled
+            <form
+                method="POST"
+                action="{{ route('verification.otp.resend') }}"
+                id="resendForm"
+                style="display: inline;"
             >
-                Resend Code
-            </button>
 
-            <div id="resendTimer" class="timer">
+                @csrf
+
+                <button
+                    type="submit"
+                    id="resendButton"
+                    class="resend-button"
+                    disabled
+                >
+                    Resend Code
+                </button>
+
+            </form>
+
+
+            <div
+                id="resendTimer"
+                class="timer"
+            >
                 You can resend in 60 seconds
             </div>
+
         </div>
 
+
+        <!-- OTP Expiry -->
         <div class="expiry">
             Your verification code expires in 10 minutes.
         </div>
@@ -280,128 +370,81 @@
 
 </div>
 
-<script>
-    const form = document.getElementById('verificationForm');
-    const otpInput = document.getElementById('otp');
-    const verifyButton = document.getElementById('verifyButton');
-    const resendButton = document.getElementById('resendButton');
-    const resendTimer = document.getElementById('resendTimer');
-    const message = document.getElementById('message');
 
-    let resendSeconds = 60;
+<script>
 
     /*
-     * Only allow numbers in OTP field
-     */
-    otpInput.addEventListener('input', function () {
-        this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    |--------------------------------------------------------------------------
+    | OTP Input
+    |--------------------------------------------------------------------------
+    */
 
-        /*
-         * Automatically submit when 6 digits are entered
-         */
-        if (this.value.length === 6) {
-            form.requestSubmit();
-        }
+    const otpInput = document.getElementById('otp');
+
+    otpInput.addEventListener('input', function () {
+
+        // Remove anything that isn't a number
+        this.value = this.value
+            .replace(/\D/g, '')
+            .slice(0, 6);
+
     });
 
 
     /*
-     * Show message
-     */
-    function showMessage(text, type) {
-        message.textContent = text;
-        message.className = 'message ' + type;
-    }
+    |--------------------------------------------------------------------------
+    | Verification Button
+    |--------------------------------------------------------------------------
+    */
 
+    const verificationForm =
+        document.getElementById('verificationForm');
 
-    /*
-     * Verify OTP
-     */
-    form.addEventListener('submit', async function (event) {
+    const verifyButton =
+        document.getElementById('verifyButton');
 
-        event.preventDefault();
+    verificationForm.addEventListener('submit', function () {
 
-        const otp = otpInput.value.trim();
+        if (otpInput.value.length !== 6) {
 
-        if (otp.length !== 6) {
-            showMessage(
-                'Please enter the 6-digit verification code.',
-                'error'
-            );
+            alert('Please enter the 6-digit verification code.');
 
             return;
         }
 
         verifyButton.disabled = true;
+
         verifyButton.textContent = 'Verifying...';
 
-        try {
-
-            const response = await fetch(
-                "{{ route('verification.otp') }}",
-                {
-                    method: 'POST',
-
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN':
-                            document.querySelector(
-                                'input[name="_token"]'
-                            ).value
-                    },
-
-                    body: JSON.stringify({
-                        otp: otp
-                    })
-                }
-            );
-
-            const data = await response.json();
-
-            if (data.status === true) {
-
-                showMessage(
-                    'Email verified successfully. Redirecting...',
-                    'success'
-                );
-
-                setTimeout(function () {
-                    window.location.href = '/admin-dashboard';
-                }, 800);
-
-                return;
-            }
-
-            showMessage(
-                data.message || 'Invalid verification code.',
-                'error'
-            );
-
-            verifyButton.disabled = false;
-            verifyButton.textContent = 'Verify Email';
-
-        } catch (error) {
-
-            showMessage(
-                'Something went wrong. Please try again.',
-                'error'
-            );
-
-            verifyButton.disabled = false;
-            verifyButton.textContent = 'Verify Email';
-        }
     });
 
 
     /*
-     * Resend countdown
-     */
+    |--------------------------------------------------------------------------
+    | Resend OTP Countdown
+    |--------------------------------------------------------------------------
+    */
+
+    const resendButton =
+        document.getElementById('resendButton');
+
+    const resendTimer =
+        document.getElementById('resendTimer');
+
+    let resendSeconds = 60;
+
+
     function startResendTimer() {
+
+        resendButton.disabled = true;
 
         resendSeconds = 60;
 
-        resendButton.disabled = true;
+        resendTimer.textContent =
+            'You can resend in ' +
+            resendSeconds +
+            ' seconds';
+
 
         const interval = setInterval(function () {
 
@@ -412,6 +455,7 @@
                 resendSeconds +
                 ' seconds';
 
+
             if (resendSeconds <= 0) {
 
                 clearInterval(interval);
@@ -420,84 +464,40 @@
 
                 resendTimer.textContent =
                     'You can request a new code now.';
+
             }
 
         }, 1000);
+
     }
 
 
     /*
-     * Resend OTP
-     */
-    resendButton.addEventListener('click', async function () {
+    |--------------------------------------------------------------------------
+    | Resend Button
+    |--------------------------------------------------------------------------
+    */
+
+    const resendForm =
+        document.getElementById('resendForm');
+
+    resendForm.addEventListener('submit', function () {
 
         resendButton.disabled = true;
+
         resendButton.textContent = 'Sending...';
 
-        try {
-
-            const response = await fetch(
-                "{{ route('verification.otp.resend') }}",
-                {
-                    method: 'POST',
-
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN':
-                            document.querySelector(
-                                'input[name="_token"]'
-                            ).value
-                    }
-                }
-            );
-
-            const data = await response.json();
-
-            if (data.status === true) {
-
-                showMessage(
-                    'A new verification code has been sent to your email.',
-                    'success'
-                );
-
-                resendButton.textContent = 'Resend Code';
-
-                startResendTimer();
-
-                return;
-            }
-
-            showMessage(
-                data.message || 'Unable to resend verification code.',
-                'error'
-            );
-
-            resendButton.disabled = false;
-            resendButton.textContent = 'Resend Code';
-
-        } catch (error) {
-
-            showMessage(
-                'Something went wrong. Please try again.',
-                'error'
-            );
-
-            resendButton.disabled = false;
-            resendButton.textContent = 'Resend Code';
-        }
     });
 
 
     /*
-     * Start the initial 60-second resend countdown
-     */
+    |--------------------------------------------------------------------------
+    | Start Countdown
+    |--------------------------------------------------------------------------
+    */
+
     startResendTimer();
 
-    /*
-     * Focus OTP field when page loads
-     */
-    otpInput.focus();
 </script>
 
 </body>
