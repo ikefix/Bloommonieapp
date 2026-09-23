@@ -32,7 +32,7 @@ class EmailVerificationController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return redirect('/dashboard');
+            return redirect('/admin-dashboard');
         }
 
         $otpRecord = EmailVerificationOtp::where('user_id', $user->id)
@@ -79,7 +79,7 @@ class EmailVerificationController extends Controller
         // Delete used OTP
         $otpRecord->delete();
 
-        return redirect('/dashboard')
+        return redirect('/admin-dashboard')
             ->with('success', 'Your email has been verified successfully.');
     }
 
@@ -91,7 +91,7 @@ class EmailVerificationController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return redirect('/dashboard');
+            return redirect('/admin-dashboard');
         }
 
         // Prevent resend spam
