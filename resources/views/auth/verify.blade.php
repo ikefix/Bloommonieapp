@@ -367,7 +367,7 @@
                 );
 
                 setTimeout(function () {
-                    window.location.href = '/admin/dashboard';
+                    window.location.href = '/admin-dashboard';
                 }, 800);
 
                 return;
