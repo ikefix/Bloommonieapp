@@ -290,263 +290,247 @@ class PurchaseItemController extends Controller
 //         ], 500);
 //     }
 // }
-
 public function store(Request $request)
 {
     try {
+
         $validated = $request->validate([
             'customer_name'  => 'nullable|string|max:255',
             'customer_phone' => 'nullable|string|max:20',
 
             'products' => 'required|array|min:1',
-            'products.*.product_id' => 'required|exists:products,id',
-            'products.*.quantity' => 'required|integer|min:1',
-            'products.*.discount_type' => 'nullable|in:none,percentage,flat',
-            'products.*.discount_value' => 'nullable|numeric|min:0',
 
-            'payment_method' => 'required|in:cash,card,transfer',
+            'products.*.product_id' =>
+                'required|exists:products,id',
+
+            'products.*.quantity' =>
+                'required|integer|min:1',
+
+            'products.*.discount_type' =>
+                'nullable|in:none,percentage,flat',
+
+            'products.*.discount_value' =>
+                'nullable|numeric|min:0',
+
+            'payment_method' =>
+                'required|in:cash,card,transfer',
         ]);
 
-        $transactionId = 'TXN-' . now()->format('YmdHis') . '-' . rand(1000, 9999);
+        $transactionId =
+            'TXN-' .
+            now()->format('YmdHis') .
+            '-' .
+            rand(1000, 9999);
 
         $lastPurchase = null;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Products that become low stock
-        |--------------------------------------------------------------------------
-        */
+        foreach ($validated['products'] as $item) {
 
-        $lowStockProducts = [];
+            /*
+            |--------------------------------------------------------------------------
+            | GET PRODUCT
+            |--------------------------------------------------------------------------
+            */
 
-        /*
-        |--------------------------------------------------------------------------
-        | Complete the entire sale inside a database transaction
-        |--------------------------------------------------------------------------
-        */
+            $product = Product::findOrFail(
+                $item['product_id']
+            );
 
-        DB::transaction(function () use (
-            $validated,
-            $transactionId,
-            &$lastPurchase,
-            &$lowStockProducts
-        ) {
-            foreach ($validated['products'] as $item) {
+            $quantityRequested =
+                (int) $item['quantity'];
 
-                /*
-                |--------------------------------------------------------------------------
-                | Get product
-                |--------------------------------------------------------------------------
-                */
 
-                $product = Product::findOrFail($item['product_id']);
+            /*
+            |--------------------------------------------------------------------------
+            | CHECK STOCK
+            |--------------------------------------------------------------------------
+            */
 
-                $quantityRequested = (int) $item['quantity'];
+            if (
+                $product->stock_quantity <
+                $quantityRequested
+            ) {
 
-                /*
-                |--------------------------------------------------------------------------
-                | Check stock
-                |--------------------------------------------------------------------------
-                */
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        "Not enough stock for {$product->name}. " .
+                        "Available: {$product->stock_quantity}"
+                ], 400);
+            }
 
-                if ($product->stock_quantity < $quantityRequested) {
-                    throw new \Exception(
-                        "Not enough stock for {$product->name}. Available: {$product->stock_quantity}"
-                    );
-                }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Discount
-                |--------------------------------------------------------------------------
-                */
+            /*
+            |--------------------------------------------------------------------------
+            | DISCOUNT
+            |--------------------------------------------------------------------------
+            */
 
-                $discountType = $item['discount_type'] ?? 'none';
+            $discountType =
+                $item['discount_type'] ?? 'none';
 
-                $discountValue = (float) ($item['discount_value'] ?? 0);
+            $discountValue =
+                $item['discount_value'] ?? 0;
 
-                $priceBeforeDiscount =
-                    $product->price * $quantityRequested;
+            $priceBeforeDiscount =
+                $product->price *
+                $quantityRequested;
 
-                $discountAmount = 0;
+            $discountAmount = 0;
 
-                if ($discountType === 'percentage') {
 
-                    $discountAmount =
-                        ($discountValue / 100) * $priceBeforeDiscount;
+            if ($discountType === 'percentage') {
 
-                } elseif ($discountType === 'flat') {
+                $discountAmount =
+                    ($discountValue / 100) *
+                    $priceBeforeDiscount;
 
-                    $discountAmount = $discountValue;
-                }
+            } elseif ($discountType === 'flat') {
 
-                /*
-                |--------------------------------------------------------------------------
-                | Prevent discount from exceeding total
-                |--------------------------------------------------------------------------
-                */
+                $discountAmount =
+                    $discountValue;
+            }
 
-                $discountAmount = min(
+
+            /*
+            |--------------------------------------------------------------------------
+            | PREVENT DISCOUNT FROM EXCEEDING TOTAL
+            |--------------------------------------------------------------------------
+            */
+
+            $discountAmount =
+                min(
                     $discountAmount,
                     $priceBeforeDiscount
                 );
 
-                $totalAfterDiscount =
-                    $priceBeforeDiscount - $discountAmount;
 
-                /*
-                |--------------------------------------------------------------------------
-                | Create purchase item
-                |--------------------------------------------------------------------------
-                */
-
-                $lastPurchase = PurchaseItem::create([
-                    'owner_id' => auth()->user()->getOwnerId(),
-
-                    'customer_name' =>
-                        $validated['customer_name'] ?? null,
-
-                    'customer_phone' =>
-                        $validated['customer_phone'] ?? null,
-
-                    'product_id' =>
-                        $product->id,
-
-                    'category_id' =>
-                        $product->category_id,
-
-                    'quantity' =>
-                        $quantityRequested,
-
-                    'total_price' =>
-                        $totalAfterDiscount,
-
-                    'discount' =>
-                        $discountAmount,
-
-                    'discount_type' =>
-                        $discountType,
-
-                    'discount_value' =>
-                        $discountValue,
-
-                    'payment_method' =>
-                        $validated['payment_method'],
-
-                    'transaction_id' =>
-                        $transactionId,
-
-                    'shop_id' =>
-                        $product->shop_id,
-
-                    'cashier_id' =>
-                        auth()->id(),
-                ]);
-
-                /*
-                |--------------------------------------------------------------------------
-                | Reduce stock
-                |--------------------------------------------------------------------------
-                */
-
-                $product->decrement(
-                    'stock_quantity',
-                    $quantityRequested
+            $totalAfterDiscount =
+                max(
+                    $priceBeforeDiscount -
+                    $discountAmount,
+                    0
                 );
 
-                /*
-                |--------------------------------------------------------------------------
-                | Refresh product so we have the new stock quantity
-                |--------------------------------------------------------------------------
-                */
 
-                $product->refresh();
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE PURCHASE
+            |--------------------------------------------------------------------------
+            */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Collect low-stock products
-                |--------------------------------------------------------------------------
-                |
-                | DO NOT send the notification here.
-                | Sending FCM inside the transaction can delay the sale response.
-                |
-                */
+            $lastPurchase = PurchaseItem::create([
 
-                if ($product->stock_quantity <= $product->stock_limit) {
-                    $lowStockProducts[] = $product;
-                }
-            }
-        });
+                'owner_id' =>
+                    auth()->user()->getOwnerId(),
+
+                'customer_name' =>
+                    $validated['customer_name'] ?? null,
+
+                'customer_phone' =>
+                    $validated['customer_phone'] ?? null,
+
+                'product_id' =>
+                    $product->id,
+
+                'category_id' =>
+                    $product->category_id,
+
+                'quantity' =>
+                    $quantityRequested,
+
+                'total_price' =>
+                    $totalAfterDiscount,
+
+                'discount' =>
+                    $discountAmount,
+
+                'discount_type' =>
+                    $discountType,
+
+                'discount_value' =>
+                    $discountValue,
+
+                'payment_method' =>
+                    $validated['payment_method'],
+
+                'transaction_id' =>
+                    $transactionId,
+
+                'shop_id' =>
+                    $product->shop_id,
+
+                'cashier_id' =>
+                    auth()->id(),
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | REDUCE STOCK
+            |--------------------------------------------------------------------------
+            */
+
+            $product->decrement(
+                'stock_quantity',
+                $quantityRequested
+            );
+        }
+
 
         /*
         |--------------------------------------------------------------------------
-        | Sale is now successfully committed.
-        |--------------------------------------------------------------------------
-        |
-        | At this point the database transaction is complete.
-        |
-        | We intentionally do NOT send FCM synchronously here because
-        | Firebase/network delays should never prevent the cashier from
-        | receiving the successful sale response.
-        |
-        */
-
-        /*
-        |--------------------------------------------------------------------------
-        | Queue low-stock notifications
-        |--------------------------------------------------------------------------
-        |
-        | LowStockAlert implements ShouldQueue, so this dispatches the
-        | notification to Laravel's queue instead of making the cashier
-        | wait for FCM.
-        |
-        */
-
-        // foreach ($lowStockProducts as $product) {
-        //     try {
-        //         Notification::send(
-        //             auth()->user(),
-        //             new LowStockAlert($product)
-        //         );
-        //     } catch (\Throwable $notificationError) {
-        //         \Log::error('Low stock notification failed', [
-        //             'product_id' => $product->id,
-        //             'product_name' => $product->name,
-        //             'error' => $notificationError->getMessage(),
-        //         ]);
-        //     }
-        // }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Return successful sale response
+        | SUCCESS RESPONSE
         |--------------------------------------------------------------------------
         */
 
         return response()->json([
-            'success' => true,
-            'message' => 'Sale completed successfully.',
-            'receipt_id' => $lastPurchase?->id,
-            'txn_id' => $transactionId,
+            'success' =>
+                true,
+
+            'message' =>
+                'Sale completed successfully.',
+
+            'receipt_id' =>
+                $lastPurchase?->id,
+
+            'txn_id' =>
+                $transactionId,
+
         ], 200);
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
+
+    } catch (
+        \Illuminate\Validation\ValidationException $e
+    ) {
 
         return response()->json([
             'success' => false,
             'message' => $e->errors(),
+
         ], 422);
+
 
     } catch (\Throwable $e) {
 
-        \Log::error('Sale creation failed', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ]);
+        \Log::error(
+            'Sale creation failed',
+            [
+                'error' =>
+                    $e->getMessage(),
+
+                'trace' =>
+                    $e->getTraceAsString(),
+            ]
+        );
 
         return response()->json([
             'success' => false,
-            'message' => 'Sale could not be completed: ' . $e->getMessage(),
+
+            'message' =>
+                'Sale could not be completed: ' .
+                $e->getMessage(),
+
         ], 500);
     }
 }
