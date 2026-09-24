@@ -78,95 +78,218 @@ class PurchaseItemController extends Controller
     // POST /api/purchase-items
     // Store the purchase item(s) and update stock
     public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                // Customer info (optional)
-                'customer_name'  => 'nullable|string|max:255',
-                'customer_phone' => 'nullable|string|max:20',
+{
+    try {
+        $validated = $request->validate([
+            // Customer info (optional)
+            'customer_name'  => 'nullable|string|max:255',
+            'customer_phone' => 'nullable|string|max:20',
 
-                'products' => 'required|array|min:1',
-                'products.*.product_id' => 'required|exists:products,id',
-                'products.*.quantity' => 'required|integer|min:1',
-                'products.*.discount_type' => 'nullable|in:none,percentage,flat',
-                'products.*.discount_value' => 'nullable|numeric|min:0',
-                'payment_method' => 'required|in:cash,card,transfer',
-            ]);
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.discount_type' => 'nullable|in:none,percentage,flat',
+            'products.*.discount_value' => 'nullable|numeric|min:0',
+            'payment_method' => 'required|in:cash,card,transfer',
+        ]);
 
-            $transactionId = 'TXN-' . now()->format('YmdHis') . '-' . rand(1000, 9999);
-            $lastPurchase = null;
+        $transactionId = 'TXN-' . now()->format('YmdHis') . '-' . rand(1000, 9999);
 
+        $lastPurchase = null;
+        $lowStockProducts = [];
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMPLETE SALE INSIDE A DATABASE TRANSACTION
+        |--------------------------------------------------------------------------
+        */
+        DB::transaction(function () use (
+            $validated,
+            $transactionId,
+            &$lastPurchase,
+            &$lowStockProducts
+        ) {
             foreach ($validated['products'] as $item) {
-                $product = Product::findOrFail($item['product_id']);
-                $quantityRequested = $item['quantity'];
 
+                $product = Product::findOrFail($item['product_id']);
+
+                $quantityRequested = (int) $item['quantity'];
+
+                /*
+                |--------------------------------------------------------------------------
+                | STOCK CHECK
+                |--------------------------------------------------------------------------
+                */
                 if ($product->stock_quantity < $quantityRequested) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Not enough stock for {$product->name}. Available: {$product->stock_quantity}"
-                    ], 400);
+                    throw new \Exception(
+                        "Not enough stock for {$product->name}. Available: {$product->stock_quantity}"
+                    );
                 }
 
-                // Calculate discount
-                $discountType  = $item['discount_type'] ?? 'none';
+                /*
+                |--------------------------------------------------------------------------
+                | DISCOUNT
+                |--------------------------------------------------------------------------
+                */
+                $discountType = $item['discount_type'] ?? 'none';
                 $discountValue = $item['discount_value'] ?? 0;
-                $priceBeforeDiscount = $product->price * $quantityRequested;
+
+                $priceBeforeDiscount =
+                    $product->price * $quantityRequested;
+
                 $discountAmount = 0;
 
                 if ($discountType === 'percentage') {
-                    $discountAmount = ($discountValue / 100) * $priceBeforeDiscount;
+                    $discountAmount =
+                        ($discountValue / 100) * $priceBeforeDiscount;
                 } elseif ($discountType === 'flat') {
                     $discountAmount = $discountValue;
                 }
 
-                $totalAfterDiscount = max($priceBeforeDiscount - $discountAmount, 0);
+                $totalAfterDiscount = max(
+                    $priceBeforeDiscount - $discountAmount,
+                    0
+                );
 
+                /*
+                |--------------------------------------------------------------------------
+                | CREATE SALE ITEM
+                |--------------------------------------------------------------------------
+                */
                 $lastPurchase = PurchaseItem::create([
                     'owner_id' => auth()->user()->getOwnerId(),
 
-                    'customer_name'  => $validated['customer_name'] ?? null,
-                    'customer_phone' => $validated['customer_phone'] ?? null,
-                    'product_id'     => $product->id,
-                    'category_id'    => $product->category_id,
-                    'quantity'       => $quantityRequested,
-                    'total_price'    => $totalAfterDiscount,
-                    'discount'       => $discountAmount,
-                    'discount_type'  => $discountType,
-                    'discount_value' => $discountValue,
-                    'payment_method' => $validated['payment_method'],
-                    'transaction_id' => $transactionId,
-                    'shop_id'        => $product->shop_id,
-                    'cashier_id'     => auth()->id(),
+                    'customer_name' =>
+                        $validated['customer_name'] ?? null,
+
+                    'customer_phone' =>
+                        $validated['customer_phone'] ?? null,
+
+                    'product_id' =>
+                        $product->id,
+
+                    'category_id' =>
+                        $product->category_id,
+
+                    'quantity' =>
+                        $quantityRequested,
+
+                    'total_price' =>
+                        $totalAfterDiscount,
+
+                    'discount' =>
+                        $discountAmount,
+
+                    'discount_type' =>
+                        $discountType,
+
+                    'discount_value' =>
+                        $discountValue,
+
+                    'payment_method' =>
+                        $validated['payment_method'],
+
+                    'transaction_id' =>
+                        $transactionId,
+
+                    'shop_id' =>
+                        $product->shop_id,
+
+                    'cashier_id' =>
+                        auth()->id(),
                 ]);
 
-                // Update stock
-                $product->decrement('stock_quantity', $quantityRequested);
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE STOCK
+                |--------------------------------------------------------------------------
+                */
+                $product->decrement(
+                    'stock_quantity',
+                    $quantityRequested
+                );
 
-                // Low stock alert
-                if ($product->stock_quantity <= $product->stock_limit) {
-                    Notification::send(auth()->user(), new LowStockAlert($product));
+                /*
+                |--------------------------------------------------------------------------
+                | COLLECT LOW STOCK PRODUCTS
+                |
+                | IMPORTANT:
+                | We DON'T send the notification here.
+                | We only remember which products need an alert.
+                |--------------------------------------------------------------------------
+                */
+                $product->refresh();
+
+                if (
+                    $product->stock_quantity <=
+                    $product->stock_limit
+                ) {
+                    $lowStockProducts[] = $product;
                 }
             }
+        });
 
-            return response()->json([
-                'success'    => true,
-                'receipt_id' => $lastPurchase->id,
-                'txn_id'     => $transactionId
-            ]);
+        /*
+        |--------------------------------------------------------------------------
+        | SEND LOW STOCK NOTIFICATIONS
+        |
+        | Notification failure must NOT make the sale fail.
+        |--------------------------------------------------------------------------
+        */
+        foreach ($lowStockProducts as $product) {
+            try {
+                Notification::send(
+                    auth()->user(),
+                    new LowStockAlert($product)
+                );
+            } catch (\Throwable $notificationError) {
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->errors(),
-            ], 422);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Server error: ' . $e->getMessage(),
-            ], 500);
+                \Log::error(
+                    'Low stock notification failed',
+                    [
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'error' => $notificationError->getMessage(),
+                    ]
+                );
+            }
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUCCESS
+        |--------------------------------------------------------------------------
+        */
+        return response()->json([
+            'success' => true,
+            'message' => 'Sale completed successfully.',
+            'receipt_id' => $lastPurchase?->id,
+            'txn_id' => $transactionId,
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->errors(),
+        ], 422);
+
+    } catch (\Throwable $e) {
+
+        \Log::error(
+            'Sale creation failed',
+            [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]
+        );
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Sale could not be completed: ' . $e->getMessage(),
+        ], 500);
     }
+}
 
     // GET /api/admin/sales?search=&date=
     // View all sales with search and date filtering FOR ADMIN
