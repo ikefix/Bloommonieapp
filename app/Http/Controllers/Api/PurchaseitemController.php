@@ -502,20 +502,20 @@ public function store(Request $request)
         |
         */
 
-        foreach ($lowStockProducts as $product) {
-            try {
-                Notification::send(
-                    auth()->user(),
-                    new LowStockAlert($product)
-                );
-            } catch (\Throwable $notificationError) {
-                \Log::error('Low stock notification failed', [
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'error' => $notificationError->getMessage(),
-                ]);
-            }
-        }
+        // foreach ($lowStockProducts as $product) {
+        //     try {
+        //         Notification::send(
+        //             auth()->user(),
+        //             new LowStockAlert($product)
+        //         );
+        //     } catch (\Throwable $notificationError) {
+        //         \Log::error('Low stock notification failed', [
+        //             'product_id' => $product->id,
+        //             'product_name' => $product->name,
+        //             'error' => $notificationError->getMessage(),
+        //         ]);
+        //     }
+        // }
 
         /*
         |--------------------------------------------------------------------------
