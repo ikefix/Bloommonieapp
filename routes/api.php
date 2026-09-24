@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\StockTransferController;
 use App\Http\Controllers\Api\ProductPermissionController;
 use App\Http\Controllers\Api\Auth\EmailVerificationController;
+use App\Http\Controllers\Api\PlanAccessController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +69,8 @@ Route::middleware('auth:sanctum')->group(function () {
         EmailVerificationController::class,
         'resendOtp'
     ]);
+
+    Route::get('/plan-access', [ PlanAccessController::class, 'index' ]);
 
 });
 
