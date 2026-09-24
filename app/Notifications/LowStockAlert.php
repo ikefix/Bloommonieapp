@@ -20,7 +20,7 @@ class LowStockAlert extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['database', 'fcm'];
+        return ['database'];
     }
 
     public function toDatabase($notifiable)
