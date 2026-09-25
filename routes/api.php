@@ -87,6 +87,11 @@ Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(functio
 
     Route::get('/plan', [PlanController::class, 'index']);
 
+    Route::get(
+        '/barcode/product/{barcode}',
+        [BarcodeController::class, 'getProduct']
+    );
+
     /*
     |--------------------------------------------------------------------------
     | Stock Transfer Data
