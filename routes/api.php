@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Auth\GoogleLoginController;
 use App\Http\Controllers\Api\Auth\LoginController;
@@ -84,6 +84,8 @@ Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(functio
         StockTransferController::class,
         'store'
     ]);
+
+    Route::get('/plan', [PlanController::class, 'index']);
 
     /*
     |--------------------------------------------------------------------------

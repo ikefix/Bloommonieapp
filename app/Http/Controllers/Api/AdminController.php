@@ -238,52 +238,78 @@ class AdminController extends Controller
      * Sales page data with date + shop list.
      */
     public function salesPage(Request $request)
-    {
-        $date = $request->input('date', now()->toDateString());
-        $shops = Shop::where('user_id', $request->user()->id)->get();
+{
+    $date = $request->input('date', now()->toDateString());
 
-        $sales = PurchaseItem::with(['product.category', 'shop'])
-            ->whereDate('created_at', $date)
-            ->orderBy('created_at', 'desc')
-            ->get();
+    $shops = Shop::where(
+        'user_id',
+        $request->user()->id
+    )->get();
 
-        return response()->json([
-            'status' => true,
-            'date' => $date,
-            'shops' => $shops,
-            'sales' => $sales,
-        ]);
+    $sales = PurchaseItem::with([
+        'product.category',
+        'shop',
+        'cashier',
+    ])
+        ->whereDate('created_at', $date)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return response()->json([
+        'status' => true,
+        'date' => $date,
+        'shops' => $shops,
+        'sales' => $sales,
+    ]);
+}
+
+
+/**
+ * Filter sales by date, search term, and shop.
+ */
+public function filterSales(Request $request)
+{
+    $date = $request->input(
+        'date',
+        now()->toDateString()
+    );
+
+    $search = $request->input('search');
+    $shopId = $request->input('shop');
+
+    $query = PurchaseItem::with([
+        'product.category',
+        'shop',
+        'cashier',
+    ])
+        ->whereDate('created_at', $date);
+
+    if ($search) {
+        $query->whereHas('product', function ($q) use ($search) {
+            $q->where(
+                'name',
+                'like',
+                "%{$search}%"
+            );
+        });
     }
 
-    /**
-     * Filter sales by date, search term, and shop.
-     */
-    public function filterSales(Request $request)
-    {
-        $date = $request->input('date', now()->toDateString());
-        $search = $request->input('search');
-        $shopId = $request->input('shop');
-
-        $query = PurchaseItem::with(['product.category', 'shop'])
-            ->whereDate('created_at', $date);
-
-        if ($search) {
-            $query->whereHas('product', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            });
-        }
-
-        if ($shopId) {
-            $query->where('shop_id', $shopId);
-        }
-
-        $sales = $query->orderBy('created_at', 'desc')->get();
-
-        return response()->json([
-            'status' => true,
-            'sales' => $sales,
-        ]);
+    if ($shopId) {
+        $query->where(
+            'shop_id',
+            $shopId
+        );
     }
+
+    $sales = $query
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return response()->json([
+        'status' => true,
+        'sales' => $sales,
+    ]);
+}
 
     /**
      * Full admin dashboard analytics.

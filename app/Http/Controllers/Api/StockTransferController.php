@@ -31,7 +31,53 @@ class StockTransferController extends Controller
         ]);
 
         try {
-            $result = DB::transaction(function () use ($validated) {
+            $result = DB::transaction(function () use ($validated, $request) {
+
+                $user = $request->user();
+
+                /*
+                |--------------------------------------------------------------------------
+                | Determine owner
+                |--------------------------------------------------------------------------
+                */
+
+                $ownerId = $user->owner_id ?? $user->id;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Verify source shop belongs to owner
+                |--------------------------------------------------------------------------
+                */
+
+                $sourceShop = Shop::where('id', $validated['shop_id'])
+                    ->where('owner_id', $ownerId)
+                    ->first();
+
+                if (!$sourceShop) {
+                    throw ValidationException::withMessages([
+                        'shop_id' => [
+                            'The selected source shop does not belong to your account.'
+                        ]
+                    ]);
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Verify destination shop belongs to owner
+                |--------------------------------------------------------------------------
+                */
+
+                $destinationShop = Shop::where('id', $validated['to_shop_id'])
+                    ->where('owner_id', $ownerId)
+                    ->first();
+
+                if (!$destinationShop) {
+                    throw ValidationException::withMessages([
+                        'to_shop_id' => [
+                            'The selected destination shop does not belong to your account.'
+                        ]
+                    ]);
+                }
 
                 /*
                 |--------------------------------------------------------------------------
@@ -98,10 +144,12 @@ class StockTransferController extends Controller
 
                 if ($product->stock_quantity <= $product->stock_limit) {
 
-                    $admins = User::whereIn('role', [
-                        'admin',
-                        'manager'
-                    ])->get();
+                    $admins = User::where('owner_id', $ownerId)
+                        ->whereIn('role', [
+                            'admin',
+                            'manager',
+                        ])
+                        ->get();
 
                     if ($admins->count() > 0) {
                         Notification::send(
@@ -131,6 +179,13 @@ class StockTransferController extends Controller
                 if ($destProduct) {
 
                     $destProduct->stock_quantity += $validated['quantity'];
+
+                    /*
+                    | Keep the transfer prices if supplied.
+                    */
+                    $destProduct->cost_price = $validated['cost_price'];
+                    $destProduct->price = $validated['selling_price'];
+
                     $destProduct->save();
 
                 } else {
@@ -151,6 +206,10 @@ class StockTransferController extends Controller
                     if ($existing) {
 
                         $existing->stock_quantity += $validated['quantity'];
+
+                        $existing->cost_price = $validated['cost_price'];
+                        $existing->price = $validated['selling_price'];
+
                         $existing->save();
 
                     } else {
@@ -164,8 +223,8 @@ class StockTransferController extends Controller
                         $destProduct = Product::create([
                             'name' => $product->name,
                             'category_id' => $product->category_id,
-                            'cost_price' => $product->cost_price,
-                            'price' => $product->price,
+                            'cost_price' => $validated['cost_price'],
+                            'price' => $validated['selling_price'],
                             'shop_id' => $validated['to_shop_id'],
                             'stock_quantity' => $validated['quantity'],
                             'stock_limit' => $product->stock_limit,
@@ -198,11 +257,17 @@ class StockTransferController extends Controller
 
 
     /**
-     * Get shops.
+     * Get shops belonging to the logged-in owner.
      */
-    public function shops()
+    public function shops(Request $request)
     {
-        $shops = Shop::all();
+        $user = $request->user();
+
+        $ownerId = $user->owner_id ?? $user->id;
+
+        $shops = Shop::where('owner_id', $ownerId)
+            ->orderBy('name')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -214,9 +279,15 @@ class StockTransferController extends Controller
     /**
      * Get products.
      */
-    public function products()
+    public function products(Request $request)
     {
-        $products = Product::all();
+        $user = $request->user();
+
+        $ownerId = $user->owner_id ?? $user->id;
+
+        $products = Product::where('owner_id', $ownerId)
+            ->orderBy('name')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -228,9 +299,15 @@ class StockTransferController extends Controller
     /**
      * Get categories.
      */
-    public function categories()
+    public function categories(Request $request)
     {
-        $categories = Category::all();
+        $user = $request->user();
+
+        $ownerId = $user->owner_id ?? $user->id;
+
+        $categories = Category::where('owner_id', $ownerId)
+            ->orderBy('name')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -241,22 +318,54 @@ class StockTransferController extends Controller
 
     /**
      * Get products belonging to a specific shop.
+     *
+     * Used by the Flutter Stock Transfer product selector.
+     *
+     * The Flutter app can then search the returned list locally
+     * by product name or barcode.
      */
-    public function getProductsByShop($shopId)
-    {
-        $shop = Shop::find($shopId);
+    public function getProductsByShop(
+        Request $request,
+        $shopId
+    ) {
+        $user = $request->user();
+
+        $ownerId = $user->owner_id ?? $user->id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verify that the shop belongs to the logged-in owner
+        |--------------------------------------------------------------------------
+        */
+
+        $shop = Shop::where('id', $shopId)
+            ->where('owner_id', $ownerId)
+            ->first();
 
         if (!$shop) {
             return response()->json([
                 'success' => false,
-                'message' => 'Shop not found.',
+                'message' => 'Shop not found or you do not have access to this shop.',
             ], 404);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Get products for this shop
+        |--------------------------------------------------------------------------
+        |
+        | Barcode is included because the Flutter product selector
+        | searches by both product name and barcode.
+        |
+        */
+
         $products = Product::where('shop_id', $shopId)
+            ->where('owner_id', $ownerId)
+            ->orderBy('name')
             ->get([
                 'id',
                 'name',
+                'barcode',
                 'category_id',
                 'cost_price',
                 'price',
