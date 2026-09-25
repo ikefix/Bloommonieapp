@@ -303,28 +303,6 @@ public function dashboard(Request $request)
     $startOfMonth = Carbon::now()->startOfMonth();
     $endOfMonth = Carbon::now()->endOfMonth();
 
-    /*
-    |--------------------------------------------------------------------------
-    | REVENUE
-    |--------------------------------------------------------------------------
-    */
-
-    // Revenue today
-    $revenueToday = PurchaseItem::whereDate('created_at', $today)
-        ->sum(DB::raw('total_price - COALESCE(discount_value, 0)'));
-
-    // Revenue this week
-    $revenueThisWeek = PurchaseItem::whereBetween(
-        'created_at',
-        [$startOfWeek, $endOfWeek]
-    )->sum(DB::raw('total_price - COALESCE(discount_value, 0)'));
-
-    // Revenue this month
-    $revenueThisMonth = PurchaseItem::whereBetween(
-        'created_at',
-        [$startOfMonth, $endOfMonth]
-    )->sum(DB::raw('total_price - COALESCE(discount_value, 0)'));
-
 
     /*
     |--------------------------------------------------------------------------
@@ -350,20 +328,74 @@ public function dashboard(Request $request)
 
     /*
     |--------------------------------------------------------------------------
+    | GROSS SALES
+    |--------------------------------------------------------------------------
+    | Gross sales = total_price before discount
+    |--------------------------------------------------------------------------
+    */
+
+    $grossSalesToday = PurchaseItem::whereDate(
+        'created_at',
+        $today
+    )->sum('total_price');
+
+    $grossSalesThisWeek = PurchaseItem::whereBetween(
+        'created_at',
+        [$startOfWeek, $endOfWeek]
+    )->sum('total_price');
+
+    $grossSalesThisMonth = PurchaseItem::whereBetween(
+        'created_at',
+        [$startOfMonth, $endOfMonth]
+    )->sum('total_price');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | REVENUE
+    |--------------------------------------------------------------------------
+    | Revenue = gross sales - discount
+    |--------------------------------------------------------------------------
+    */
+
+    $revenueToday =
+        (float) $grossSalesToday -
+        (float) $totalDiscountToday;
+
+    $revenueThisWeek =
+        (float) $grossSalesThisWeek -
+        (float) $totalDiscountThisWeek;
+
+    $revenueThisMonth =
+        (float) $grossSalesThisMonth -
+        (float) $totalDiscountThisMonth;
+
+
+    /*
+    |--------------------------------------------------------------------------
     | COST OF GOODS SOLD
     |--------------------------------------------------------------------------
     */
 
-    $costToday = PurchaseItem::whereDate('created_at', $today)
+    $costToday = PurchaseItem::whereDate(
+        'created_at',
+        $today
+    )
         ->with('product')
         ->get()
         ->sum(function ($item) {
 
-            $costPrice = (float) ($item->product->cost_price ?? 0);
-            $quantity = (float) ($item->quantity ?? 0);
+            $costPrice = (float) (
+                $item->product->cost_price ?? 0
+            );
+
+            $quantity = (float) (
+                $item->quantity ?? 0
+            );
 
             return $costPrice * $quantity;
         });
+
 
     $costThisWeek = PurchaseItem::whereBetween(
         'created_at',
@@ -373,11 +405,17 @@ public function dashboard(Request $request)
         ->get()
         ->sum(function ($item) {
 
-            $costPrice = (float) ($item->product->cost_price ?? 0);
-            $quantity = (float) ($item->quantity ?? 0);
+            $costPrice = (float) (
+                $item->product->cost_price ?? 0
+            );
+
+            $quantity = (float) (
+                $item->quantity ?? 0
+            );
 
             return $costPrice * $quantity;
         });
+
 
     $costThisMonth = PurchaseItem::whereBetween(
         'created_at',
@@ -387,8 +425,13 @@ public function dashboard(Request $request)
         ->get()
         ->sum(function ($item) {
 
-            $costPrice = (float) ($item->product->cost_price ?? 0);
-            $quantity = (float) ($item->quantity ?? 0);
+            $costPrice = (float) (
+                $item->product->cost_price ?? 0
+            );
+
+            $quantity = (float) (
+                $item->quantity ?? 0
+            );
 
             return $costPrice * $quantity;
         });
@@ -398,13 +441,18 @@ public function dashboard(Request $request)
     |--------------------------------------------------------------------------
     | GROSS PROFIT
     |--------------------------------------------------------------------------
+    | Gross profit = revenue after discount - cost of goods
+    |--------------------------------------------------------------------------
     */
 
-    $grossProfitToday = $revenueToday - $costToday;
+    $grossProfitToday =
+        $revenueToday - $costToday;
 
-    $grossProfitWeek = $revenueThisWeek - $costThisWeek;
+    $grossProfitWeek =
+        $revenueThisWeek - $costThisWeek;
 
-    $grossProfitMonth = $revenueThisMonth - $costThisMonth;
+    $grossProfitMonth =
+        $revenueThisMonth - $costThisMonth;
 
 
     /*
@@ -418,10 +466,12 @@ public function dashboard(Request $request)
         $today
     )->sum('amount');
 
+
     $weeklyExpenses = Expense::whereBetween(
         'date',
         [$startOfWeek, $endOfWeek]
     )->sum('amount');
+
 
     $monthlyExpenses = Expense::whereBetween(
         'date',
@@ -435,11 +485,14 @@ public function dashboard(Request $request)
     |--------------------------------------------------------------------------
     */
 
-    $netProfitToday = $grossProfitToday - $dailyExpenses;
+    $netProfitToday =
+        $grossProfitToday - $dailyExpenses;
 
-    $netProfitWeek = $grossProfitWeek - $weeklyExpenses;
+    $netProfitWeek =
+        $grossProfitWeek - $weeklyExpenses;
 
-    $netProfitMonth = $grossProfitMonth - $monthlyExpenses;
+    $netProfitMonth =
+        $grossProfitMonth - $monthlyExpenses;
 
 
     /*
@@ -494,8 +547,11 @@ public function dashboard(Request $request)
         ->take(5)
         ->get();
 
+
     $topSellingProductNames = [];
+
     $topSellingProductSales = [];
+
 
     foreach ($topSelling as $item) {
 
@@ -514,11 +570,11 @@ public function dashboard(Request $request)
     */
 
     $salesTrend = PurchaseItem::select(
-            DB::raw('DATE(created_at) as date'),
-            DB::raw(
-                'SUM(total_price - COALESCE(discount_value, 0)) as total'
-            )
+        DB::raw('DATE(created_at) as date'),
+        DB::raw(
+            'SUM(total_price - COALESCE(discount_value, 0)) as total'
         )
+    )
         ->whereDate(
             'created_at',
             '>=',
@@ -528,8 +584,11 @@ public function dashboard(Request $request)
         ->orderBy('date')
         ->get();
 
+
     $salesTrendLabels = [];
+
     $salesTrendData = [];
+
 
     $dates = collect(range(0, 6))
         ->map(function ($daysAgo) {
@@ -541,15 +600,18 @@ public function dashboard(Request $request)
         })
         ->reverse();
 
+
     foreach ($dates as $date) {
 
         $salesTrendLabels[] =
             Carbon::parse($date)->format('M d');
 
+
         $daySale = $salesTrend->firstWhere(
             'date',
             $date
         );
+
 
         $salesTrendData[] =
             $daySale
@@ -565,57 +627,84 @@ public function dashboard(Request $request)
     */
 
     return response()->json([
+
         'status' => true,
 
         'data' => [
 
             /*
             |--------------------------------------------------------------------------
-            | REVENUE
+            | SALES / REVENUE
             |--------------------------------------------------------------------------
             */
 
-            'totalRevenueToday' => (float) $revenueToday,
+            // Gross sales before discount
+            'grossSalesToday' =>
+                (float) $grossSalesToday,
 
-            'totalRevenueThisWeek' => (float) $revenueThisWeek,
+            'grossSalesThisWeek' =>
+                (float) $grossSalesThisWeek,
 
-            'totalRevenueThisMonth' => (float) $revenueThisMonth,
+            'grossSalesThisMonth' =>
+                (float) $grossSalesThisMonth,
 
-            // Keep old field for compatibility
-            'totalSalesThisWeek' => (float) $revenueThisWeek,
+
+            // Revenue after discount
+            'totalRevenueToday' =>
+                (float) $revenueToday,
+
+            'totalRevenueThisWeek' =>
+                (float) $revenueThisWeek,
+
+            'totalRevenueThisMonth' =>
+                (float) $revenueThisMonth,
+
+
+            // Keep old field for Flutter compatibility
+            'totalSalesThisWeek' =>
+                (float) $revenueThisWeek,
 
 
             /*
             |--------------------------------------------------------------------------
-            | COST OF GOODS
+            | COST
             |--------------------------------------------------------------------------
             */
 
-            'costToday' => (float) $costToday,
+            'costToday' =>
+                (float) $costToday,
 
-            'costThisWeek' => (float) $costThisWeek,
+            'costThisWeek' =>
+                (float) $costThisWeek,
 
-            'costThisMonth' => (float) $costThisMonth,
+            'costThisMonth' =>
+                (float) $costThisMonth,
 
 
             /*
             |--------------------------------------------------------------------------
-            | GROSS PROFIT
+            | PROFIT
             |--------------------------------------------------------------------------
             */
 
-            'dailyProfit' => (float) $grossProfitToday,
+            'dailyProfit' =>
+                (float) $grossProfitToday,
 
-            'weeklyProfit' => (float) $grossProfitWeek,
+            'weeklyProfit' =>
+                (float) $grossProfitWeek,
 
-            'monthlyProfit' => (float) $grossProfitMonth,
+            'monthlyProfit' =>
+                (float) $grossProfitMonth,
 
-            // More explicit names
-            'grossProfitToday' => (float) $grossProfitToday,
 
-            'grossProfitWeek' => (float) $grossProfitWeek,
+            'grossProfitToday' =>
+                (float) $grossProfitToday,
 
-            'grossProfitMonth' => (float) $grossProfitMonth,
+            'grossProfitWeek' =>
+                (float) $grossProfitWeek,
+
+            'grossProfitMonth' =>
+                (float) $grossProfitMonth,
 
 
             /*
@@ -624,11 +713,14 @@ public function dashboard(Request $request)
             |--------------------------------------------------------------------------
             */
 
-            'dailyExpenses' => (float) $dailyExpenses,
+            'dailyExpenses' =>
+                (float) $dailyExpenses,
 
-            'weeklyExpenses' => (float) $weeklyExpenses,
+            'weeklyExpenses' =>
+                (float) $weeklyExpenses,
 
-            'monthlyExpenses' => (float) $monthlyExpenses,
+            'monthlyExpenses' =>
+                (float) $monthlyExpenses,
 
 
             /*
@@ -637,11 +729,14 @@ public function dashboard(Request $request)
             |--------------------------------------------------------------------------
             */
 
-            'netProfitToday' => (float) $netProfitToday,
+            'netProfitToday' =>
+                (float) $netProfitToday,
 
-            'netProfitWeek' => (float) $netProfitWeek,
+            'netProfitWeek' =>
+                (float) $netProfitWeek,
 
-            'netProfitMonth' => (float) $netProfitMonth,
+            'netProfitMonth' =>
+                (float) $netProfitMonth,
 
 
             /*
@@ -650,11 +745,14 @@ public function dashboard(Request $request)
             |--------------------------------------------------------------------------
             */
 
-            'dailyLoss' => (float) $dailyLoss,
+            'dailyLoss' =>
+                (float) $dailyLoss,
 
-            'weeklyLoss' => (float) $weeklyLoss,
+            'weeklyLoss' =>
+                (float) $weeklyLoss,
 
-            'monthlyLoss' => (float) $monthlyLoss,
+            'monthlyLoss' =>
+                (float) $monthlyLoss,
 
 
             /*
@@ -663,11 +761,14 @@ public function dashboard(Request $request)
             |--------------------------------------------------------------------------
             */
 
-            'totalDiscountToday' => (float) $totalDiscountToday,
+            'totalDiscountToday' =>
+                (float) $totalDiscountToday,
 
-            'totalDiscountThisWeek' => (float) $totalDiscountThisWeek,
+            'totalDiscountThisWeek' =>
+                (float) $totalDiscountThisWeek,
 
-            'totalDiscountThisMonth' => (float) $totalDiscountThisMonth,
+            'totalDiscountThisMonth' =>
+                (float) $totalDiscountThisMonth,
 
 
             /*
@@ -676,16 +777,18 @@ public function dashboard(Request $request)
             |--------------------------------------------------------------------------
             */
 
-            'productsInStock' => $productsInStock,
+            'productsInStock' =>
+                $productsInStock,
 
 
             /*
             |--------------------------------------------------------------------------
-            | TOP PRODUCTS
+            | TOP SELLING
             |--------------------------------------------------------------------------
             */
 
-            'topSelling' => $topSelling,
+            'topSelling' =>
+                $topSelling,
 
             'topSellingProductNames' =>
                 $topSellingProductNames,
@@ -696,7 +799,7 @@ public function dashboard(Request $request)
 
             /*
             |--------------------------------------------------------------------------
-            | SALES CHART
+            | SALES TREND
             |--------------------------------------------------------------------------
             */
 
