@@ -202,30 +202,51 @@ public function store(Request $request)
     }
 
     // Update an existing product (admin only)
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'shop_id' => 'required|exists:shops,id', // 💥 Add this line
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'cost_price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-        ]);
+    // Update an existing product
+public function update(Request $request, $id)
+{
+    $product = Product::findOrFail($id);
 
-        // Prevent stock quantity from going below zero
-        if ($request->stock_quantity < 0) {
-            return response()->json(['error' => 'Stock quantity cannot be negative'], 422);
-        }
+    $request->validate([
+        'category_id'    => 'required|exists:categories,id',
+        'shop_id'        => 'required|exists:shops,id',
+        'name'           => 'required|string|max:255',
 
-        $product->update($request->all());
+        // Ignore this product's own barcode when checking uniqueness
+        'barcode'        => 'required|string|unique:products,barcode,' . $product->id,
 
-        // Notify admin if stock quantity is at or below reorder level after update
-        $this->checkStockNotification($product);
+        'price'          => 'required|numeric|min:0',
+        'cost_price'     => 'required|numeric|min:0',
+        'stock_limit'    => 'required|numeric|min:0',
+        'stock_quantity' => 'required|numeric|min:0',
 
-        return response()->json(['message' => 'Product updated successfully', 'product' => $product]);
-    }
+        // Manufacturing fields
+        'stock_unit'     => 'nullable|string|max:50',
+        'unit_size'      => 'nullable|numeric|min:0',
+    ]);
+
+    $product->update([
+        'category_id'    => $request->category_id,
+        'shop_id'        => $request->shop_id,
+        'name'           => $request->name,
+        'barcode'        => $request->barcode,
+        'price'          => $request->price,
+        'cost_price'     => $request->cost_price,
+        'stock_limit'    => $request->stock_limit,
+        'stock_quantity' => $request->stock_quantity,
+        'stock_unit'     => $request->stock_unit,
+        'unit_size'      => $request->unit_size,
+    ]);
+
+    // Check stock after update
+    $this->checkStockNotification($product);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Product updated successfully',
+        'data' => $product->fresh(),
+    ]);
+}
 
     // Delete a product (admin only)
     public function destroy($id)
