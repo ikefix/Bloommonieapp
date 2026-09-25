@@ -33,6 +33,8 @@ use App\Http\Controllers\Api\ProductPermissionController;
 use App\Http\Controllers\Api\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\PlanAccessController;
 
+use App\Http\Controllers\Api\BarcodeController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
