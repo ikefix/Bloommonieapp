@@ -75,15 +75,23 @@
                 </td>
                 <td>{{ $product->unit_size ?? 'Not assigned' }}</td>
                 <td class="product-btn">
-                    <button type="button" class="btn btn-sm btn-warning edit-btn"
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-primary edit-btn"
+
                         data-id="{{ $product->id }}"
                         data-name="{{ $product->name }}"
                         data-category="{{ $product->category_id }}"
                         data-price="{{ $product->price }}"
                         data-cost="{{ $product->cost_price }}"
                         data-stock="{{ $product->stock_quantity }}"
-                        data-limit="{{ $product->stock_limit }}">
-                        Edit
+                        data-limit="{{ $product->stock_limit }}"
+                        data-shop="{{ $product->shop_id }}"
+                        data-barcode="{{ $product->barcode }}"
+                        data-stock-unit="{{ $product->stock_unit }}"
+                        data-unit-size="{{ $product->unit_size }}"
+                    >
+                        <i class="bx bx-edit"></i> Edit
                     </button>
 
                     <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline-block;" class="delete-form">

@@ -343,38 +343,161 @@ document.getElementById('toggle-extra-fields').addEventListener('click', functio
         }
     });
 
-    // Edit button logic
+    // ============================================================
+    // EDIT PRODUCT
+    // ============================================================
+
     document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('edit-btn')) {
-            const button = e.target;
 
-            document.querySelector('#product_id').value = button.dataset.id;
-            document.querySelector('#name').value = button.dataset.name;
-            document.querySelector('#category_id').value = button.dataset.category;
-            document.querySelector('#price').value = button.dataset.price;
-            document.querySelector('#cost_price').value = button.dataset.cost;
-            document.querySelector('#stock_quantity').value = button.dataset.stock;
-            document.querySelector('#stock_limit').value = button.dataset.limit;
-            document.querySelector('#shop_id').value = button.closest('tr').querySelector('td:nth-child(7)').innerText;
+        const button = e.target.closest('.edit-btn');
 
-            // Populate barcode if exists
-            if (button.dataset.barcode) {
-                document.querySelector('#barcode').value = button.dataset.barcode;
-                JsBarcode("#barcode-preview", button.dataset.barcode, {
-                    format: "CODE128",
-                    lineColor: "#000",
+        if (!button) return;
+
+        // ----------------------------------------------------------
+        // BASIC PRODUCT INFORMATION
+        // ----------------------------------------------------------
+
+        document.querySelector('#product_id').value =
+            button.dataset.id || '';
+
+        document.querySelector('#name').value =
+            button.dataset.name || '';
+
+        document.querySelector('#category_id').value =
+            button.dataset.category || '';
+
+        document.querySelector('#price').value =
+            button.dataset.price || '';
+
+        document.querySelector('#cost_price').value =
+            button.dataset.cost || '';
+
+        document.querySelector('#stock_quantity').value =
+            button.dataset.stock || '';
+
+        document.querySelector('#stock_limit').value =
+            button.dataset.limit || '';
+
+        // ----------------------------------------------------------
+        // SHOP
+        // ----------------------------------------------------------
+
+        document.querySelector('#shop_id').value =
+            button.dataset.shop || '';
+
+        // ----------------------------------------------------------
+        // STOCK UNIT
+        // ----------------------------------------------------------
+
+        document.querySelector('#stock_unit').value =
+            button.dataset.stockUnit || '';
+
+        // ----------------------------------------------------------
+        // UNIT SIZE
+        // ----------------------------------------------------------
+
+        document.querySelector('#unit_size').value =
+            button.dataset.unitSize || '';
+
+        // ----------------------------------------------------------
+        // BARCODE
+        // ----------------------------------------------------------
+
+        const barcodeInput =
+            document.querySelector('#barcode');
+
+        const barcodePreview =
+            document.querySelector('#barcode-preview');
+
+        const downloadButton =
+            document.querySelector('#download-barcode');
+
+        const barcode =
+            button.dataset.barcode || '';
+
+        barcodeInput.value = barcode;
+
+        // Clear previous barcode preview
+        barcodePreview.innerHTML = '';
+
+        if (barcode.trim() !== '') {
+
+            JsBarcode(
+                '#barcode-preview',
+                barcode,
+                {
+                    format: 'CODE128',
+                    lineColor: '#000',
                     width: 2,
                     height: 60,
                     displayValue: true
-                });
-                document.getElementById('download-barcode').style.display = 'inline-block';
-            }
+                }
+            );
 
-            // Set form method to PUT for editing
-            document.querySelector('#form_method').value = 'PUT';
+            downloadButton.style.display =
+                'inline-block';
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+
+            downloadButton.style.display =
+                'none';
         }
+
+        // ----------------------------------------------------------
+        // CHANGE FORM TO EDIT MODE
+        // ----------------------------------------------------------
+
+        document.querySelector('#form_method').value =
+            'PUT';
+
+        // Change button text
+        const submitButton =
+            document.querySelector(
+                '#product-form button[type="submit"]'
+            );
+
+        if (submitButton) {
+            submitButton.innerText =
+                'Update Product';
+        }
+
+        // ----------------------------------------------------------
+        // SHOW UNIT DETAILS IF PRODUCT HAS UNIT DATA
+        // ----------------------------------------------------------
+
+        const extraFields =
+            document.querySelector('#extra-fields');
+
+        const toggleButton =
+            document.querySelector('#toggle-extra-fields');
+
+        const stockUnit =
+            button.dataset.stockUnit || '';
+
+        const unitSize =
+            button.dataset.unitSize || '';
+
+        if (
+            stockUnit.trim() !== '' ||
+            unitSize.trim() !== ''
+        ) {
+            extraFields.style.display = 'block';
+
+            if (toggleButton) {
+                toggleButton.innerText =
+                    '- Hide Unit Details';
+            }
+        }
+
+        // ----------------------------------------------------------
+        // SCROLL TO FORM
+        // ----------------------------------------------------------
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
     });
 
     // Submit form via fetch (POST or PUT)
