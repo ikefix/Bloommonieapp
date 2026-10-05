@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\PlanAccessController;
 
 use App\Http\Controllers\Api\BarcodeController;
+use App\Http\Controllers\Api\HardwareProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -244,6 +245,7 @@ Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(functio
     Route::delete('purchase-items/{id}', [PurchaseItemController::class, 'destroy']);
     Route::get('admin/sales', [PurchaseItemController::class, 'allSales']);
     Route::get('manager/sales', [PurchaseItemController::class, 'managersales']);
+    
 
     // EXPENSE ROUTES
     // Admin
@@ -324,3 +326,7 @@ Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive']);
 
 
 Route::post('/paystack/webhook', [SubscriptionController::class, 'webhook']);
+
+Route::get('/products', [HardwareProductController::class, 'index']);
+Route::post('/products', [HardwareProductController::class, 'store']);
+Route::get('/products/{id}', [HardwareProductController::class, 'show']);

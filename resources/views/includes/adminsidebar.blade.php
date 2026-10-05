@@ -110,6 +110,10 @@
                     <span class="sidebar-icon"><i class='bx bx-collection'></i></span>
                     <span class="sidebar-text">Collectables</span>
                 </a>  
+                <a href="{{ route('debtors.index') }}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-book-content'></i></span>
+                    <span class="sidebar-text">Debtors Log</span>
+                </a>
             </div>
 
              <a class="sidebar-link collapsible-btn" onclick="toggleSubmenu(this)">

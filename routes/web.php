@@ -36,6 +36,7 @@ use App\Http\Controllers\CollectableController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\DebtorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,7 +49,9 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 
 */
 
-
+ 
+Route::get('/debtors-log', [DebtorController::class, 'index'])->name('debtors.index');
+Route::get('/debtors-log/data', [DebtorController::class, 'data'])->name('debtors.data');
 
 
 Route::get('/pricing', function () {
