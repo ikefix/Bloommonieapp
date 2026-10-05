@@ -4,7 +4,11 @@
 <style>
     .dl { max-width: 1100px; margin: 0 auto; padding: 16px; font-family: inherit; }
     .dl h1 { font-size: 1.5rem; margin: 0 0 4px; }
+    .dl-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
     .dl-sub { color: #6b7280; font-size: .9rem; margin-bottom: 16px; }
+    .dl-btn { padding: 10px 16px; border: 1px solid #1d4ed8; background: #2563eb; color: #fff; border-radius: 8px; font-size: .95rem; font-weight: 600; cursor: pointer; }
+    .dl-btn:hover { background: #1d4ed8; }
+    .dl-btn:disabled { background: #9ca3af; border-color: #9ca3af; cursor: not-allowed; }
     .dl-summary { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
     .dl-stat { flex: 1 1 160px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; }
     .dl-stat span { display: block; font-size: .75rem; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; }
@@ -36,8 +40,13 @@
 </style>
 
 <div class="dl">
-    <h1>Debtors Log</h1>
-    <div class="dl-sub">Products customers are still owing for. Pick a product to see who owes.</div>
+    <div class="dl-head">
+        <div>
+            <h1>Debtors Log</h1>
+            <div class="dl-sub">Products customers are still owing for. Pick a product to see who owes.</div>
+        </div>
+        <button type="button" class="dl-btn" id="dl-pdf" disabled>Download PDF</button>
+    </div>
 
     <div class="dl-summary">
         <div class="dl-stat"><span>Products owing</span><strong id="dl-s-products">0</strong></div>
@@ -69,6 +78,7 @@
 <script>
 (function () {
     var dataUrl = @json(route('debtors.data'));
+    var pdfUrl  = @json(route('debtors.pdf'));
     var state = { products: [], selected: null, query: '' };
 
     function $(id) { return document.getElementById(id); }
@@ -80,14 +90,18 @@
         });
     }
 
-    function load() {
+    // Cashier + shop filters (shared by the on-screen list and the PDF)
+    function filterParams() {
         var params = new URLSearchParams();
         if ($('dl-cashier').value) params.set('cashier_id', $('dl-cashier').value);
         if ($('dl-shop').value) params.set('shop_id', $('dl-shop').value);
+        return params;
+    }
 
+    function load() {
         $('dl-status').textContent = 'Loading…';
 
-        fetch(dataUrl + '?' + params.toString(), {
+        fetch(dataUrl + '?' + filterParams().toString(), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(function (res) {
@@ -102,6 +116,7 @@
             $('dl-s-products').textContent = num(json.summary.products);
             $('dl-s-customers').textContent = num(json.summary.customers);
             $('dl-s-balance').textContent = naira(json.summary.balance);
+            $('dl-pdf').disabled = !state.products.length;
             $('dl-status').textContent = '';
             render();
         })
@@ -191,6 +206,11 @@
     $('dl-search').addEventListener('input', function (e) {
         state.query = e.target.value;
         renderProducts();
+    });
+
+    // PDF includes ALL owing products for the selected cashier / shop (search box is ignored)
+    $('dl-pdf').addEventListener('click', function () {
+        window.location.href = pdfUrl + '?' + filterParams().toString();
     });
 
     $('dl-cashier').addEventListener('change', load);

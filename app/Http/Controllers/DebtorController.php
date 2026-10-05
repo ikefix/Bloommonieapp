@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class DebtorController extends Controller
@@ -39,13 +40,54 @@ class DebtorController extends Controller
 
     /**
      * JSON: owing products, each with the customers who owe for it.
+     */
+    public function data(Request $request)
+    {
+        return response()->json($this->buildReport($request));
+    }
+
+    /**
+     * PDF: every owing product with its customer table (honours the cashier / shop filters).
+     */
+    public function pdf(Request $request)
+    {
+        $user = auth()->user();
+        $ownerId = $user->getOwnerId();
+
+        $report = $this->buildReport($request);
+
+        $shop = $request->filled('shop_id') ? Shop::find($request->shop_id) : null;
+
+        // Only resolve a cashier name if they belong to this owner's team
+        $cashier = $request->filled('cashier_id')
+            ? User::query()
+                ->where('id', $request->cashier_id)
+                ->where(function ($q) use ($ownerId) {
+                    $q->where('owner_id', $ownerId)->orWhere('id', $ownerId);
+                })
+                ->first()
+            : null;
+
+        $pdf = Pdf::loadView('debtors.pdf', [
+            'products'    => $report['products'],
+            'summary'     => $report['summary'],
+            'shopName'    => optional($shop)->name ?: 'All shops',
+            'cashierName' => optional($cashier)->name ?: 'All cashiers',
+            'generatedAt' => now()->format('d M Y, h:i A'),
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('Debtors-Log-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Builds the debtors report: owing products, each with the customers who owe for it.
      *
      * Products come from each owing invoice's `goods` list. Debt is stored per invoice
      * (amount_paid / balance), not per product, so for an invoice with several products
      * the paid and owing amounts are split across its lines in proportion to each
      * line's share of the invoice.
      */
-    public function data(Request $request)
+    private function buildReport(Request $request): array
     {
         $user = auth()->user();
 
@@ -146,13 +188,13 @@ class DebtorController extends Controller
             ];
         })->sortByDesc('total_balance')->values();
 
-        return response()->json([
+        return [
             'products' => $products,
             'summary'  => [
                 'products'  => $products->count(),
                 'customers' => $lines->pluck('customer_id')->unique()->count(),
                 'balance'   => round($products->sum('total_balance'), 2),
             ],
-        ]);
+        ];
     }
 }

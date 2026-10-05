@@ -52,7 +52,7 @@ use App\Http\Controllers\DebtorController;
  
 Route::get('/debtors-log', [DebtorController::class, 'index'])->name('debtors.index');
 Route::get('/debtors-log/data', [DebtorController::class, 'data'])->name('debtors.data');
-
+Route::get('/debtors-log/pdf', [DebtorController::class, 'pdf'])->name('debtors.pdf');
 
 Route::get('/pricing', function () {
     return view('pricing');
