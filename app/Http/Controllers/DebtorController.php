@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PurchaseItem;
+use App\Models\Invoice;
+use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -39,9 +40,10 @@ class DebtorController extends Controller
     /**
      * JSON: owing products, each with the customers who owe for it.
      *
-     * Debt is stored per invoice (amount_paid / balance), not per product, so for an
-     * invoice with several products the paid and owing amounts are split across its
-     * product lines in proportion to each line's share of the invoice.
+     * Products come from each owing invoice's `goods` list. Debt is stored per invoice
+     * (amount_paid / balance), not per product, so for an invoice with several products
+     * the paid and owing amounts are split across its lines in proportion to each
+     * line's share of the invoice.
      */
     public function data(Request $request)
     {
@@ -51,51 +53,73 @@ class DebtorController extends Controller
 
         $ownerId = $user->getOwnerId();
 
-        $rows = PurchaseItem::query()
-            ->join('invoices', 'invoices.id', '=', 'purchase_items.invoice_id')
-            ->join('customers', 'customers.id', '=', 'invoices.customer_id')
-            ->join('products', 'products.id', '=', 'purchase_items.product_id')
-            ->where('purchase_items.owner_id', $ownerId)
-            ->where('invoices.payment_status', 'owing')
-            ->where('invoices.balance', '>', 0)
-            ->when($user->role === 'manager', fn ($q) => $q->where('invoices.shop_id', $user->shop_id))
-            ->when($request->filled('shop_id'), fn ($q) => $q->where('invoices.shop_id', $request->shop_id))
-            ->when($request->filled('cashier_id'), fn ($q) => $q->where('invoices.user_id', $request->cashier_id))
-            ->get([
-                'purchase_items.product_id',
-                'products.name as product_name',
-                'purchase_items.quantity',
-                'purchase_items.total_price as line_total',
-                'invoices.id as invoice_id',
-                'invoices.amount_paid as invoice_paid',
-                'invoices.balance as invoice_balance',
-                'customers.id as customer_id',
-                'customers.name as customer_name',
-                'customers.phone as customer_phone',
-            ]);
+        // Everyone on this owner's team (owner + their staff), so we only see our own invoices
+        $teamIds = User::query()
+            ->where(function ($q) use ($ownerId) {
+                $q->where('owner_id', $ownerId)->orWhere('id', $ownerId);
+            })
+            ->pluck('id');
 
-        // Per-invoice totals used to split paid / balance across product lines
-        $invoiceLineSums   = $rows->groupBy('invoice_id')->map(fn ($g) => (float) $g->sum('line_total'));
-        $invoiceLineCounts = $rows->groupBy('invoice_id')->map->count();
+        $invoices = Invoice::query()
+            ->with('customer:id,name,phone')
+            ->whereIn('user_id', $teamIds)
+            ->where('payment_status', 'owing')
+            ->where('balance', '>', 0)
+            ->when($user->role === 'manager', fn ($q) => $q->where('shop_id', $user->shop_id))
+            ->when($request->filled('shop_id'), fn ($q) => $q->where('shop_id', $request->shop_id))
+            ->when($request->filled('cashier_id'), fn ($q) => $q->where('user_id', $request->cashier_id))
+            ->get();
 
-        $lines = $rows->map(function ($r) use ($invoiceLineSums, $invoiceLineCounts) {
-            $sum   = $invoiceLineSums[$r->invoice_id] ?? 0;
-            $share = $sum > 0
-                ? ((float) $r->line_total / $sum)
-                : (1 / max($invoiceLineCounts[$r->invoice_id] ?? 1, 1));
+        // Normalise each invoice's goods into an array
+        $goodsByInvoice = $invoices->mapWithKeys(function ($invoice) {
+            $goods = $invoice->goods;
 
-            return [
-                'product_id'     => (int) $r->product_id,
-                'product_name'   => $r->product_name,
-                'customer_id'    => (int) $r->customer_id,
-                'customer_name'  => $r->customer_name,
-                'customer_phone' => $r->customer_phone,
-                'quantity'       => (float) $r->quantity,
-                'total'          => (float) $r->line_total,
-                'paid'           => (float) $r->invoice_paid * $share,
-                'balance'        => (float) $r->invoice_balance * $share,
-            ];
+            if (!is_array($goods)) {
+                $goods = json_decode((string) $goods, true) ?: [];
+            }
+
+            return [$invoice->id => $goods];
         });
+
+        $productNames = Product::query()
+            ->whereIn('id', $goodsByInvoice->flatten(1)->pluck('product_id')->filter()->unique())
+            ->pluck('name', 'id');
+
+        $lines = collect();
+
+        foreach ($invoices as $invoice) {
+            $goods = $goodsByInvoice[$invoice->id] ?? [];
+
+            if (empty($goods)) {
+                continue;
+            }
+
+            $sum = 0;
+            foreach ($goods as $g) {
+                $sum += (float) ($g['total_price'] ?? 0);
+            }
+
+            foreach ($goods as $g) {
+                if (empty($g['product_id'])) {
+                    continue;
+                }
+
+                $lineTotal = (float) ($g['total_price'] ?? 0);
+                $share     = $sum > 0 ? $lineTotal / $sum : 1 / count($goods);
+
+                $lines->push([
+                    'product_id'     => (int) $g['product_id'],
+                    'product_name'   => $productNames[$g['product_id']] ?? 'Deleted product',
+                    'customer_id'    => (int) $invoice->customer_id,
+                    'customer_name'  => optional($invoice->customer)->name,
+                    'customer_phone' => optional($invoice->customer)->phone,
+                    'quantity'       => (float) ($g['quantity'] ?? 0),
+                    'total'          => $lineTotal,
+                    'paid'           => (float) $invoice->amount_paid * $share,
+                    'balance'        => (float) $invoice->balance * $share,
+                ]);
+            }
+        }
 
         $products = $lines->groupBy('product_id')->map(function ($productLines) {
             $customers = $productLines->groupBy('customer_id')->map(function ($c) {
