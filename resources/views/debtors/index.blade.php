@@ -309,7 +309,7 @@
 ></div>
 
 <div id="dl-detail"></div>
-```
+
 
 </div>
 
@@ -869,82 +869,75 @@
     |
     */
 
-    $('dl-pdf').addEventListener(
-        'click',
-        function () {
-
-            if ($('dl-pdf').disabled) {
-                return;
-            }
+    $('dl-pdf').addEventListener('click', function () {
 
 
-            var params = new URLSearchParams();
+        if ($('dl-pdf').disabled) {
+            return;
+        }
 
+        /*
+        * The PDF MUST use the product currently selected.
+        */
+        if (!state.selected) {
+            alert('Please select a product first.');
+            return;
+        }
 
-            var cashierId =
-                $('dl-cashier').value;
+        var params = new URLSearchParams();
 
-            var shopId =
-                $('dl-shop').value;
+        /*
+        * Selected product
+        */
+        params.set(
+            'product_id',
+            state.selected
+        );
 
+        /*
+        * Optional cashier filter
+        */
+        var cashierId = $('dl-cashier').value;
 
-            /*
-            |--------------------------------------------------------------------------
-            | Only add cashier filter
-            |--------------------------------------------------------------------------
-            */
-
-            if (cashierId) {
-
-                params.set(
-                    'cashier_id',
-                    cashierId
-                );
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Only add shop filter
-            |--------------------------------------------------------------------------
-            */
-
-            if (shopId) {
-
-                params.set(
-                    'shop_id',
-                    shopId
-                );
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Build PDF URL
-            |--------------------------------------------------------------------------
-            */
-
-            var url = pdfUrl;
-
-            if (params.toString()) {
-
-                url += '?' +
-                    params.toString();
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Open PDF in a new tab
-            |--------------------------------------------------------------------------
-            */
-
-            window.open(
-                url,
-                '_blank'
+        if (cashierId) {
+            params.set(
+                'cashier_id',
+                cashierId
             );
         }
-    );
+
+        /*
+        * Optional shop filter
+        */
+        var shopId = $('dl-shop').value;
+
+        if (shopId) {
+            params.set(
+                'shop_id',
+                shopId
+            );
+        }
+
+        /*
+        * Open PDF.
+        *
+        * Example:
+        *
+        * /debtors-log/pdf?product_id=25&shop_id=2
+        */
+        var url =
+            pdfUrl +
+            '?' +
+            params.toString();
+
+        window.open(
+            url,
+            '_blank'
+        );
+
+
+    });
+
 
 
     /*
