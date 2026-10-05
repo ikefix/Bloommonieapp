@@ -54,16 +54,26 @@ class DebtorController extends Controller
         $user = auth()->user();
         $ownerId = $user->getOwnerId();
 
-        $report = $this->buildReport($request);
+        // IMPORTANT:
+        // Always build the report from cashier/shop filters only.
+        // The selected product on the page is NOT used.
+        $reportRequest = new Request([
+            'shop_id'    => $request->input('shop_id'),
+            'cashier_id' => $request->input('cashier_id'),
+        ]);
 
-        $shop = $request->filled('shop_id') ? Shop::find($request->shop_id) : null;
+        $report = $this->buildReport($reportRequest);
 
-        // Only resolve a cashier name if they belong to this owner's team
+        $shop = $request->filled('shop_id')
+            ? Shop::find($request->shop_id)
+            : null;
+
         $cashier = $request->filled('cashier_id')
             ? User::query()
                 ->where('id', $request->cashier_id)
                 ->where(function ($q) use ($ownerId) {
-                    $q->where('owner_id', $ownerId)->orWhere('id', $ownerId);
+                    $q->where('owner_id', $ownerId)
+                    ->orWhere('id', $ownerId);
                 })
                 ->first()
             : null;
@@ -76,7 +86,9 @@ class DebtorController extends Controller
             'generatedAt' => now()->format('d M Y, h:i A'),
         ])->setPaper('a4', 'portrait');
 
-        return $pdf->download('Debtors-Log-' . now()->format('Y-m-d') . '.pdf');
+        return $pdf->download(
+            'Debtors-Log-' . now()->format('Y-m-d') . '.pdf'
+        );
     }
 
     /**
