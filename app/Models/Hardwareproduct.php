@@ -17,6 +17,7 @@ class HardwareProduct extends Model
         'price',
         'stock',
         'image',
+        'category',
     ];
 
     protected $casts = [

@@ -327,6 +327,6 @@ Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive']);
 
 Route::post('/paystack/webhook', [SubscriptionController::class, 'webhook']);
 
-Route::get('/products', [HardwareProductController::class, 'index']);
-Route::post('/products', [HardwareProductController::class, 'store']);
+// Route::get('/products', [HardwareProductController::class, 'index']);
+// Route::post('/products', [HardwareProductController::class, 'store']);
 Route::get('/products/{id}', [HardwareProductController::class, 'show']);
