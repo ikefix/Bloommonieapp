@@ -152,10 +152,14 @@ Route::get('/subscription-expired', function () {
 });
 
 
+Route::view('/privacy-policy', 'privacy')->name('privacy');
 
 
+Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
+    ->name('customers.edit');
 
-
+Route::put('/customers/{customer}', [CustomerController::class, 'update'])
+    ->name('customers.update');
 
 Route::get('/products/export', function () {
     return Excel::download(new ProductsExport, 'products.xlsx');
