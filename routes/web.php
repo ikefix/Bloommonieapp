@@ -128,6 +128,21 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth'])
+    ->group(function () {
+
+
+        // Add these two routes
+        Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
+            ->name('customers.edit');
+
+        Route::put('/customers/{customer}', [CustomerController::class, 'update'])
+            ->name('customers.update');
+
+    });
+
 
 Route::middleware(['auth', 'activated', 'subscription', 'restricted'])->group(function () {
 
@@ -155,11 +170,7 @@ Route::get('/subscription-expired', function () {
 Route::view('/privacy-policy', 'privacy')->name('privacy');
 
 
-Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
-    ->name('customers.edit');
 
-Route::put('/customers/{customer}', [CustomerController::class, 'update'])
-    ->name('customers.update');
 
 Route::get('/products/export', function () {
     return Excel::download(new ProductsExport, 'products.xlsx');
