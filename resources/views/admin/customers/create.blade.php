@@ -20,6 +20,7 @@
         </div>
     @endif
 
+    {{-- Create / Edit Customer Form --}}
     <div class="form-fess">
         <div class="card p-3 mb-3">
 
@@ -40,46 +41,66 @@
 
                 <div class="mb-2">
                     <label>Name</label>
-                    <input type="text" name="name"
+                    <input
+                        type="text"
+                        name="name"
                         class="form-control form-control-sm"
                         value="{{ old('name', $editCustomer->name ?? '') }}"
-                        required>
+                        required
+                        oninvalid="this.setCustomValidity('Please enter customer name')"
+                        oninput="this.setCustomValidity('')"
+                    >
                 </div>
 
                 <div class="mb-2">
                     <label>Email</label>
-                    <input type="email" name="email"
+                    <input
+                        type="email"
+                        name="email"
                         class="form-control form-control-sm"
-                        value="{{ old('email', $editCustomer->email ?? '') }}">
+                        value="{{ old('email', $editCustomer->email ?? '') }}"
+                    >
                 </div>
 
                 <div class="mb-2">
                     <label>Phone</label>
-                    <input type="text" name="phone"
+                    <input
+                        type="text"
+                        name="phone"
                         class="form-control form-control-sm"
                         value="{{ old('phone', $editCustomer->phone ?? '') }}"
-                        required>
+                        required
+                        oninvalid="this.setCustomValidity('Please enter phone number')"
+                        oninput="this.setCustomValidity('')"
+                    >
                 </div>
 
                 <div class="mb-2">
                     <label>Address</label>
-                    <textarea name="address"
+                    <textarea
+                        name="address"
                         class="form-control form-control-sm"
-                        rows="2">{{ old('address', $editCustomer->address ?? '') }}</textarea>
+                        rows="2"
+                    >{{ old('address', $editCustomer->address ?? '') }}</textarea>
                 </div>
 
                 <div class="mb-2">
                     <label>Company</label>
-                    <input type="text" name="company"
+                    <input
+                        type="text"
+                        name="company"
                         class="form-control form-control-sm"
-                        value="{{ old('company', $editCustomer->company ?? '') }}">
+                        value="{{ old('company', $editCustomer->company ?? '') }}"
+                    >
                 </div>
 
                 <div class="mb-2">
                     <label>Notes</label>
-                    <textarea name="notes"
+                    <textarea
+                        name="notes"
                         class="form-control form-control-sm"
-                        rows="2">{{ old('notes', $editCustomer->notes ?? '') }}</textarea>
+                        rows="2"
+                    >{{ old('notes', $editCustomer->notes ?? '') }}</textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-sm">
@@ -87,11 +108,14 @@
                 </button>
 
                 @if(isset($editCustomer))
-                    <a href="{{ route(auth()->user()->role . '.customers.index') }}"
-                        class="btn btn-secondary btn-sm">
+                    <a
+                        href="{{ route(auth()->user()->role . '.customers.index') }}"
+                        class="btn btn-secondary btn-sm"
+                    >
                         Cancel
                     </a>
                 @endif
+
             </form>
         </div>
     </div>
@@ -102,13 +126,16 @@
             <h4>All Customers</h4>
 
             <div class="mb-3">
-                <input type="text" id="customerSearch"
+                <input
+                    type="text"
+                    id="customerSearch"
                     class="form-control"
-                    placeholder="Search by name, email, phone, company...">
+                    placeholder="Search by name, email, phone, company..."
+                >
             </div>
 
             <div class="table-responsive"
-                style="max-height: 500px; overflow-y: auto;">
+                 style="max-height: 500px; overflow-y: auto;">
 
                 <table class="table table-bordered table-striped table-sm mb-0">
                     <thead class="table-light">
@@ -119,7 +146,7 @@
                             <th>Address</th>
                             <th>Company</th>
                             <th>Notes</th>
-                            <th>Action</th>
+                            <th style="min-width: 150px;">Action</th>
                         </tr>
                     </thead>
 
@@ -137,27 +164,32 @@
                                     <div class="d-flex gap-1">
 
                                         {{-- Edit Button --}}
-                                        <a href="{{ route(
-                                            auth()->user()->role . '.customers.edit',
-                                            $customer->id
-                                        ) }}"
-                                            class="btn btn-warning btn-sm">
+                                        <a
+                                            href="{{ route(
+                                                auth()->user()->role . '.customers.edit',
+                                                $customer->id
+                                            ) }}"
+                                            class="btn btn-warning btn-sm"
+                                        >
                                             Edit
                                         </a>
 
                                         {{-- Delete Button --}}
-                                        <form action="{{ route(
-                                            auth()->user()->role . '.customers.destroy',
-                                            $customer->id
-                                        ) }}"
+                                        <form
+                                            action="{{ route(
+                                                auth()->user()->role . '.customers.destroy',
+                                                $customer->id
+                                            ) }}"
                                             method="POST"
-                                            onsubmit="return confirm('Are you sure you want to delete this customer?')">
-
+                                            onsubmit="return confirm('Are you sure you want to delete this customer?')"
+                                        >
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit"
-                                                class="btn btn-danger btn-sm">
+                                            <button
+                                                type="submit"
+                                                class="btn btn-danger btn-sm"
+                                            >
                                                 Delete
                                             </button>
                                         </form>
@@ -179,15 +211,22 @@
     </div>
 </div>
 
+{{-- Customer Search --}}
 <script>
-document.getElementById('customerSearch').addEventListener('keyup', function () {
-    let searchValue = this.value.toLowerCase();
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('customerSearch');
 
-    document.querySelectorAll('#customerTable tr').forEach(function (row) {
-        row.style.display = row.textContent.toLowerCase().includes(searchValue)
-            ? ''
-            : 'none';
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+
+            document.querySelectorAll('#customerTable tr').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(searchValue)
+                    ? ''
+                    : 'none';
+            });
+        });
+    }
 });
 </script>
 

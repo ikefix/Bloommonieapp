@@ -26,19 +26,21 @@ public function index()
 // Show edit customer form
 public function edit(Customer $customer)
 {
-    $role = auth()->user()->role;
+    $customers = Customer::latest()->get();
 
-    $view = match ($role) {
-        'admin'   => 'admin.customers.edit',
-        'manager' => 'manager.customers.edit',
-        default   => 'cashier.customers.edit',
+    $view = match (auth()->user()->role) {
+        'admin'   => 'admin.customers.create',
+        'manager' => 'manager.customers.create',
+        default   => 'cashier.customers.create',
     };
 
-    return view($view, compact('customer'));
+    return view($view, [
+        'customers' => $customers,
+        'editCustomer' => $customer,
+    ]);
 }
 
 
-// Update customer details
 public function update(Request $request, Customer $customer)
 {
     $request->validate([
@@ -51,22 +53,12 @@ public function update(Request $request, Customer $customer)
     ]);
 
     $customer->update($request->only([
-        'name',
-        'email',
-        'phone',
-        'address',
-        'company',
-        'notes'
+        'name', 'email', 'phone', 'address', 'company', 'notes'
     ]));
 
-    $redirect = match (auth()->user()->role) {
-        'admin'   => route('admin.customers.index'),
-        'manager' => route('manager.customers.index'),
-        default   => route('cashier.customers.index'),
-    };
-
-    return redirect($redirect)
-        ->with('success', 'Customer updated successfully!');
+    return redirect()->route(
+        auth()->user()->role . '.customers.index'
+    )->with('success', 'Customer updated successfully!');
 }
 
 
