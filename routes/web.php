@@ -37,6 +37,7 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\DebtorController;
+use App\Http\Controllers\ProductStockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -253,6 +254,7 @@ Route::post('/products', [ProductController::class, 'store'])->name('products.st
 
 
 
+Route::get('/inventory/products', [ProductStockController::class, 'index'])->name('inventory.products');
 
 
 

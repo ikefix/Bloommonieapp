@@ -113,6 +113,10 @@
                 <a href="{{ route('debtors.index') }}" class="sidebar-link">
                     <span class="sidebar-icon"><i class='bx bx-book-content'></i></span>
                     <span class="sidebar-text">Debtors Log</span>
+                </a>  
+                <a href="{{ route('inventory.products') }}" class="sidebar-link">
+                    <span class="sidebar-icon"><i class='bx bx-book-content'></i></span>
+                    <span class="sidebar-text">Products Log</span>
                 </a>
             </div>
 
