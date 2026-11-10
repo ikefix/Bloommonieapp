@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Auth\GoogleLoginController;
-use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\AdminController;

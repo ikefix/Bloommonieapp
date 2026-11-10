@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\EmailVerificationOtp;
 
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;

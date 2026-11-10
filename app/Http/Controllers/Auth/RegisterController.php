@@ -93,7 +93,7 @@ class RegisterController extends Controller
         $user = $this->create($request->all());
 
         // =====================================================
-        // 📧 CREATE EMAIL VERIFICATION OTP
+        // ðŸ“§ CREATE EMAIL VERIFICATION OTP
         // =====================================================
 
         // Generate 6-digit OTP
