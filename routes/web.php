@@ -255,7 +255,7 @@ Route::post('/products', [ProductController::class, 'store'])->name('products.st
 
 
 Route::get('/inventory/products', [ProductStockController::class, 'index'])->name('inventory.products');
-
+Route::get('/inventory/products/download', [ProductStockController::class, 'download'])->name('inventory.products.download');
 
 
 Route::middleware(['auth', 'role:admin', 'subscription', 'restricted'])->group(function () {

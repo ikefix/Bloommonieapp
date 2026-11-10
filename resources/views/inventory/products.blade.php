@@ -26,6 +26,13 @@
     .ps-btn:hover { color:#fff; filter:brightness(1.15); }
     .ps-btn-ghost { border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:10px; padding:8px 18px; font-weight:600; text-decoration:none; }
 
+    /* download button */
+    .ps-btn-dl { display:inline-flex; align-items:center; gap:8px; background:#fff; color:var(--brand); border:1.5px solid var(--brand);
+                 border-radius:10px; padding:9px 16px; font-weight:700; font-size:14px; text-decoration:none; }
+    .ps-btn-dl:hover { background:var(--brand); color:#fff; }
+    .ps-dl-count { background:var(--soft); color:var(--brand); border-radius:999px; padding:0 9px; font-size:12px; font-weight:800; line-height:20px; }
+    .ps-btn-dl:hover .ps-dl-count { background:rgba(255,255,255,.2); color:#fff; }
+
     /* table */
     .ps-box { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
     .ps-scroll { overflow-x:auto; }
@@ -75,9 +82,24 @@
 
 <div class="container-fluid py-4 ps-page">
 
-    <div class="ps-head mb-4">
-        <h4>Product Stock</h4>
-        <p>When each product was added, last edited, and how much is left.</p>
+    @php
+        // true when the person has narrowed the list with any filter
+        $hasFilters = collect(request()->only(['search','shop_id','category_id','status','from','to']))
+                        ->filter(fn($v) => $v !== null && $v !== '')->isNotEmpty();
+    @endphp
+
+    <div class="ps-head mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h4>Product Stock</h4>
+            <p>When each product was added, last edited, and how much is left.</p>
+        </div>
+
+        {{-- Sends the current filters along, so the PDF matches what's on screen --}}
+        <a href="{{ route('inventory.products.download', request()->query()) }}" class="ps-btn-dl">
+            <i class="bi bi-file-earmark-pdf"></i>
+            {{ $hasFilters ? 'Download filtered PDF' : 'Download all as PDF' }}
+            <span class="ps-dl-count">{{ number_format($products->total()) }}</span>
+        </a>
     </div>
 
     {{-- Summary --}}
