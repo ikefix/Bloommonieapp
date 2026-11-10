@@ -1,7 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.adminapp')
 
-@section('content')
-
+@section('admincontent')
 <style>
     .inv-card { border:1px solid #e5e7eb; border-radius:12px; padding:16px 18px; background:#fff; }
     .inv-card small { color:#6b7280; text-transform:uppercase; letter-spacing:.5px; font-size:11px; }
