@@ -32,7 +32,7 @@ use App\Http\Controllers\Api\StockTransferController;
 use App\Http\Controllers\Api\ProductPermissionController;
 use App\Http\Controllers\Api\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\PlanAccessController;
-
+use App\Http\Controllers\Api\HardwareOrderController;
 use App\Http\Controllers\Api\BarcodeController;
 use App\Http\Controllers\Api\HardwareProductController;
 
@@ -46,7 +46,21 @@ use App\Http\Controllers\Api\HardwareProductController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::prefix('hardware-orders')->group(function () {
 
+    // Create order and initialize Paystack
+    Route::post('/initialize', [
+        HardwareOrderController::class,
+        'initializePayment'
+    ]);
+
+    // Verify Paystack payment
+    Route::get('/verify/{reference}', [
+        HardwareOrderController::class,
+        'verifyPayment'
+    ]);
+
+});
 
 
 Route::post('/register', [RegisterController::class, 'register']);
