@@ -1,12 +1,17 @@
-@extends('layouts.adminapp')
+@extends('layouts.app')
 
-@section('admincontent')
+@section('content')
+
 <style>
     .inv-card { border:1px solid #e5e7eb; border-radius:12px; padding:16px 18px; background:#fff; }
     .inv-card small { color:#6b7280; text-transform:uppercase; letter-spacing:.5px; font-size:11px; }
     .inv-card h4 { margin:6px 0 0; font-weight:700; }
     .inv-table th { font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:#6b7280; white-space:nowrap; }
-    .inv-table td { vertical-align:middle; }
+    .inv-table td, .inv-table th { vertical-align:middle !important; }
+    .inv-table td .badge { display:inline-block; }
+    .inv-pager nav { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .inv-pager .pagination { margin:0; flex-wrap:wrap; justify-content:center; }
+    .inv-pager p.small { margin:0; color:#6b7280; }
     .inv-muted { color:#6b7280; font-size:12px; }
 </style>
 
@@ -177,8 +182,8 @@
             </table>
         </div>
 
-        <div class="p-3">
-            {{ $products->links() }}
+        <div class="p-3 inv-pager">
+            {{ $products->onEachSide(2)->links('pagination::bootstrap-5') }}
         </div>
     </div>
 
