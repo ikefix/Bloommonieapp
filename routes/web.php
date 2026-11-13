@@ -38,6 +38,7 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\DebtorController;
 use App\Http\Controllers\ProductStockController;
+use App\Http\Controllers\Api\Auth\PasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,11 @@ use App\Http\Controllers\ProductStockController;
 | contains the "web" middleware group. Now create something great!
 
 */
+
+Route::get(
+    '/app/reset-password/{token}',
+    [PasswordResetController::class, 'showAppResetLanding']
+)->name('app.password.reset');
 
  
 Route::get('/debtors-log', [DebtorController::class, 'index'])->name('debtors.index');

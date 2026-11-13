@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use App\Notifications\BloommonieAppResetPasswordNotification;
 
 class PasswordResetController extends Controller
 {
@@ -14,35 +15,38 @@ class PasswordResetController extends Controller
      * Send a password reset link to the user's email.
      */
     public function sendResetLink(Request $request)
-    {
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
+{
+    $request->validate([
+        'email' => ['required', 'email'],
+    ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+    $broker = Password::broker();
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'status' => true,
-                'message' => 'If an account exists with that email, a password reset link has been sent.',
-            ]);
-        }
+    $user = $broker->getUser(
+        $request->only('email')
+    );
 
-        if ($status === Password::INVALID_USER) {
-            // Keep the response generic to avoid revealing registered emails.
-            return response()->json([
-                'status' => true,
-                'message' => 'If an account exists with that email, a password reset link has been sent.',
-            ]);
-        }
+    // Always return a generic response.
+    // This prevents revealing whether an email is registered.
+    $successResponse = [
+        'status' => true,
+        'message' => 'If an account exists with that email, a password reset link has been sent.',
+    ];
 
-        return response()->json([
-            'status' => false,
-            'message' => 'Unable to send the reset link. Please try again later.',
-        ], 500);
+    if (!$user) {
+        return response()->json($successResponse);
     }
+
+    // Generate a Laravel password-reset token.
+    $token = $broker->createToken($user);
+
+    // Send the dedicated Flutter app notification.
+    $user->notify(
+        new BloommonieAppResetPasswordNotification($token)
+    );
+
+    return response()->json($successResponse);
+}
 
     /**
      * Reset the user's password using the emailed token.
@@ -89,4 +93,18 @@ class PasswordResetController extends Controller
                 : 'Unable to reset your password. Please try again.',
         ], 422);
     }
+
+    public function showAppResetLanding(Request $request, $token)
+{
+    $email = $request->query('email');
+
+    if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        abort(400, 'Invalid password reset link.');
+    }
+
+    return view('auth.app-password-reset', [
+        'token' => $token,
+        'email' => $email,
+    ]);
+}
 }
