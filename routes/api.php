@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Auth\GoogleLoginController;
-use App\Http\Controllers\Auth\LoginController;
+// use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\LoginController as ApiLoginController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\AdminController;
@@ -77,7 +78,7 @@ Route::post('/reset-password', [
 
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/google-login', [GoogleLoginController::class, 'googleLogin']);
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [ApiLoginController::class, 'login']);
 
 
     Route::get('/subscription/plans', [SubscriptionController::class, 'plans']);
@@ -190,7 +191,7 @@ Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(functio
 
 
 
-    Route::post('/logout', [LoginController::class, 'logout']);
+    Route::post('/logout', [ApiLoginController::class, 'logout']);
 
     // CATEGORIES
     Route::get('/categories', [CategoryController::class, 'index']);
