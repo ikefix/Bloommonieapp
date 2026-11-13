@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\BloommonieResetPasswordNotification;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -234,6 +235,13 @@ public function getLimitMessage($type, $feature = null)
         default:
             return "Your current plan does not support this action.";
     }
+}
+
+public function sendPasswordResetNotification($token)
+{
+    $this->notify(
+        new BloommonieResetPasswordNotification($token)
+    );
 }
 }
 

@@ -35,7 +35,9 @@ use App\Http\Controllers\Api\PlanAccessController;
 use App\Http\Controllers\Api\HardwareOrderController;
 use App\Http\Controllers\Api\BarcodeController;
 use App\Http\Controllers\Api\HardwareProductController;
-
+use App\Http\Controllers\Api\ProductStockController;
+use App\Http\Controllers\Api\DebtorApiController;
+use App\Http\Controllers\Api\Auth\PasswordResetController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -61,6 +63,16 @@ Route::prefix('hardware-orders')->group(function () {
     ]);
 
 });
+
+Route::post('/forgot-password', [
+    PasswordResetController::class,
+    'sendResetLink',
+])->middleware('throttle:5,1');
+
+Route::post('/reset-password', [
+    PasswordResetController::class,
+    'resetPassword',
+])->middleware('throttle:5,1');
 
 
 Route::post('/register', [RegisterController::class, 'register']);
@@ -109,6 +121,26 @@ Route::middleware(['auth:sanctum', 'subscription', 'restricted'])->group(functio
         [BarcodeController::class, 'getProduct']
     );
 
+        // Initial data: shops, cashiers and debtor report
+    Route::get('/', [DebtorApiController::class, 'index']);
+
+    // Fetch debtor report with filters
+    Route::get('/data', [DebtorApiController::class, 'data']);
+
+    // Download debtor PDF
+    Route::get('/pdf', [DebtorApiController::class, 'pdf']);
+
+
+
+    Route::get('/product-stock', [
+        ProductStockController::class,
+        'index'
+    ]);
+
+    Route::get('/product-stock/download', [
+        ProductStockController::class,
+        'download'
+    ]);
     /*
     |--------------------------------------------------------------------------
     | Stock Transfer Data
