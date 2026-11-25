@@ -410,4 +410,18 @@ class HardwareOrderController extends Controller
 
         return rtrim($baseUrl, '/') . $path;
     }
+
+        /**
+     * List orders for the admin panel.
+     */
+    public function adminIndex(Request $request)
+    {
+        // Change this if your users table marks admins differently.
+        abort_unless($request->user()?->role === 'admin', 403);
+
+        return response()->json([
+            'success' => true,
+            'orders' => Order::with('items')->latest()->paginate(20),
+        ]);
+    }
 }

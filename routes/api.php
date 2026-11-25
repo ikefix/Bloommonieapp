@@ -65,6 +65,11 @@ Route::prefix('hardware-orders')->group(function () {
 
 });
 
+Route::middleware('auth:sanctum')->get(
+    '/admin/orders',
+    [HardwareOrderController::class, 'adminIndex']
+);
+
 Route::post('/forgot-password', [
     PasswordResetController::class,
     'sendResetLink',
