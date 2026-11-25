@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class HardwareOrderController extends Controller
@@ -165,14 +166,10 @@ class HardwareOrderController extends Controller
 
             // Initialize Paystack
             $response = Http::timeout(30)
-                ->withToken(config('services.paystack.secret_key'))
+                ->withToken(config('services.paystack.secret'))
                 ->acceptJson()
                 ->post(
-                    rtrim(
-                        config('services.paystack.payment_url'),
-                        '/'
-                    ) . '/transaction/initialize',
-
+                    $this->paystackUrl('/transaction/initialize'),
                     [
                         'email' => $order->email,
 
@@ -185,15 +182,17 @@ class HardwareOrderController extends Controller
                         'reference' => $reference,
 
                         'callback_url' =>
-                            rtrim(
-                                config('services.frontend.url'),
-                                '/'
-                            ) . '/order-success',
+                            'https://bloommonie88.store/order-success',
                     ]
                 );
 
             if (!$response->successful() ||
                 !$response->json('status')) {
+
+                Log::error('Paystack initialize failed', [
+                    'http_status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
 
                 return response()->json([
                     'success' => false,
@@ -232,6 +231,10 @@ class HardwareOrderController extends Controller
 
         } catch (\Exception $e) {
 
+            Log::error('Hardware checkout failed', [
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -269,18 +272,21 @@ class HardwareOrderController extends Controller
         try {
 
             $response = Http::timeout(30)
-                ->withToken(config('services.paystack.secret_key'))
+                ->withToken(config('services.paystack.secret'))
                 ->acceptJson()
                 ->get(
-                    rtrim(
-                        config('services.paystack.payment_url'),
-                        '/'
-                    ) . '/transaction/verify/' .
-                    urlencode($reference)
+                    $this->paystackUrl(
+                        '/transaction/verify/' . urlencode($reference)
+                    )
                 );
 
             if (!$response->successful() ||
                 !$response->json('status')) {
+
+                Log::error('Paystack verify failed', [
+                    'http_status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
 
                 return response()->json([
                     'success' => false,
@@ -382,10 +388,26 @@ class HardwareOrderController extends Controller
 
         } catch (\Exception $e) {
 
+            Log::error('Payment verification failed', [
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Payment verification failed.',
             ], 500);
         }
+    }
+
+
+    /**
+     * Build a Paystack API URL.
+     */
+    private function paystackUrl(string $path): string
+    {
+        $baseUrl = config('services.paystack.payment_url')
+            ?: 'https://api.paystack.co';
+
+        return rtrim($baseUrl, '/') . $path;
     }
 }
