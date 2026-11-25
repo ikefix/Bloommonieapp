@@ -383,3 +383,4 @@ Route::post('/paystack/webhook', [SubscriptionController::class, 'webhook']);
 Route::get('/hardware-products', [HardwareProductController::class, 'index']);
 Route::post('/hardware-products', [HardwareProductController::class, 'store']);
 Route::get('/hardware-products/{id}', [HardwareProductController::class, 'show']);
+Route::apiResource('hardware-products', HardwareProductController::class);
