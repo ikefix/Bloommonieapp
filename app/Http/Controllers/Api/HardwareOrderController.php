@@ -416,8 +416,14 @@ class HardwareOrderController extends Controller
      */
     public function adminIndex(Request $request)
     {
-        // Change this if your users table marks admins differently.
-        abort_unless($request->user()?->role === 'admin', 403);
+        $password = (string) config('admin.password');
+
+        abort_unless(
+            $password !== '' &&
+            $request->header('X-Admin-User') === config('admin.username') &&
+            hash_equals($password, (string) $request->header('X-Admin-Key')),
+            401
+        );
 
         return response()->json([
             'success' => true,

@@ -65,10 +65,10 @@ Route::prefix('hardware-orders')->group(function () {
 
 });
 
-Route::middleware('auth:sanctum')->get(
-    '/admin/orders',
-    [HardwareOrderController::class, 'adminIndex']
-);
+
+Route::get('/admin/orders', [HardwareOrderController::class, 'adminIndex'])
+    ->middleware('throttle:30,1');
+
 
 Route::post('/forgot-password', [
     PasswordResetController::class,
